@@ -15,28 +15,23 @@ Have the LLM reference this file at the beginning of any new conversation.
 
 ## Key Features (MVP - Minimum Viable Product)
 
-1.  **User Authentication:**
-    * Email/Password registration and login.
-    * OAuth 2.0 login with Google.
-    * OAuth 2.0 login with Apple.
-    * Secure session management (JWT).
-2.  **Shopping List Management:**
-    * Create new shopping lists.
-    * View user's own shopping lists.
-    * Rename shopping list.
-    * Add items to a list (name, optional quantity, notes). Items can be either new (by typing a name) or existing ones from family shopping history or from database of common items.
-    * Test unified search for items (family shopping history, common items, items in the list) or new items (by typing a name), with immediate reaction as user types.
-    * Mark items as purchased (put by family member into shopping cart), mark item as temporary unavailable (e.g. out of stock or available only in other store).
-    * Visualize family member nickname, who requested item, and who made the last action with item (incl. date and time of the action).
-    * Edit item details.
-    * Remove items from a list - after a confirmation, item is removed from the list, but it is not deleted from the database.
-    * Delete shopping lists.
-3.  **Sharing & Collaboration:**
-    * Invite other registered users (family members) to a shopping list (by email/username).
-    * Shared lists update in real-time for all members when changes are made (via WebSockets).
-    * View members of a shared list.
-    * Remove members from a shared list.
-4.  **Testing strategy:**
+> For detailed user stories and functional requirements, see [User Stories and Functional Requirements](./USER_STORIES.md).
+
+## General Requirements, Stacks, Testing, Deployment, and Scalability Goals
+1.  **User authentication:**
+    * Email/password registration and login.
+    * OAuth2 with Google and Apple Sign-In.
+    * Secure session management using JWT tokens.
+2.  **Responsive UI:**
+    * The application should be usable on mobile phone, tablet, and desktop.
+3.  **Performance goals:**
+    * Search for items should be fast as-you-type with minimal response latency (under 200 milliseconds).
+    * Updates on list items across users should be fast (under 1 second).
+4.  **I18n:**
+    * Integrate I18n for multi-language support.
+    * Keep English as default language in the database for item category names.
+    * Generate translations for item category names and UI components via LLM API calls.
+5.  **Testing strategy:**
     * Unit testing for backend.
     * Integration testing for backend.
     * UI testing for frontend.
@@ -44,26 +39,34 @@ Have the LLM reference this file at the beginning of any new conversation.
     * DevOps best practice and CI/CD pipeline for continuous integration and delivery.
     * All code changes shall pass automated tests before deployment. For backend Python code - PyLint, PyTest, Black, Isort, Bandit.
     * For frontend code - ESLint, Prettier, Jest.
-5.  **Responsive UI:**
-    * The application should be usable on mobile phone, tablet, and desktop.
-6.  **I8n:**
-    * Integrate I8n for multi-language support.
-    * Keep English as default language in the database for item category names.
-    * Generate translations for item category names and UI components via LLM API calls.
-7.  **LLM Integration:**
-    * Integrate LLM via API calls for item classification, translation, icons generation, etc.
-    * Integrate LLM via API calls for translation of item names, item categories, etc.
-    * Integrate LLM via API calls for generation of item icons and category icons.
-8.  **Performance goals:**
-    * Search for items should be fast as-you-type with minimal response latency (under 200 milliseconds).
-    * Updates on list items across users should be fast (under 1 second).
-9.  **Security goals:**
+6.  **Security goals:**
     * User authentication should be secure.
+    * Sessions shall use JWT tokens.
+    * OAuth2 with Google and Apple Sign-In should be implemented.
     * User data should be protected.
     * Access to services like LLM shall use API-keys.
     * API-keys shall be protected. Use environment variables / .env file to store API-keys.
     * API-keys shall be always manually configured - no auto generation of API-keys.
-9.  **Deployment strategy:**
+7.  **Data Privacy & GDPR Compliance:**
+    * User data protection and privacy measures.
+    * Data retention policies.
+    * User consent management.
+    * Data export/deletion capabilities.
+    * Privacy policy documentation requirements.
+8.  **AI Integration Details:**
+    * Gemini API for item classification and natural language understanding and generation of translations.
+    * Gemini API for item icon generation and color classification.
+    * Caching strategy for AI-generated content - keep item categories, translations, and icons in the database to avoid unnecessary API calls.
+    * Built-in rate limiting and quota management through Google Cloud.
+    * Cost optimization through Google Cloud budgets.
+    * Rate limiting and cost optimization measures.
+9.  **Technical Architecture Details:**
+    * Microservices vs Monolith trade-offs.
+    * Database schema design principles.
+    * API versioning strategy.
+    * Caching strategy (Redis/Memcached).
+    * Monitoring and logging setup (Prometheus/Grafana).
+10. **Deployment strategy:**
     * The application should be deployed on a self-hosted server.
     * The application shall be fully containerized.
     * The application shall be able to run on a single server.
@@ -78,7 +81,6 @@ Have the LLM reference this file at the beginning of any new conversation.
     * The documentation should be generated automatically from the code.
     * Use standard tools like Swagger / OpenAPI for API documentation.
 
-
 ## Technology Choices
 
 * **Backend:** FastAPI (Python)
@@ -86,6 +88,11 @@ Have the LLM reference this file at the beginning of any new conversation.
     * Authentication: `fastapi-users` library, JWT
     * Real-time: WebSockets
     * API: RESTful for CRUD, WebSockets for notifications.
+    * AI: Google Gemini API for item classification, translation, and icon generation.
+* **Frontend:** To be determined (HTML, CSS, JavaScript)
+    * Framework/Libraries: TBD (Firebase Studio/Google's AI-assisted tools)
+    * Real-time updates via WebSocket connection
+    * Client-side AI: Firebase ML SDK
 * **Frontend:** To be determined (HTML, CSS, JavaScript).
     * Framework/Libraries: TBD (AI tools like Firebase Studio/Google's AI-assisted tools will be explored).
     * Real-time updates via WebSocket connection to the backend.
@@ -157,3 +164,10 @@ Have the LLM reference this file at the beginning of any new conversation.
 * **Frontend AI Tool Limitations:** Reliance on AI tools for frontend might hit limitations requiring manual JS/CSS work.
 * **Real-time Complexity:** Ensuring reliable and efficient real-time updates across all clients.
 * **Scope Creep:** Adding too many features before MVP is solid.
+
+## Success Metrics
+* User engagement metrics (DAU/MAU)
+* Performance metrics (response times, uptime)
+* Error rates and bug resolution time
+* User satisfaction scores
+* AI feature accuracy rates
