@@ -18,9 +18,9 @@ A shared shopping list application built with FastAPI and PostgreSQL.
 
 ## (Development Only) Install and Configure MCP Servers: Fetch, PostgreSQL MCP Server
 
-> **Note:** The Model Context Protocol (MCP) is a development tool that enhances the experience of using AI tools like GitHub Copilot in VS Code. It is not required for running the application in production or normal usage.
+> **Note:** The Model Context Protocol (MCP) is a development tool that enhances the experience of using AI tools like GitHub Copilot in VS Code. It is not required for running the application in production or normal usage. General information about MCP [https://modelcontextprotocol.io/introduction](https://modelcontextprotocol.io/introduction), available MCP servers could be found at [https://mcp.so/servers](https://mcp.so/servers) or [https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers). 
 
-> **Note:** The Fetch MCP Server ([http://mcp.so/server/fetch/modelcontextprotocol](http://mcp.so/server/fetch/modelcontextprotocol)) is only required for development in VS Code with GitHub Copilot. It is not needed for running the application in production or normal usage.
+The Fetch MCP Server ([http://mcp.so/server/fetch/modelcontextprotocol](http://mcp.so/server/fetch/modelcontextprotocol)) is only required for development in VS Code with GitHub Copilot. It is not needed for running the application in production or normal usage.
 
 Installation details here: [https://github.com/modelcontextprotocol/servers/tree/main/src/fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch).
 1. install uvx - see [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/): powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
