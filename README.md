@@ -10,13 +10,15 @@ A shared shopping list application built with FastAPI and PostgreSQL.
 - RESTful API for shopping lists and items
 - Database migrations with Alembic
 
-## Prerequisites
+## Prerequisites    
 
 - Docker and Docker Compose
 - Python 3.9+
 - Git
 
-## (Development Only) Install and Configure MCP Servers: Fetch, PostgreSQL MCP Server
+## (Development Only) Setup VS Code Development Environment and GitHub Copilot and Install and Configure MCP Servers: Fetch, PostgreSQL, Brave Search
+
+To instruct Copilot in VS Code to use workspace/project-specific rules, see documentation: [https://code.visualstudio.com/docs/copilot/copilot-customization](https://code.visualstudio.com/docs/copilot/copilot-customization). Create a file .github/copilot-instructions.md (part of this the repository). Enable VS Code to use GitHub Copilot custom instructions by setting the `github.copilot.customInstructions` setting to `true` in your VS Code settings - [vscode://settings/github.copilot.chat.codeGeneration.useInstructionFiles](vscode://settings/github.copilot.chat.codeGeneration.useInstructionFiles).
 
 > **Note:** The Model Context Protocol (MCP) is a development tool that enhances the experience of using AI tools like GitHub Copilot in VS Code. It is not required for running the application in production or normal usage. General information about MCP [https://modelcontextprotocol.io/introduction](https://modelcontextprotocol.io/introduction), available MCP servers could be found at [https://mcp.so/servers](https://mcp.so/servers) or [https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers). 
 
@@ -34,6 +36,8 @@ Installation details here: [https://github.com/modelcontextprotocol/servers/tree
 3. In the mcp.json edit the PostgreSQL connect string as per .env file or generally deployed PostgreSQL server, e.g. `postgresql://username:password@localhost:5432/familycart`.
 4. It appears as a new Tool in Copilot chat - MCP Server: postgres.
 5. To use it in the Copilot chat, you can use the `#query` tag to query the PostgreSQL MCP server.
+
+Brave Search MCP Server ([https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search#usage-with-vs-code](https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search#usage-with-vs-code)) - click on VS Code icon and in VS Code confirm on 'Install Server'. Replace the placeholder in the `mcp.json` file with your Brave Search API key - [https://api-dashboard.search.brave.com/app/keys] (https://api-dashboard.search.brave.com/app/keys).
 
 ## Getting Started
 
