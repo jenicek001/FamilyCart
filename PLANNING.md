@@ -17,6 +17,29 @@ Have the LLM reference this file at the beginning of any new conversation.
 
 > For detailed user stories and functional requirements, see [User Stories and Functional Requirements](./USER_STORIES.md).
 
+*   **User Authentication:** Email/password and OAuth (Google, Apple).
+*   **Shopping List Management:** Create, view, rename, delete lists.
+*   **Item Management:**
+    *   Add items with quantity, units, and notes.
+    *   Search for items (history, global list).
+    *   Edit and remove items (soft delete).
+    *   Mark items as purchased or unavailable.
+    *   View item requester/updater information.
+*   **Advanced Item Organization:**
+    *   Group and sort items by category.
+    *   Reorder items within categories.
+    *   Reorder entire categories.
+*   **Collaboration & Sharing:**
+    *   Invite users to lists.
+    *   Manage list members.
+*   **Real-time Synchronization:** Instant updates for all shared users via WebSockets.
+*   **AI-Powered Features:**
+    *   Item classification (category).
+    *   Item translation.
+    *   Icon generation for items.
+*   **Responsive UI & Modern UX:** Accessible on mobile, tablet, and desktop.
+*   **Internationalization (I18n):** Support for multiple languages.
+
 ## General Requirements, Stacks, Testing, Deployment, and Scalability Goals
 1.  **User authentication:**
     * Email/password registration and login.
@@ -105,7 +128,7 @@ Have the LLM reference this file at the beginning of any new conversation.
 ### Milestone 1: Backend Core & Authentication (Target: Week X-Y)
 
 * [ ] Setup FastAPI project structure.
-* [ ] Implement database models (User, ShoppingList, Item).
+* [ ] Implement database models (User, ShoppingList, Item, Category, ItemCategoryLink).
 * [ ] Integrate `fastapi-users` for email/password authentication.
 * [ ] Setup JWT authentication.
 * [ ] Setup PostgreSQL and Alembic migrations.
@@ -116,38 +139,46 @@ Have the LLM reference this file at the beginning of any new conversation.
 ### Milestone 2: Core Shopping List API (Target: Week Y-Z)
 
 * [ ] CRUD API endpoints for Shopping Lists.
-* [ ] CRUD API endpoints for Items within lists.
-* [ ] Integrate LLM via API calls for item classification, translation, icons generation, etc.
+* [ ] CRUD API endpoints for Items within lists (including quantity, units, notes, status).
+* [ ] API endpoints for managing item categories.
+* [ ] API endpoints for linking items to categories and managing their order within categories.
+* [ ] API endpoints for reordering categories within a list.
+* [ ] Integrate LLM via API calls for item classification (to category), translation, icons generation.
 * [ ] Implement basic ownership and permissions (user can only access their lists).
-* [ ] CRUD API endpoints for sharing lists with other users.
+* [ ] CRUD API endpoints for sharing lists with other users and managing members.
 
-### Milestone 3: Basic Frontend Scaffolding (Target: Week A-B)
+### Milestone 3: Real-time Backend & Advanced Features (Target: Week Z-A)
+
+* [ ] Implement WebSocket endpoint for real-time notifications.
+* [ ] Integrate WebSocket manager to broadcast updates on list/item/category changes.
+* [ ] Logic to send notifications for:
+    *   Item additions, updates (name, quantity, notes, status, category, order), deletions.
+    *   Category additions, updates (name, order), deletions.
+    *   List sharing and member changes.
+* [ ] API endpoints for item history and search improvements (FR023, FR024).
+
+### Milestone 4: Basic Frontend Scaffolding (Target: Week A-B)
 
 * [ ] Setup basic frontend project structure.
 * [ ] Implement basic UI for login and registration (to test backend auth).
 * [ ] Explore AI tools for generating initial UI components.
 
-### Milestone 4: Frontend MVP Features (Target: Week B-C)
+### Milestone 5: Frontend MVP Features (Target: Week B-C)
 
 * [ ] UI for creating/viewing lists.
 * [ ] UI for adding/editing/deleting/marking items.
+* [ ] UI for managing item categories (viewing items by category, reordering items within categories, reordering categories).
 * [ ] Integrate WebSocket client for real-time list updates.
 * [ ] UI for sharing lists.
 * [ ] Basic responsive design.
 
-### Milestone 5: Testing, Deployment & Refinement (Target: Week C-D)
+### Milestone 6: Testing, Deployment & Refinement (Target: Week C-D)
 
 * [ ] Write unit and integration tests for backend.
 * [ ] Frontend testing.
 * [ ] Setup CI/CD pipeline.
 * [ ] Deploy to chosen hosting environment.
 * [ ] User acceptance testing (family testing!).
-
-### Milestone 6: Real-time & Sharing Backend (Target: Week Z-A)
-
-* [ ] Implement WebSocket endpoint for notifications.
-* [ ] Integrate WebSocket manager to broadcast updates.
-* [ ] Logic to send notifications on list/item changes to shared users.
 
 ## Future Considerations / Post-MVP
 

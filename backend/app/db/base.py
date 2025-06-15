@@ -1,6 +1,6 @@
+from typing import Any, Generator
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 from app.core.config import settings
 
@@ -11,9 +11,11 @@ engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create a base class for our models
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """Base class for all database models."""
+    pass
 
-def get_db():
+def get_db() -> Generator:
     """
     Dependency function that yields database sessions.
     
@@ -25,3 +27,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Import all models here for Alembic to discover them
+from ..models.user import User  # noqa
+from ..models.shopping_list import ShoppingList  # noqa
+from ..models.item import Item  # noqa

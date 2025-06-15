@@ -1,6 +1,7 @@
-# FamilyCart API
+# FamilyCart
 
-A shared shopping list application built with FastAPI and PostgreSQL.
+This application allows family members to create, manage, and share shopping lists in real-time.
+This project is designed to be a full-stack application with a focus on real-time updates, user authentication, and a clean API design. It uses FastAPI for the backend, PostgreSQL for the database, and React for the frontend.
 
 ## Features
 
@@ -38,6 +39,8 @@ Installation details here: [https://github.com/modelcontextprotocol/servers/tree
 5. To use it in the Copilot chat, you can use the `#query` tag to query the PostgreSQL MCP server.
 
 Brave Search MCP Server ([https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search#usage-with-vs-code](https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search#usage-with-vs-code)) - click on VS Code icon and in VS Code confirm on 'Install Server'. Replace the placeholder in the `mcp.json` file with your Brave Search API key - [https://api-dashboard.search.brave.com/app/keys] (https://api-dashboard.search.brave.com/app/keys).
+
+> **Note:** Recommended MCP Server: GistPad - This server allows you to use GitHub Gists as a storage for your code snippets and other data, which can be very useful for development. See [https://github.com/lostintangent/gistpad-mcp?tab=readme-ov-file](https://github.com/lostintangent/gistpad-mcp?tab=readme-ov-file). Register with GitHub: [https://gistpad.dev/](https://gistpad.dev/), Install GistPad extension in VS Code, and follow the instructions and authorize access to GitHub Gists via GitHub. Check with 'How many gists have I edited this month?' in Agent Chat in VS Code.
 
 ## Getting Started
 

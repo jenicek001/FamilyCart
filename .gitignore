@@ -69,3 +69,10 @@ yarn.lock # If using Yarn and package.json is authoritative
 .vscode/
 *.swp
 *~
+
+
+# Ignore these files and directories
+env
+*.pyc
+__pycache__/
+.pytest_cache/
