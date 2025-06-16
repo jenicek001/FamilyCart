@@ -22,12 +22,26 @@ To instruct Copilot in VS Code to use workspace/project-specific rules, see docu
 
 > **Note:** The Model Context Protocol (MCP) is a development tool that enhances the experience of using AI tools like GitHub Copilot in VS Code. It is not required for running the application in production or normal usage. General information about MCP [https://modelcontextprotocol.io/introduction](https://modelcontextprotocol.io/introduction), available MCP servers could be found at [https://mcp.so/servers](https://mcp.so/servers) or [https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers). 
 
+First make sure npx is installed by typing:
+```
+npx --version
+```
+If missing, install npx from: [https://nodejs.org/en](https://nodejs.org/en) (Node.js includes npx).
+
 The Fetch MCP Server ([http://mcp.so/server/fetch/modelcontextprotocol](http://mcp.so/server/fetch/modelcontextprotocol)) is only required for development in VS Code with GitHub Copilot. It is not needed for running the application in production or normal usage.
 
 Installation details here: [https://github.com/modelcontextprotocol/servers/tree/main/src/fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch).
-1. install uvx - see [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/): powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-2. See instructions - ensure uvx tool and other are in the Windows PATH either restarting PowerShell / VS Code or in PowerShell type: $env:Path = "C:\Users\janza\.local\bin;$env:Path"
-4. To install/configure into VS Code use embedded one-click install here: [https://github.com/modelcontextprotocol/servers/tree/main/src/fetch#configure-for-vs-code](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch#configure-for-vs-code).
+1. Install the `uvx` tool, which is a command-line utility for managing MCP servers. You can install it using PowerShell on Windows:
+```powershell
+# Install uvx using PowerShell
+irm https://astral.sh/uv/install.ps1 | iex
+```
+2. Ensure the `uvx` tool and other installed tools are available in your Windows `PATH`. After installation, either restart PowerShell and VS Code, or update your current session's `PATH` by running:
+
+```powershell
+$env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+```
+3. To install/configure into VS Code use embedded one-click install here: [https://github.com/modelcontextprotocol/servers/tree/main/src/fetch#configure-for-vs-code](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch#configure-for-vs-code).
 
 > **Note:** The PostgreSQL MCP Server ([http://mcp.so/server/postgres/modelcontextprotocol](http://mcp.so/server/postgres/modelcontextprotocol)) is only required for development in VS Code with GitHub Copilot. It is not needed for running the application in production or normal usage.
 
