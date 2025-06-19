@@ -38,6 +38,12 @@ It will be installed into the `%APPDATA%\pypoetry` directory, which should be ad
 
 ## (Development Only) Setup VS Code Development Environment and GitHub Copilot and Install and Configure MCP Servers: Fetch, PostgreSQL, Brave Search
 
+### First time Git configuration
+```bash
+git config --global user.name "Jan Zahradnik"
+git config --global user.email jan.zahradnik@centrum.cz
+```
+
 Here is a comprehensive, step-by-step guide to get Docker running on your x64/AMD64 Ubuntu machine, presented from an industry-professional perspective.
 
 ### **Philosophy: Why We Follow These Steps**
