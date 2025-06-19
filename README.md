@@ -23,6 +23,12 @@ python -m pip install --user pipx
 python -m pipx ensurepath
 echo %PATH%
 ```
+```bash
+# Install pipx on Linux
+sudo apt update
+sudo apt install pipx
+pipx ensurepath
+```
 - Poetry: [https://python-poetry.org/docs/#installation](https://python-poetry.org/docs/#installation)
 ```powershell
 # Install Poetry on Windows
@@ -232,11 +238,16 @@ Installation details here: [https://github.com/modelcontextprotocol/servers/tree
 
 > **Note:** The PostgreSQL MCP Server ([http://mcp.so/server/postgres/modelcontextprotocol](http://mcp.so/server/postgres/modelcontextprotocol)) is only required for development in VS Code with GitHub Copilot. It is not needed for running the application in production or normal usage.
 
-1. In the VS Code top search bar, put '>MCP' and choose 'MCP: Add Server...', Choose NPM package, Package name: '@modelcontextprotocol/server-postgres' and store to Workspace settings.
-2. Name it postgres
-3. In the mcp.json edit the PostgreSQL connect string as per .env file or generally deployed PostgreSQL server, e.g. `postgresql://username:password@localhost:5432/familycart`.
-4. It appears as a new Tool in Copilot chat - MCP Server: postgres.
-5. To use it in the Copilot chat, you can use the `#query` tag to query the PostgreSQL MCP server.
+1. Install npx - see [https://ubuntushell.com/install-npx/](https://ubuntushell.com/install-npx/) - 
+```bash
+sudo apt install npm
+npx -v
+```
+2. In the VS Code top search bar, put '>MCP' and choose 'MCP: Add Server...', Choose NPM package, Package name: '@modelcontextprotocol/server-postgres' and store to Workspace settings.
+3. Name it postgres
+4. In the mcp.json edit the PostgreSQL connect string as per .env file or generally deployed PostgreSQL server, e.g. `postgresql://username:password@localhost:5432/familycart`.
+5. It appears as a new Tool in Copilot chat - MCP Server: postgres.
+6. To use it in the Copilot chat, you can use the `#query` tag to query the PostgreSQL MCP server.
 
 Brave Search MCP Server ([https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search#usage-with-vs-code](https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search#usage-with-vs-code)) - click on VS Code icon and in VS Code confirm on 'Install Server'. Replace the placeholder in the `mcp.json` file with your Brave Search API key - [https://api-dashboard.search.brave.com/app/keys] (https://api-dashboard.search.brave.com/app/keys).
 
