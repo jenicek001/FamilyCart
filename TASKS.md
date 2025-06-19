@@ -24,15 +24,15 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * [x] Configure basic FastAPI app structure (`main.py`, `core/config.py`).
     * [x] Setup PostgreSQL database locally (e.g., via Docker).
     * [x] Configure database connection in `backend/.env` and `core/config.py`.
-    * [ ] Initialize Alembic: `alembic init alembic`. Configure `env.py` and `alembic.ini`.
+    * [x] Initialize Alembic: `alembic init alembic`. Configure `env.py` and `alembic.ini`.
 * **Authentication Implementation:**
-    * [ ] Define User model (`models/user.py`) compatible with `fastapi-users` and SQLAlchemy.
-    * [ ] Define User Pydantic schemas (`schemas/user.py`) for `fastapi-users`.
-    * [ ] Create initial Alembic migration for the user table: `alembic revision -m "create_user_table"` and implement `upgrade/downgrade`.
-    * [ ] Apply migration: `alembic upgrade head`.
-    * [ ] Integrate `fastapi-users` core components (UserManager, backends, strategies).
-    * [ ] Implement email/password registration and login routers using `fastapi-users`.
-    * [ ] Setup JWT strategy for authentication.
+    * [x] Define User model (`models/user.py`) compatible with `fastapi-users` and SQLAlchemy.
+    * [x] Define User Pydantic schemas (`schemas/user.py`) for `fastapi-users`.
+    * [x] Create initial Alembic migration for the user table: `alembic revision -m "create_user_table"` and implement `upgrade/downgrade`.
+    * [x] Apply migration: `alembic upgrade head`.
+    * [x] Integrate `fastapi-users` core components (UserManager, backends, strategies).
+    * [x] Implement email/password registration and login routers using `fastapi-users`.
+    * [x] Setup JWT strategy for authentication.
     * [ ] Configure Google OAuth2 client ID/secret in `.env`.
     * [ ] Add Google OAuth2 router from `fastapi-users`.
     * [ ] Research and configure Apple OAuth2 (this may require more specific steps, like setting up an App ID, Service ID, and private key with Apple Developer).
