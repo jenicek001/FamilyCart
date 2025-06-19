@@ -1,106 +1,68 @@
 # backend/pyproject.toml
 
 [tool.poetry]
-name = "shared-shopping-list-backend"
+name = "familycart-backend"
 version = "0.1.0"
-description = "Backend API for the Shared Shopping List application."
-authors = ["Jan Zahradnik <jan.zahradnik@centrum.cz>"]
-readme = "README.md" # Assuming you'll add a README.md in the backend folder too, or adjust path
+description = "Backend for the FamilyCart application"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
 packages = [{include = "app", from = "."}]
 
 [tool.poetry.dependencies]
-python = "^3.9" # Or your preferred supported version, e.g., ^3.10, ^3.11
+python = ">=3.11, <3.13"
 fastapi = "^0.111.0"
-uvicorn = {extras = ["standard"], version = "^0.30.0"} # As of June 2025, check for latest
-sqlalchemy = "^2.0.30"
-psycopg2-binary = "^2.9.9" # For PostgreSQL
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.30"}
 alembic = "^1.13.1"
-python-dotenv = "^1.0.1"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+psycopg2-binary = "^2.9.9" # For synchronous Alembic operations if needed, or use asyncpg for async
+asyncpg = "^0.29.0" # For FastAPI async database operations
+pydantic = {extras = ["email"], version = "^2.7.1"}
+pydantic-settings = "^2.2.1"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-# fastapi-users with SQLAlchemy and OAuth support (for Google/Apple etc.)
-fastapi-users = {extras = ["sqlalchemy", "oauth"], version = "^13.0.0"}
-# httpx is required by fastapi-users[oauth] for OAuth client calls
-httpx = "^0.27.0"
-# For email validation, often useful with user registration
-email-validator = "^2.1.1"
-# For WebSockets
-# websockets = "^12.0" # FastAPI's uvicorn brings Starlette which handles WebSockets
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.9" # For FastAPI file uploads, if needed
+tenacity = "^8.2.3" # For retry mechanisms, e.g. DB connection
+# For WebSocket support
+websockets = "^12.0"
 
-# If you plan to send emails (e.g., for verification, password reset)
-# python-multipart = "^0.0.9" # For form data, fastapi-users might use it
-# premailer = "^3.10.0" # For inlining CSS in HTML emails
-# Jinja2 = "^3.1.3" # For email templates
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.2.2"
+pytest = "^8.2.0"
 pytest-cov = "^5.0.0"
-# httpx is also used by TestClient in FastAPI for testing
-# (already in main dependencies due to fastapi-users[oauth], but good to note its dev use)
-httpx = "^0.27.0" # For testing client
-# Add linters/formatters if desired e.g. ruff, mypy
-ruff = "^0.4.8" # Linter and formatter
 mypy = "^1.10.0"
-types-passlib = "^1.7.7.20240106" # Type hints for passlib
-types-python-jose = "^3.3.4.20240106" # Type hints for python-jose
-types-setuptools = "^70.0.0.20240526" # Often useful for mypy
-sqlalchemy-stubs = "^0.4" # Type hints for SQLAlchemy, if not covered by SQLAlchemy 2.0 itself
+ruff = "^0.4.4"
+pre-commit = "^3.7.0"
+httpx = "^0.27.0" # For testing FastAPI endpoints
+pytest-asyncio = "^0.23.7"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true # Recommended for projects with C extensions or stubs not in typeshed
+
+[tool.pytest.ini_options]
+pythonpath = [""]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-# Optional: Configuration for Ruff (linter/formatter)
-[tool.ruff]
-line-length = 88
-target-version = "py39" # Match your Python version
-
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # Pyflakes
-    "I",  # isort
-    "C90", # mccabe complexity
-    "N",  # pep8-naming
-    "UP", # pyupgrade
-    "ASYNC", # flake8-async
-    "B",  # flake8-bugbear
-    "A",  # flake8-builtins
-    "PT", # flake8-pytest-style
-    "SIM",# flake8-simplify
-    # "D",  # pydocstyle (uncomment if you want to enforce docstrings)
-]
-ignore = [
-    "E501", # Line too long (handled by formatter)
-    # "B008", # Do not perform function calls in argument defaults (can be noisy)
-    # "D100", # Missing docstring in public module
-    # "D103", # Missing docstring in public function
-    # "D104", # Missing docstring in public package
-]
-# exclude = [".venv", "alembic/versions"] # Example exclusions
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
-
-# Optional: Configuration for Mypy
-[tool.mypy]
-python_version = "3.9" # Match your Python version
-warn_return_any = true
-warn_unused_configs = true
-ignore_missing_imports = true # Can be helpful initially, tighten later
-# plugins = ["sqlalchemy.ext.mypy.plugin"] # If using SQLAlchemy 1.4 style, less needed for 2.0 with type annotations
-
-# Optional: Configuration for Pytest
-[tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q --cov=app --cov-report=html --cov-report=term"
-testpaths = [
-    "tests",
-]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"

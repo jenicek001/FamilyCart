@@ -1,7 +1,9 @@
+from typing import TYPE_CHECKING, List
+
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
-from sqlalchemy.orm import Mapped, relationship, mapped_column
-from sqlalchemy import String, Boolean, ForeignKey
-from typing import List, TYPE_CHECKING
+from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..db.base import Base
 
 if TYPE_CHECKING:
@@ -15,19 +17,26 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     last_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
     
     # Relationships
-    shopping_lists: Mapped[List["ShoppingList"]] = relationship(
+    owned_shopping_lists: Mapped[List["ShoppingList"]] = relationship(
+        foreign_keys="[ShoppingList.owner_id]",
         back_populates="owner",
         cascade="all, delete-orphan"
     )
     
-    shared_lists: Mapped[List["ShoppingList"]] = relationship(
-        secondary="user_shopping_list",
-        back_populates="shared_with"
+    shared_shopping_lists: Mapped[List["ShoppingList"]] = relationship(
+        secondary="user_shopping_list_link",
+        back_populates="shared_with_users"
     )
 
-    def __str__(self) -> str:
-        """String representation of the user."""
-        return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.email
+    def __repr__(self) -> str:
+        return f"<User(id={self.id}, email='{self.email}')>"
+    
+    @property
+    def full_name(self) -> str:
+        """Returns the user's full name."""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.email
 
 # If you need a separate OAuthAccount table (fastapi-users usually handles this internally or via association table)
 # class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):

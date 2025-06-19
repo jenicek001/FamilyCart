@@ -14,8 +14,21 @@ This project is designed to be a full-stack application with a focus on real-tim
 ## Prerequisites    
 
 - Docker and Docker Compose
-- Python 3.9+
+- Python 3.12+
 - Git
+- pipx: [https://pipx.pypa.io/stable/installation/](https://pipx.pypa.io/stable/installation/)
+```powershell
+# Install pipx on Windows
+python -m pip install --user pipx
+python -m pipx ensurepath
+echo %PATH%
+```
+- Poetry: [https://python-poetry.org/docs/#installation](https://python-poetry.org/docs/#installation)
+```powershell
+# Install Poetry on Windows
+pipx install poetry
+```
+It will be installed into the `%APPDATA%\pypoetry` directory, which should be added to your PATH environment variable.
 
 ## (Development Only) Setup VS Code Development Environment and GitHub Copilot and Install and Configure MCP Servers: Fetch, PostgreSQL, Brave Search
 
@@ -67,16 +80,26 @@ Edit the `.env` file with your configuration.
 docker-compose up -d db
 ```
 
-### 4. Set up Python environment
+### 4. Set up Python environment (Backend)
 
+The backend uses [Poetry](https://python-poetry.org/) for dependency management and virtual environment creation.
+
+Navigate to the backend directory:
 ```bash
-# Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+cd backend
 ```
+
+Install dependencies and create/activate the virtual environment:
+```bash
+poetry install
+```
+This command will create a `.venv` folder in the `backend` directory and install all necessary dependencies specified in `pyproject.toml`.
+
+To activate the virtual environment, you can use:
+```bash
+poetry shell
+```
+Alternatively, you can run commands within the virtual environment using `poetry run <command>`.
 
 ### 5. Initialize the database
 
