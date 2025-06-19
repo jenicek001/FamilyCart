@@ -1,5 +1,5 @@
 from typing import Optional
-
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -14,8 +14,21 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
     SQLALCHEMY_DATABASE_URI_ASYNC: Optional[str] = None
 
+    @model_validator(mode='after')
+    def get_db_connection_str(self) -> 'Settings':
+        if self.POSTGRES_USER and self.POSTGRES_PASSWORD and self.POSTGRES_SERVER and self.POSTGRES_DB:
+            self.SQLALCHEMY_DATABASE_URI = (
+                f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
+                f"{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+            )
+            self.SQLALCHEMY_DATABASE_URI_ASYNC = (
+                f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
+                f"{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+            )
+        return self
+
     # fastapi-users & JWT
-    SECRET_KEY: str = ""
+    SECRET_KEY: str = "a_very_secret_key"  # CHANGE THIS!
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -24,21 +37,17 @@ class Settings(BaseSettings):
     GOOGLE_OAUTH_CLIENT_SECRET: Optional[str] = None
 
     # OAuth Apple
-    APPLE_OAUTH_CLIENT_ID: Optional[str] = None # Usually your Bundle ID
+    APPLE_OAUTH_CLIENT_ID: Optional[str] = None  # Usually your Bundle ID
     APPLE_OAUTH_TEAM_ID: Optional[str] = None
     APPLE_OAUTH_KEY_ID: Optional[str] = None
-    APPLE_OAUTH_PRIVATE_KEY: Optional[str] = None # The content of your .p8 key file
+    APPLE_OAUTH_PRIVATE_KEY: Optional[str] = None  # The content of your .p8 key file
 
     class Config:
-        env_file = ".env"
+        # Pydantic-settings will automatically load environment variables.
+        # We will load the .env file manually in the application's entry points
+        # before this Settings class is instantiated.
         env_file_encoding = 'utf-8'
-        extra = 'ignore' # Add this to ignore extra fields if any
+        extra = 'ignore'
+
 
 settings = Settings()
-
-# Reason: Construct the database URIs after loading other settings.
-if settings.POSTGRES_SERVER and not settings.SQLALCHEMY_DATABASE_URI:
-    settings.SQLALCHEMY_DATABASE_URI = f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}/{settings.POSTGRES_DB}"
-
-if settings.POSTGRES_SERVER and not settings.SQLALCHEMY_DATABASE_URI_ASYNC:
-    settings.SQLALCHEMY_DATABASE_URI_ASYNC = f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}/{settings.POSTGRES_DB}"

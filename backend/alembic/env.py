@@ -1,20 +1,25 @@
-import asyncio
 import sys
-from logging.config import fileConfig
 from pathlib import Path
+from logging.config import fileConfig
+
+from dotenv import load_dotenv
 
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-# Add the project root to sys.path
-# This is to ensure that alembic can find the app module
-# Reason: Alembic runs from the `backend` directory, but models are in `backend/app`
-# Adjust if your alembic.ini is not in the `backend` directory relative to project root
-project_root = Path(__file__).resolve().parent.parent.parent  # backend/alembic -> backend -> FamilyCart
-sys.path.insert(0, str(project_root / "backend"))
+# Add the project root to sys.path and load .env
+# The root is the 'backend' directory
+project_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(project_root))
+env_path = project_root / ".env"
 
+if env_path.is_file():
+    print(f"Loading environment variables from {env_path}")
+    load_dotenv(dotenv_path=env_path)
+else:
+    print(f"Warning: .env file not found at {env_path}")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,15 +30,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Import all models here to ensure they are registered with Base.metadata
-# For example:
-# from app.models.user import User
-# from app.models.item import Item
-# A common pattern is to have an __init__.py in your models directory that imports all models,
-# then you can just import that:
+# Now that env is loaded, we can import settings and models
+# This will now be populated correctly from the loaded .env file
+from app.core.config import settings
 import app.models  # This assumes app/models/__init__.py imports all your model classes
-from app.core.config import settings  # Import your settings
-# Import Base from your models and all models for autogenerate support
 from app.db.base import Base  # Adjust if your Base is elsewhere
 
 target_metadata = Base.metadata
@@ -86,18 +86,14 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-    # section = config.get_section(config.config_ini_section, {}) # Original line
-    # section['sqlalchemy.url'] = settings.SQLALCHEMY_DATABASE_URI # Use URI from settings
-
-    # Create a dictionary for async_engine_from_config, ensuring the URL is set correctly
-    # The config object itself can be used if sqlalchemy.url is correctly set in alembic.ini
-    # or overridden here.
-
     engine_config = config.get_section(config.config_ini_section, {})
-    engine_config["sqlalchemy.url"] = settings.SQLALCHEMY_DATABASE_URI_ASYNC  # Ensure this is your async DB URI
+    engine_config["sqlalchemy.url"] = settings.SQLALCHEMY_DATABASE_URI_ASYNC
+
+    if not engine_config["sqlalchemy.url"]:
+        raise ValueError("Database URL is not set. Check your .env file and configuration.")
 
     connectable = async_engine_from_config(
-        engine_config,  # Use the modified section or ensure alembic.ini has the async URL
+        engine_config,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -109,8 +105,13 @@ async def run_async_migrations() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
+    """Run migrations in 'online' mode.
 
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+    import asyncio
     asyncio.run(run_async_migrations())
 
 

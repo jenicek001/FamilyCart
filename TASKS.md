@@ -18,12 +18,12 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 ### Tasks:
 
 * **Backend Setup:**
-    * [ ] Initialize FastAPI project with Poetry: `poetry init`, `poetry add fastapi uvicorn[standard] sqlalchemy psycopg2-binary alembic python-dotenv passlib[bcrypt]`
-    * [ ] Add `fastapi-users[sqlalchemy]`: `poetry add "fastapi-users[sqlalchemy]"`
-    * [ ] Add OAuth/JWT libraries: `poetry add "python-jose[cryptography]" httpx` (check `fastapi-users` docs for specifics, it brings many).
-    * [ ] Configure basic FastAPI app structure (`main.py`, `core/config.py`).
-    * [ ] Setup PostgreSQL database locally (e.g., via Docker).
-    * [ ] Configure database connection in `.env` and `core/config.py`.
+    * [x] Initialize FastAPI project with Poetry: `poetry init`, `poetry add fastapi uvicorn[standard] sqlalchemy psycopg2-binary alembic python-dotenv passlib[bcrypt]`
+    * [x] Add `fastapi-users[sqlalchemy]`: `poetry add "fastapi-users[sqlalchemy]"`
+    * [x] Add OAuth/JWT libraries: `poetry add "python-jose[cryptography]" httpx` (check `fastapi-users` docs for specifics, it brings many).
+    * [x] Configure basic FastAPI app structure (`main.py`, `core/config.py`).
+    * [x] Setup PostgreSQL database locally (e.g., via Docker).
+    * [x] Configure database connection in `backend/.env` and `core/config.py`.
     * [ ] Initialize Alembic: `alembic init alembic`. Configure `env.py` and `alembic.ini`.
 * **Authentication Implementation:**
     * [ ] Define User model (`models/user.py`) compatible with `fastapi-users` and SQLAlchemy.

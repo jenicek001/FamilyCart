@@ -3,13 +3,12 @@
 
 from .category import Category, CategoryTranslation
 from .item import Item
-from .shopping_list import ShoppingList, UserShoppingListLink
+from .shopping_list import ShoppingList
 from .user import User
 
 __all__ = [
     "User",
     "ShoppingList",
-    "UserShoppingListLink",
     "Item",
     "Category",
     "CategoryTranslation",

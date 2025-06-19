@@ -70,6 +70,12 @@ yarn.lock # If using Yarn and package.json is authoritative
 *.swp
 *~
 
+# Environments
+.env
+backend/.env
+
+# VS Code
+.vscode/
 
 # Ignore these files and directories
 env
