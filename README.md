@@ -259,6 +259,93 @@ Brave Search MCP Server ([https://github.com/modelcontextprotocol/servers-archiv
 
 > **Note:** Recommended MCP Server: GistPad - This server allows you to use GitHub Gists as a storage for your code snippets and other data, which can be very useful for development. See [https://github.com/lostintangent/gistpad-mcp?tab=readme-ov-file](https://github.com/lostintangent/gistpad-mcp?tab=readme-ov-file). Register with GitHub: [https://gistpad.dev/](https://gistpad.dev/), Install GistPad extension in VS Code, and follow the instructions and authorize access to GitHub Gists via GitHub. Check with 'How many gists have I edited this month?' in Agent Chat in VS Code.
 
+---
+
+**Playwright MCP Server** ([https://github.com/microsoft/playwright-mcp/](https://github.com/microsoft/playwright-mcp/))
+
+The Playwright MCP server provides browser automation capabilities using Playwright, enabling LLMs and tools to interact with web pages through structured accessibility snapshots (not screenshots). This is useful for automated browser testing, scraping, and LLM-driven web navigation.
+
+**Key Features:**
+- Fast, lightweight, and deterministic (uses Playwright's accessibility tree)
+- LLM-friendly (no vision models required)
+- Supports multiple browsers: Chrome, Firefox, WebKit, Edge
+- Can run in snapshot (default) or vision (screenshot-based) mode
+
+**Requirements:**
+- Node.js 18 or newer
+- VS Code, Cursor, or any MCP-compatible client
+
+**Installation & Configuration:**
+1. Install via VS Code MCP integration or manually add to your `mcp.json`:
+   ```json
+   {
+     "mcpServers": {
+       "playwright": {
+         "command": "npx",
+         "args": ["@playwright/mcp@latest"]
+       }
+     }
+   }
+   ```
+2. To enable vision (screenshot) mode, add the `--vision` flag to the args list.
+3. For advanced configuration (browser, port, user data dir, etc.), see the [Playwright MCP README](https://github.com/microsoft/playwright-mcp/) or run:
+   ```bash
+   npx @playwright/mcp@latest --help
+   ```
+4. To run as a standalone server (e.g., for remote access or custom port):
+   ```bash
+   npx @playwright/mcp@latest --port 8931
+   ```
+   Then set the MCP client config `url` to `http://localhost:8931/sse`.
+
+**User Profile Modes:**
+- Persistent (default): Stores login/session state between runs (location can be overridden with `--user-data-dir`)
+- Isolated: Each session is stateless (useful for testing, can provide initial state with `--storage-state`)
+
+See the [official documentation](https://github.com/microsoft/playwright-mcp/) for more details and advanced options.
+
+**GitHub MCP Server** ([https://mcp.so/server/github/modelcontextprotocol](https://mcp.so/server/github/modelcontextprotocol?tab=tools))
+
+The GitHub MCP server enables repository management, file operations, and full GitHub API integration via the Model Context Protocol. It provides tools for creating/updating files, searching repositories/code/issues, managing pull requests, issues, branches, and more—all accessible to LLMs and automation tools.
+
+**Key Features:**
+- Create, update, and search repositories, files, code, and issues
+- Manage pull requests, branches, and commits
+- Integrate with GitHub Actions and workflows
+- Supports all major repository management operations
+
+**Requirements:**
+- Docker (recommended for easiest setup)
+- A GitHub Personal Access Token (with appropriate repo permissions)
+
+**Installation & Configuration:**
+1. Add the following to your `mcp.json` (or MCP client configuration):
+   ```json
+   {
+     "mcpServers": {
+       "github": {
+         "command": "docker",
+         "args": [
+           "run",
+           "-i",
+           "--rm",
+           "-e",
+           "GITHUB_PERSONAL_ACCESS_TOKEN",
+           "mcp/github"
+         ],
+         "env": {
+           "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
+         }
+       }
+     }
+   }
+   ```
+   Replace `<YOUR_TOKEN>` with your GitHub Personal Access Token.
+2. For more details and advanced usage, see the [official documentation](https://github.com/modelcontextprotocol/servers/tree/main/src/github).
+
+After setup, the GitHub MCP server will be available as a tool in your MCP-compatible client (e.g., Copilot Chat in VS Code), allowing you to automate and manage GitHub repositories programmatically.
+
+
 ## Getting Started
 
 ### 1. Clone the repository
