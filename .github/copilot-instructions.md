@@ -21,6 +21,7 @@
 
 ## 🧠 AI Behavior Rules
 - **Never assume missing context. Ask questions if uncertain.**
+- **When developing new features or debugging** - always use Context7 MCP to reference up-to-date API documentation and code examples for any libraries or frameworks involved. Add 'use context7' to your prompt or leverage the Context7 MCP server for the most current, version-specific docs.
 - **Never hallucinate libraries or functions** – only use known, verified Python packages.
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
 - **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASK.md`.

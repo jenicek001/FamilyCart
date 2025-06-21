@@ -345,6 +345,41 @@ The GitHub MCP server enables repository management, file operations, and full G
 
 After setup, the GitHub MCP server will be available as a tool in your MCP-compatible client (e.g., Copilot Chat in VS Code), allowing you to automate and manage GitHub repositories programmatically.
 
+**Context7 MCP Server** ([https://github.com/upstash/context7](https://github.com/upstash/context7?tab=readme-ov-file))
+
+Context7 MCP provides up-to-date, version-specific code documentation and examples for LLMs and AI coding assistants. It fetches the latest docs and code snippets for libraries and frameworks, reducing hallucinated or outdated code in AI-generated answers.
+
+**Key Features:**
+- Fetches real-time, version-specific documentation and code examples
+- Supports a wide range of libraries and frameworks
+- Integrates with Cursor, Windsurf, Claude Desktop, VS Code, and other MCP clients
+- Tools for resolving library IDs and fetching docs by topic
+
+**Requirements:**
+- Node.js >= 18
+- MCP-compatible client (Cursor, Windsurf, Claude Desktop, VS Code, etc.)
+
+**Installation & Configuration:**
+1. Install via VS Code MCP integration or manually add to your `mcp.json`:
+   ```json
+   {
+     "mcpServers": {
+       "context7": {
+         "command": "npx",
+         "args": ["-y", "@upstash/context7-mcp@latest"]
+       }
+     }
+   }
+   ```
+2. To run as a standalone server with HTTP or SSE transport (for remote or custom port):
+   ```bash
+   npx -y @upstash/context7-mcp@latest --transport http --port 8080
+   ```
+   Then set the MCP client config `url` to `http://localhost:8080` (or your chosen port).
+3. For advanced usage, see the [official documentation](https://github.com/upstash/context7?tab=readme-ov-file).
+
+After setup, Context7 MCP will be available as a tool in your MCP-compatible client, providing instant, up-to-date code docs and examples for your prompts.
+
 
 ## Getting Started
 
