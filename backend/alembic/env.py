@@ -33,7 +33,11 @@ if config.config_file_name is not None:
 # Now that env is loaded, we can import settings and models
 # This will now be populated correctly from the loaded .env file
 from app.core.config import settings
-import app.models  # This assumes app/models/__init__.py imports all your model classes
+# Explicitly import all models to ensure they are registered with Base
+from app.models.user import User
+from app.models.category import Category
+from app.models.shopping_list import ShoppingList
+from app.models.item import Item
 from app.db.base import Base  # Adjust if your Base is elsewhere
 
 target_metadata = Base.metadata

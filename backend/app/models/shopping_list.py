@@ -15,15 +15,15 @@ user_shopping_list = Table(
     "user_shopping_list",
     Base.metadata,
     Column("user_id", ForeignKey("user.id"), primary_key=True),
-    Column("shopping_list_id", ForeignKey("shoppinglist.id"), primary_key=True),
+    Column("shopping_list_id", ForeignKey("shopping_list.id"), primary_key=True),
 )
 
 class ShoppingList(Base):
     """Shopping list model with relationships to users and items."""
     
-    __tablename__ = "shoppinglist"
+    __tablename__ = "shopping_list"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)

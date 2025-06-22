@@ -1,15 +1,14 @@
 # This file ensures that all models are imported when 'app.models' is imported.
 # This is crucial for Alembic to detect all models for autogeneration.
 
-from .category import Category, CategoryTranslation
-from .item import Item
-from .shopping_list import ShoppingList
 from .user import User
+from .category import Category
+from .shopping_list import ShoppingList
+from .item import Item
 
 __all__ = [
     "User",
+    "Category",
     "ShoppingList",
     "Item",
-    "Category",
-    "CategoryTranslation",
 ]

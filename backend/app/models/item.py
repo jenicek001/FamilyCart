@@ -1,31 +1,37 @@
-from sqlalchemy import String, ForeignKey, Boolean, Integer
+from sqlalchemy import String, ForeignKey, Boolean, Integer, Text
 from sqlalchemy.orm import Mapped, relationship, mapped_column
-from typing import TYPE_CHECKING
+from typing import Optional
 from datetime import datetime
-import uuid
 
 from ..db.base import Base
-
-if TYPE_CHECKING:
-    from .shopping_list import ShoppingList
+from .shopping_list import ShoppingList
+from .user import User
+from .category import Category
 
 class Item(Base):
     """Item model for shopping list items."""
     
     __tablename__ = "item"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(String(100))
-    quantity: Mapped[int] = mapped_column(Integer, default=1)
-    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    note: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    is_purchased: Mapped[bool] = mapped_column(Boolean, default=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    quantity: Mapped[str | None] = mapped_column(String(50))
+    description: Mapped[str | None] = mapped_column(Text)
+    is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    icon_name: Mapped[str | None] = mapped_column(String(50)) # For Lucide icon name
+
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Shopping list relationship
-    shopping_list_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("shoppinglist.id"))
+    # Relationships
+    shopping_list_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"))
     shopping_list: Mapped["ShoppingList"] = relationship(back_populates="items")
 
+    owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    owner: Mapped["User"] = relationship()
+
+    category_id: Mapped[int | None] = mapped_column(ForeignKey("category.id"))
+    category: Mapped[Optional["Category"]] = relationship(back_populates="items")
+
     def __str__(self) -> str:
-        return f"{self.name} ({self.quantity} {self.unit if self.unit else ''})"
+        return f"{self.name} ({self.quantity})"
