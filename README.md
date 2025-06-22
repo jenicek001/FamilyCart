@@ -461,6 +461,20 @@ isort .
 flake8
 ```
 
+### Install Prettier Extension for VS Code
+
+To ensure consistent code formatting, install the official Prettier extension in VS Code:
+
+1. Open VS Code and go to the Extensions view (`Ctrl+Shift+X`).
+2. Search for "Prettier - Code formatter" by Prettier.
+3. Click "Install".
+4. (Recommended) Set Prettier as your default formatter:
+   - Open Command Palette (`Ctrl+Shift+P`), type `Format Document With...`, then select `Configure Default Formatter` and choose `Prettier - Code formatter`.
+5. (Optional) Enable format on save:
+   - Go to Settings (`Ctrl+,`), search for "format on save", and enable `Editor: Format On Save`.
+
+This will help maintain code style consistency across the project.
+
 ### Database migrations
 
 To create a new migration:
