@@ -39,7 +39,7 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * [ ] Add Google OAuth2 router from `fastapi-users`.
     * [ ] Research and configure Apple OAuth2 (this may require more specific steps, like setting up an App ID, Service ID, and private key with Apple Developer).
     * [ ] Add Apple OAuth2 router (custom or via a `fastapi-users` compatible library if available).
-    * [ ] Create basic protected endpoint `/api/v1/users/me` to test authentication.
+    * [x] Create basic protected endpoint `/api/v1/users/me` to test authentication. (2025-06-24)
 * **Documentation & Testing:**
     * [ ] Ensure OpenAPI docs (`/docs`) reflect auth endpoints.
     * [ ] Write basic unit tests for user creation/login.
