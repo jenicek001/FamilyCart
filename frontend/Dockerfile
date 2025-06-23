@@ -26,7 +26,6 @@ WORKDIR /app
 
 # Copy the built application from the previous stage
 COPY --from=base /app/.next ./.next
-COPY --from=base /app/public ./public
 COPY --from=base /app/package.json ./
 
 # Expose the port the app runs on

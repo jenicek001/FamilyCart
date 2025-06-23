@@ -22,6 +22,8 @@ RUN poetry install --no-root --without dev
 # 7. Copy the rest of the application source code
 COPY . .
 
-# The command to run the application will be specified in docker-compose.yml
-# But it's good practice to have a default command here
-CMD ["sh", "-c", "poetry run alembic upgrade head && poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# 8. Make the startup script executable
+RUN chmod +x /app/scripts/start.sh
+
+# 9. Set the startup script as the entrypoint
+CMD ["/app/scripts/start.sh"]

@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase/firebase';
-import type { User } from 'firebase/auth';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,36 +13,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Home, LogOut, Settings, ShoppingCart, UserCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Home, LogOut, Settings, ShoppingCart, UserCircle, Loader2 } from 'lucide-react';
 
 export default function Header() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      toast({ title: "Logged Out", description: "You have been successfully logged out." });
-      router.push('/login');
-    } catch (error: any) {
-      toast({ title: "Logout Failed", description: error.message, variant: "destructive" });
-    }
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
   };
 
-  const getInitials = (email?: string | null) => {
-    if (!email) return "FC"; // FamilyCart
-    return email.substring(0, 2).toUpperCase();
+  const getInitials = (name?: string | null, email?: string | null) => {
+    if (name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    return "FC"; // FamilyCart
   }
 
   return (
@@ -57,15 +43,16 @@ export default function Header() {
         </Link>
         
         <nav className="flex items-center gap-4">
-          {isLoading ? (
-             <div className="h-8 w-20 bg-muted rounded animate-pulse"></div>
+          {loading ? (
+             <Loader2 className="h-6 w-6 animate-spin text-primary"/>
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.photoURL || undefined} alt={user.email || "User"} data-ai-hint="profile avatar" />
-                    <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                    {/* Using a service like DiceBear for avatars based on user info */}
+                    <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user.full_name || user.email}`} alt={user.full_name || user.email || "User"} />
+                    <AvatarFallback>{getInitials(user.full_name, user.email)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -73,7 +60,7 @@ export default function Header() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user.displayName || user.email}
+                      {user.full_name || 'User'}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
@@ -89,10 +76,6 @@ export default function Header() {
                   <UserCircle className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />

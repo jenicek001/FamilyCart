@@ -42,10 +42,13 @@ class Settings(BaseSettings):
     APPLE_OAUTH_KEY_ID: Optional[str] = None
     APPLE_OAUTH_PRIVATE_KEY: Optional[str] = None  # The content of your .p8 key file
 
+    # AI APIs
+    OPENAI_API_KEY: Optional[str] = None
+    GOOGLE_API_KEY: Optional[str] = None
+
     class Config:
-        # Pydantic-settings will automatically load environment variables.
-        # We will load the .env file manually in the application's entry points
-        # before this Settings class is instantiated.
+        # Pydantic-settings will automatically load environment variables from the .env file.
+        env_file = ".env"
         env_file_encoding = 'utf-8'
         extra = 'ignore'
 

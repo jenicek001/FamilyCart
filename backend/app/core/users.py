@@ -10,6 +10,7 @@ from app.core.config import settings
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     """Manages user authentication and operations."""
+
     reset_password_token_secret = settings.SECRET_KEY
     verification_token_secret = settings.SECRET_KEY
 

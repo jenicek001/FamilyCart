@@ -1,27 +1,16 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase/firebase';
 import { Loader2, ShoppingCart } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/login');
-      }
-      // setLoading(false); // Keep loading until redirect completes
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    // The auth check is now handled by layout components or the dashboard itself.
+    // This page simply acts as an entry point and redirects.
+    router.replace('/dashboard');
   }, [router]);
 
   return (

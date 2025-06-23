@@ -213,6 +213,9 @@ cp .env.example .env
 
 Edit the `.env` file with your configuration.
 
+#### Get Google API key
+Get key on [Google AI Studio](https://aistudio.google.com/apikey).
+
 ### 3. Start the database
 
 ```bash
