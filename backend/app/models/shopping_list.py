@@ -31,7 +31,7 @@ class ShoppingList(Base):
 
     # Owner relationship
     owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
-    owner: Mapped["User"] = relationship(back_populates="shopping_lists")
+    owner: Mapped["User"] = relationship(back_populates="owned_shopping_lists")
 
     # Users with whom the list is shared
     shared_with: Mapped[List["User"]] = relationship(

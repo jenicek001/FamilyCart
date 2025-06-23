@@ -35,17 +35,23 @@ export default function SignupPage() {
     }
     setIsLoading(true);
     try {
-      await axios.post('/api/v1/users', {
+      // Split fullName into first_name and last_name
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      
+      await axios.post('/api/v1/auth/register', {
         email,
         password,
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
       });
 
       const params = new URLSearchParams();
       params.append('username', email);
       params.append('password', password);
 
-      const { data } = await axios.post('/api/v1/auth/login', params, {
+      const { data } = await axios.post('/api/v1/auth/jwt/login', params, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

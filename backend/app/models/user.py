@@ -23,9 +23,9 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
         cascade="all, delete-orphan"
     )
     
-    shared_shopping_lists: Mapped[List["ShoppingList"]] = relationship(
-        secondary="user_shopping_list_link",
-        back_populates="shared_with_users"
+    shared_lists: Mapped[List["ShoppingList"]] = relationship(
+        secondary="user_shopping_list",
+        back_populates="shared_with"
     )
 
     def __repr__(self) -> str:

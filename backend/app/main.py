@@ -11,7 +11,7 @@ app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/o
 
 # Include v1 Routers
 app.include_router(auth_v1_router.router, prefix=settings.API_V1_STR, tags=["auth"])
-app.include_router(users_v1_router.router, prefix=settings.API_V1_STR, tags=["users"])
+app.include_router(users_v1_router.router, prefix=settings.API_V1_STR, tags=["users"])  # Removed the /users suffix as it's already included in the router paths
 app.include_router(sl_v1_router.router, prefix=settings.API_V1_STR + "/shopping-lists", tags=["shopping_lists"])
 app.include_router(items_v1_router.router, prefix=settings.API_V1_STR + "/items", tags=["items"])
 app.include_router(ai_v1_router.router, prefix=settings.API_V1_STR, tags=["ai"]) # Add the AI router

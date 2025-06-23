@@ -1,15 +1,15 @@
+import uuid
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-# Assuming a schema for Category exists in .category
-# If not, you might need to define a simple one here.
-class Category(BaseModel):
+# A simple schema for Category to be used in ItemRead
+class CategoryRead(BaseModel):
     id: int
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Shared properties
 class ItemBase(BaseModel):
@@ -18,10 +18,9 @@ class ItemBase(BaseModel):
     description: Optional[str] = None
 
 # Properties to receive on item creation
-# We receive category_name and let the backend handle finding/creating the category ID.
 class ItemCreate(ItemBase):
     shopping_list_id: int
-    category_name: Optional[str] = None
+    category_name: Optional[str] = None # The backend will handle resolving this to a category_id
 
 # Properties to receive on item update
 class ItemUpdate(BaseModel):
@@ -33,15 +32,15 @@ class ItemUpdate(BaseModel):
     icon_name: Optional[str] = None
 
 # Properties to return to client
-class Item(ItemBase):
+class ItemRead(ItemBase):
     id: int
     shopping_list_id: int
+    owner_id: uuid.UUID
     is_completed: bool
     created_at: datetime
     updated_at: datetime
-    category: Optional[Category] = None
+    category: Optional[CategoryRead] = None
     icon_name: Optional[str] = None
-    owner_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

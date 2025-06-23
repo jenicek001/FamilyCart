@@ -29,7 +29,7 @@ export default function LoginForm() {
       params.append('username', email);
       params.append('password', password);
 
-      const { data } = await axios.post('/api/v1/auth/login', params, {
+      const { data } = await axios.post('/api/v1/auth/jwt/login', params, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

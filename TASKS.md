@@ -33,6 +33,8 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * [x] Integrate `fastapi-users` core components (UserManager, backends, strategies).
     * [x] Implement email/password registration and login routers using `fastapi-users`.
     * [x] Setup JWT strategy for authentication.
+    * [x] Fix authentication router paths for proper frontend integration (2025-06-23)
+    * [x] Fix user name handling during registration (2025-06-23)
     * [ ] Configure Google OAuth2 client ID/secret in `.env`.
     * [ ] Add Google OAuth2 router from `fastapi-users`.
     * [ ] Research and configure Apple OAuth2 (this may require more specific steps, like setting up an App ID, Service ID, and private key with Apple Developer).
