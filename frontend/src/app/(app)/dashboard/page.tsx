@@ -14,6 +14,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, ListPlus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import ConfirmDeleteDialog from '@/components/shopping/ConfirmDeleteDialog';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, token } = useAuth();
@@ -24,6 +25,8 @@ export default function DashboardPage() {
   const [listToEdit, setListToEdit] = useState<ShoppingList | null>(null);
   const [isEditListDialogOpen, setIsEditListDialogOpen] = useState(false);
   const [editedListName, setEditedListName] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [listToDelete, setListToDelete] = useState<ShoppingList | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -90,60 +93,23 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDeleteList = async (listId: number) => {
+  const requestDeleteList = (list: ShoppingList) => {
+    setListToDelete(list);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteListConfirmed = async () => {
+    if (!listToDelete) return;
     try {
-      await apiClient.delete(`/api/v1/shopping-lists/${listId}`);
-      setLists(prev => prev.filter(l => l.id !== listId));
+      await apiClient.delete(`/api/v1/shopping-lists/${listToDelete.id}`);
+      setLists(prev => prev.filter(l => l.id !== listToDelete.id));
       toast({ title: "List Deleted", description: "The shopping list has been removed." });
     } catch (error) {
       console.error("Error deleting list: ", error);
       toast({ title: "Error", description: "Could not delete list.", variant: "destructive" });
-    }
-  };
-
-  const handleAddItem = async (listId: number, item: { name: string; quantity?: string; description?: string; category_name?: string; icon_name?: string }) => {
-    try {
-      const { data: newItem } = await apiClient.post<ShoppingListItem>(
-        `/api/v1/shopping-lists/${listId}/items`,
-        item,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const updatedLists = lists.map(list => {
-        if (list.id === listId) {
-          // Create a new items array with the new item included
-          const newItems = [...(list.items || []), newItem];
-          return { ...list, items: newItems };
-        }
-        return list;
-      });
-      setLists(updatedLists);
-      toast({ title: "Item Added", description: `\"${item.name}\" was added to the list.` });
-    } catch (error) {
-      console.error("Error adding item: ", error);
-      toast({ title: "Error", description: "Could not add item.", variant: "destructive" });
-    }
-  };
-
-  const handleToggleItem = async (listId: number, itemId: number) => {
-    const list = lists.find(l => l.id === listId);
-    const item = list?.items.find(i => i.id === itemId);
-    if (!item) return;
-
-    try {
-      const { data: updatedItem } = await apiClient.put<ShoppingListItem>(
-        `/api/v1/items/${itemId}`,
-        { is_completed: !item.is_completed }
-      );
-      const updatedLists = lists.map(l => {
-        if (l.id === listId) {
-          return { ...l, items: l.items.map(i => i.id === itemId ? updatedItem : i) };
-        }
-        return l;
-      });
-      setLists(updatedLists);
-    } catch (error) {
-      console.error("Error toggling item: ", error);
-      toast({ title: "Error", description: "Could not update item status.", variant: "destructive" });
+    } finally {
+      setDeleteDialogOpen(false);
+      setListToDelete(null);
     }
   };
 
@@ -173,6 +139,40 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error sharing list: ", error);
       toast({ title: "Sharing Failed", description: (error as any).response?.data?.detail || "Could not share list.", variant: "destructive" });
+    }
+  };
+
+  const handleAddItem = async (
+    listId: number,
+    item: { name: string; quantity?: string; description?: string; category_name?: string; icon_name?: string }
+  ) => {
+    try {
+      const { data: newItem } = await apiClient.post(`/api/v1/shopping-lists/${listId}/items/`, item);
+      setLists(prevLists => prevLists.map(list =>
+        list.id === listId ? { ...list, items: [newItem, ...list.items] } : list
+      ));
+      toast({ title: "Item Added", description: `Added '${item.name}' to the list.` });
+    } catch (error) {
+      console.error("Error adding item:", error);
+      toast({ title: "Error", description: "Could not add item.", variant: "destructive" });
+    }
+  };
+
+  const handleToggleItem = async (listId: number, itemId: number) => {
+    try {
+      // Find the item to toggle
+      const list = lists.find(l => l.id === listId);
+      if (!list) return;
+      const item = list.items.find(i => i.id === itemId);
+      if (!item) return;
+      const updated = { ...item, is_completed: !item.is_completed };
+      const { data: updatedItem } = await apiClient.put(`/api/v1/items/${itemId}`, { is_completed: updated.is_completed });
+      setLists(prevLists => prevLists.map(l =>
+        l.id === listId ? { ...l, items: l.items.map(i => i.id === itemId ? updatedItem : i) } : l
+      ));
+    } catch (error) {
+      console.error("Error toggling item:", error);
+      toast({ title: "Error", description: "Could not update item.", variant: "destructive" });
     }
   };
 
@@ -292,12 +292,18 @@ export default function DashboardPage() {
               onToggleItem={handleToggleItem}
               onDeleteItem={handleDeleteItem}
               onEditList={() => handleEditList(list)}
-              onDeleteList={handleDeleteList}
+              onDeleteList={() => requestDeleteList(list)}
               onShareList={handleShareList}
             />
           ))}
         </div>
       )}
+      <ConfirmDeleteDialog
+        open={deleteDialogOpen}
+        onConfirm={handleDeleteListConfirmed}
+        onCancel={() => { setDeleteDialogOpen(false); setListToDelete(null); }}
+        listName={listToDelete?.name}
+      />
     </div>
   );
 }
