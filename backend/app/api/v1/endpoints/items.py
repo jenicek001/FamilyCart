@@ -70,7 +70,11 @@ async def read_item(
     """
     Get an item by ID.
     """
-    result = await session.execute(select(Item).where(Item.id == item_id))
+    result = await session.execute(
+        select(Item)
+        .where(Item.id == item_id)
+        .options(selectinload(Item.shopping_list), selectinload(Item.category))
+    )
     item = result.scalars().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -79,6 +83,33 @@ async def read_item(
          raise HTTPException(status_code=403, detail="Not authorized to view this item")
 
     return item
+
+@router.get("/list/{list_id}", response_model=List[ItemRead])
+async def read_items_from_list(
+    list_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(current_user),
+):
+    """
+    Get all items from a specific shopping list.
+    """
+    # Check if the shopping list exists and belongs to the user
+    result = await session.execute(
+        select(ShoppingList).where(ShoppingList.id == list_id)
+    )
+    shopping_list = result.scalars().first()
+    if not shopping_list:
+        raise HTTPException(status_code=404, detail="Shopping list not found")
+    if shopping_list.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view items in this list")
+    # Eagerly load category for all items
+    result = await session.execute(
+        select(Item)
+        .where(Item.shopping_list_id == list_id)
+        .options(selectinload(Item.category), selectinload(Item.shopping_list))
+    )
+    items = result.scalars().all()
+    return items
 
 @router.put("/{item_id}", response_model=ItemRead)
 async def update_item(
@@ -91,7 +122,12 @@ async def update_item(
     """
     Update an item.
     """
-    result = await session.execute(select(Item).where(Item.id == item_id))
+    # Eagerly load shopping_list relationship
+    result = await session.execute(
+        select(Item)
+        .where(Item.id == item_id)
+        .options(selectinload(Item.shopping_list), selectinload(Item.category))
+    )
     db_item = result.scalars().first()
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")

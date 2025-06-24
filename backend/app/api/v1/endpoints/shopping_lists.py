@@ -355,13 +355,11 @@ async def read_items_from_list(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Shopping list not found or you don't have access"
             )
-    
-    # Get all items from this list
+    # Eagerly load category for all items
     result = await session.execute(
-        select(Item).where(Item.shopping_list_id == list_id)
+        select(Item).where(Item.shopping_list_id == list_id).options(selectinload(Item.category), selectinload(Item.shopping_list))
     )
     items = result.scalars().all()
-    
     return items
 
 

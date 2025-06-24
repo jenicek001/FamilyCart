@@ -170,6 +170,10 @@ export default function DashboardPage() {
       setLists(prevLists => prevLists.map(l =>
         l.id === listId ? { ...l, items: l.items.map(i => i.id === itemId ? updatedItem : i) } : l
       ));
+      toast({
+        title: updatedItem.is_completed ? "Item Purchased" : "Item Unmarked",
+        description: `Item '${updatedItem.name}' was ${updatedItem.is_completed ? "marked as purchased" : "marked as not purchased"}.`,
+      });
     } catch (error) {
       console.error("Error toggling item:", error);
       toast({ title: "Error", description: "Could not update item.", variant: "destructive" });
