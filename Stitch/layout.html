@@ -1,0 +1,283 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    .group-hover-delay {
+      display: none;
+      transition-delay: 150ms;
+    }
+    .group:hover .group-hover-delay-block {
+        display: block;
+    }
+    .group .group-hover-delay-block {
+        display: none;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+    }
+    .group:hover .group-hover-delay-block {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 150ms;
+    }
+    .group-hover-delay-block:hover {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }.click-menu-button:focus + .click-menu,
+    .click-menu:focus-within {
+        opacity: 1;
+        visibility: visible;
+        display: block;
+    }
+    .click-menu {
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    }
+ </style>
+</head>
+<body>
+<div class="relative flex size-full min-h-screen flex-col bg-[#FCFAF8] group/design-root overflow-x-hidden" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(252,250,248)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); font-family: &quot;Plus Jakarta Sans&quot;, &quot;Noto Sans&quot;, sans-serif;">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#F3ECE7] px-4 sm:px-6 lg:px-8 py-3 sticky top-0 z-20 bg-[#FCFAF8]/80 backdrop-blur-sm">
+<div class="flex items-center gap-3">
+<div class="size-7 text-[#ED782A]">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+</svg>
+</div>
+<h1 class="text-[#1B130D] text-xl font-bold leading-tight tracking-[-0.015em]">Family Groceries</h1>
+</div>
+<div class="flex items-center gap-2">
+<button aria-label="Add new item" class="flex items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-[#ED782A] text-white hover:bg-[#D66A25] transition-colors duration-200">
+<span class="material-icons text-2xl">add</span>
+</button>
+<div class="relative group">
+<button aria-label="User menu" class="flex items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 click-menu-button">
+<span class="material-icons text-2xl">person</span>
+</button>
+<div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 ring-1 ring-black ring-opacity-5 click-menu">
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="#">Profile</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="#">Settings</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="#">Logout</a>
+</div>
+</div>
+</div>
+</header>
+<main class="px-4 sm:px-6 lg:px-8 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col w-full max-w-2xl flex-1">
+<div class="flex items-center justify-between px-2 pb-4 pt-2">
+<h2 class="text-[#1B130D] text-2xl font-bold leading-tight tracking-[-0.015em]">Shopping List</h2>
+<div class="relative">
+<button aria-label="Filter categories" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E7D9CF] bg-white text-[#1B130D] hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200 shadow-sm hover:shadow-md click-menu-button">
+<span class="material-icons text-xl text-gray-500">filter_list</span>
+<span class="text-sm font-medium">Filter</span>
+</button>
+<div class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-30 ring-1 ring-black ring-opacity-5 click-menu" tabindex="-1">
+<h3 class="px-4 py-2 text-sm font-semibold text-gray-500">Filter by Category</h3>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Dairy &amp; Eggs
+                </label>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Produce
+                </label>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Bakery
+                </label>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Pantry
+                </label>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Beverages
+                </label>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Household
+                </label>
+<label class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+<input class="h-4 w-4 rounded border-gray-300 text-[#ED782A] focus:ring-[#ED782A]/50 mr-2" type="checkbox"/> Personal Care
+                </label>
+<div class="border-t border-gray-200 mt-1 pt-1">
+<button class="w-full text-left px-4 py-2 text-sm text-[#ED782A] hover:bg-gray-100 font-medium">Apply Filters</button>
+<button class="w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-gray-100">Clear Filters</button>
+</div>
+</div>
+</div>
+</div>
+<div class="mb-4 px-2">
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#E7D9CF] bg-white text-[#1B130D] placeholder-gray-400 focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] focus:outline-none shadow-sm hover:shadow-md transition-shadow" placeholder="Search items..." type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-blue-100 text-blue-600 shrink-0 size-12">
+<span class="material-icons text-2xl">egg</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Milk</p>
+<p class="text-blue-600 text-sm font-normal leading-normal">Dairy &amp; Eggs</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Mom <span class="text-gray-400">· Last modified: Dad, 2023-10-27 10:15 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-green-100 text-green-600 shrink-0 size-12">
+<span class="material-icons text-2xl">local_florist</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Apples</p>
+<p class="text-green-600 text-sm font-normal leading-normal">Produce</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Dad <span class="text-gray-400">· Last modified: Dad, 2023-10-27 09:30 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-yellow-100 text-yellow-700 shrink-0 size-12">
+<span class="material-icons text-2xl">bakery_dining</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Bread</p>
+<p class="text-yellow-700 text-sm font-normal leading-normal">Bakery</p>
+<p class="text-xs text-gray-500 mt-1">Suggested for you <span class="text-gray-400">· Last modified: System, 2023-10-26 08:00 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-orange-100 text-orange-600 shrink-0 size-12">
+<span class="material-icons text-2xl">inventory_2</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Pasta</p>
+<p class="text-orange-600 text-sm font-normal leading-normal">Pantry</p>
+<p class="text-xs text-gray-500 mt-1">Suggested for you <span class="text-gray-400">· Last modified: System, 2023-10-26 08:00 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-teal-100 text-teal-600 shrink-0 size-12">
+<span class="material-icons text-2xl">local_cafe</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Juice</p>
+<p class="text-teal-600 text-sm font-normal leading-normal">Beverages</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Alex <span class="text-gray-400">· Last modified: Alex, 2023-10-27 11:00 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 shrink-0 size-12">
+<span class="material-icons text-2xl">cleaning_services</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Paper Towels</p>
+<p class="text-indigo-600 text-sm font-normal leading-normal">Household</p>
+<p class="text-xs text-gray-500 mt-1">Suggested for you <span class="text-gray-400">· Last modified: System, 2023-10-26 08:00 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+<button class="p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
+<span class="material-icons text-3xl">drag_indicator</span>
+</button>
+<div class="flex items-center justify-center rounded-lg bg-pink-100 text-pink-600 shrink-0 size-12">
+<span class="material-icons text-2xl">spa</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal">Shampoo</p>
+<p class="text-pink-600 text-sm font-normal leading-normal">Personal Care</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Mom <span class="text-gray-400">· Last modified: Mom, 2023-10-27 10:00 AM</span></p>
+</div>
+<div class="shrink-0">
+<input class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-[#F3ECE7]">
+<h3 class="text-[#1B130D] text-xl font-semibold leading-tight tracking-[-0.01em] px-2 pb-3">Checked Items</h3>
+<div class="space-y-2 opacity-60">
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7]">
+<div class="w-11 shrink-0"></div>
+<div class="flex items-center justify-center rounded-lg bg-red-100 text-red-600 shrink-0 size-12">
+<span class="material-icons text-2xl">set_meal</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal line-through">Chicken</p>
+<p class="text-red-600 text-sm font-normal leading-normal line-through">Meat &amp; Seafood</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Alex <span class="text-gray-400">· Checked by: Dad, 2023-10-28 09:45 AM</span> <span class="text-gray-400">· Last modified: Dad, 2023-10-28 09:45 AM</span></p>
+</div>
+<div class="shrink-0">
+<input checked="" class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7]">
+<div class="w-11 shrink-0"></div>
+<div class="flex items-center justify-center rounded-lg bg-cyan-100 text-cyan-600 shrink-0 size-12">
+<span class="material-icons text-2xl">ac_unit</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal line-through">Ice Cream</p>
+<p class="text-cyan-600 text-sm font-normal leading-normal line-through">Frozen</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Mom <span class="text-gray-400">· Checked by: Mom, 2023-10-28 10:30 AM</span> <span class="text-gray-400">· Last modified: Mom, 2023-10-28 10:30 AM</span></p>
+</div>
+<div class="shrink-0">
+<input checked="" class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7]">
+<div class="w-11 shrink-0"></div>
+<div class="flex items-center justify-center rounded-lg bg-purple-100 text-purple-600 shrink-0 size-12">
+<span class="material-icons text-2xl">cookie</span>
+</div>
+<div class="flex-grow">
+<p class="text-[#1B130D] text-base font-medium leading-normal line-through">Chips</p>
+<p class="text-purple-600 text-sm font-normal leading-normal line-through">Snacks</p>
+<p class="text-xs text-gray-500 mt-1">Added by: Dad <span class="text-gray-400">· Checked by: Alex, 2023-10-28 11:15 AM</span> <span class="text-gray-400">· Last modified: Alex, 2023-10-28 11:15 AM</span></p>
+</div>
+<div class="shrink-0">
+<input checked="" class="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] checked:bg-[image:--checkbox-tick-svg] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer" type="checkbox"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -107,6 +107,57 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 * [ ] Display item quantities in the shopping list UI (Frontend)
 * [ ] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
 
+## Sprint 2 Extension: UI Migration to Stitch Style
+
+### Goal:
+Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping list and all main app screens, ensuring consistency in layout, color, icons, and interactivity.
+
+### Tasks:
+* **Audit & Planning:**
+    * [ ] Inventory all current UI screens and components (shopping list, item details, user profile, etc.)
+    * [ ] Identify migration priorities (start with shopping list UI)
+    * [ ] Document current vs. target UI structure for each screen
+* **Design Tokens & Global Styles:**
+    * [ ] Extract color palette, font families, and spacing from Stitch/layout.html
+    * [ ] Update Tailwind config (or CSS framework) to match Stitch tokens
+    * [ ] Set global font to "Plus Jakarta Sans" and "Noto Sans"
+    * [ ] Standardize border radius, box shadows, and spacing utilities
+* **Layout & Structure:**
+    * [ ] Refactor main layout to use centered, max-width container and sticky header
+    * [ ] Apply section headers and consistent spacing to all main pages
+    * [ ] Update navigation/header to match Stitch style (logo, title, user menu)
+* **Component Refactoring:**
+    * [ ] Refactor shopping list items to card-based design (icon, colored background, item/category, metadata, checkbox, drag handle)
+    * [ ] Assign category colors and icons as in Stitch sample
+    * [ ] Move checked items to faded, line-through section at the bottom
+    * [ ] Implement dropdown filter menu and search bar with leading icon
+    * [ ] Refactor all buttons to rounded, colored/outlined style
+* **Icons & Visuals:**
+    * [ ] Use Material Icons for all UI elements
+    * [ ] Map each category to a unique icon and color
+* **Accessibility & Responsiveness:**
+    * [ ] Ensure all interactive elements have ARIA labels and visible focus states
+    * [ ] Use Tailwind’s responsive classes for all layouts and components
+* **Reusable Components:**
+    * [ ] Abstract repeated UI patterns (cards, buttons, dropdowns, etc.) into reusable components
+* **Testing & QA:**
+    * [ ] Test new UI on all target devices and browsers
+    * [ ] Check accessibility (keyboard navigation, screen reader support)
+* **Documentation:**
+    * [ ] Update README.md with new setup instructions, design tokens, and component usage
+    * [ ] Document any new or changed components
+* **Iterative Rollout:**
+    * [ ] Migrate one feature/page at a time, starting with shopping list
+    * [ ] Get user feedback after each major migration step
+
+### Success Criteria:
+- [ ] All main screens use Stitch layout, color, and icon style
+- [ ] Shopping list UI matches Stitch sample (cards, icons, checked items, etc.)
+- [ ] All components are responsive and accessible
+- [ ] Design tokens and reusable components are documented
+- [ ] User feedback is positive on new UI
+
+
 ## Sprint 3: Item Completion & UI Enhancement
 
 ### User Stories:
@@ -468,5 +519,6 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 - Database migration strategy for new features
 
 ---
+
 *Updated: 2025-06-24*
 *Next Review: 2025-07-01*
