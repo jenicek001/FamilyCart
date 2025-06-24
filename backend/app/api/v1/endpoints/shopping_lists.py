@@ -272,11 +272,14 @@ async def create_item_for_list(
     """
     Add an item to a specific shopping list.
     """
+    # Extract all needed scalar values from current_user at the very start
+    user_id = current_user.id
+
     # Check if the shopping list exists and belongs to the user
     result = await session.execute(
         select(ShoppingList).where(
             ShoppingList.id == list_id,
-            ShoppingList.owner_id == current_user.id
+            ShoppingList.owner_id == user_id
         )
     )
     shopping_list = result.scalars().first()
@@ -298,7 +301,7 @@ async def create_item_for_list(
         quantity=item_in.quantity,
         description=item_in.description,
         shopping_list_id=list_id,
-        owner_id=current_user.id,
+        owner_id=user_id,
         category_id=category.id if category else None,
         icon_name=item_in.icon_name if hasattr(item_in, 'icon_name') else None
     )
@@ -306,7 +309,8 @@ async def create_item_for_list(
     session.add(db_item)
     await session.commit()
     await session.refresh(db_item)
-    
+    # Eagerly load relationships for response
+    await session.refresh(db_item, attribute_names=["category"])
     return db_item
 
 
