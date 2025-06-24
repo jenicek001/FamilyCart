@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.core.fastapi_users import current_user
 from app.models import User, Item, ShoppingList, Category
@@ -117,12 +118,19 @@ async def delete_item(
     """
     Delete an item.
     """
-    result = await session.execute(select(Item).where(Item.id == item_id))
+    # Eagerly load shopping_list relationship
+    result = await session.execute(
+        select(Item)
+        .where(Item.id == item_id)
+        .options(selectinload(Item.shopping_list))
+    )
     item = result.scalars().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    if item.shopping_list.owner_id != current_user.id:
+    # Extract owner_id early to avoid lazy loading
+    owner_id = item.shopping_list.owner_id if item.shopping_list else None
+    if owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this item")
 
     await session.delete(item)

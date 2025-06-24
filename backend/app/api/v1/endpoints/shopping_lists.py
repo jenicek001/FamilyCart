@@ -89,7 +89,10 @@ async def read_shopping_lists(
         result = await session.execute(
             select(ShoppingList)
             .where(ShoppingList.owner_id == current_user.id)
-            .options(selectinload(ShoppingList.items), selectinload(ShoppingList.shared_with))
+            .options(
+                selectinload(ShoppingList.items).selectinload(Item.category),
+                selectinload(ShoppingList.shared_with)
+            )
         )
         owned_lists = result.scalars().all()
 
@@ -104,7 +107,10 @@ async def read_shopping_lists(
             shared_lists_result = await session.execute(
                 select(ShoppingList)
                 .where(ShoppingList.id.in_(shared_ids))
-                .options(selectinload(ShoppingList.items), selectinload(ShoppingList.shared_with))
+                .options(
+                    selectinload(ShoppingList.items).selectinload(Item.category),
+                    selectinload(ShoppingList.shared_with)
+                )
             )
             shared_lists = shared_lists_result.scalars().all()
         else:
