@@ -1,26 +1,7 @@
-# Purpose of this file: Tracks current tasks, backlog, and sub-tasks.
-# Includes: Bullet list of active work, milestones, and anything discovered mid-process.
-# Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
-
-## Documentation & Process Improvements
-* [x] Document the correct backend startup procedure (2023-06-25)
-  * Backend should be started using the `backend/scripts/start.sh` script, which runs database migrations before starting the application
-  * Avoid running `uvicorn` directly as it skips necessary setup stepss file
-Tracks current tasks, backlog, and sub-tasks.
-Includes: Bullet list of active work, milestones, and anything discovered mid-process.
-Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
-Can prompt the LLM to automatically update and create tasks as well (through global rules).
-
-# Current Tasks
-
-## Documentation & Process Improvements
-* [x] Document the correct backend startup procedure (2023-06-25)
-  * Backend should be started using the `backend/scripts/start.sh` script, which runs database migrations before starting the application
-  * Avoid running `uvicorn` directly as it skips necessary setup stepspose of this file
-Tracks current tasks, backlog, and sub-tasks.
-Includes: Bullet list of active work, milestones, and anything discovered mid-process.
-Prompt to AI: “Update TASK.md to mark XYZ as done and add ABC as a new task.”
-Can prompt the LLM to automatically update and create tasks as well (through global rules).
+# TASKS.md - Purpose of this file: Tracks current tasks, backlog, and sub-tasks.
+* Tracks current tasks, backlog, and sub-tasks.
+* Includes: Bullet list of active work, milestones, and anything discovered mid-process.
+* Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
 
 # Initial Development Tasks (MVP Focus)
 
@@ -29,8 +10,6 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 ### User Stories:
 * As a user, I want to register for a new account using my email and password so I can access the application.
 * As a user, I want to log in with my email and password.
-* As a user, I want to log in/register using my Google account.
-* As a user, I want to log in/register using my Apple ID.
 * As a developer, I need a secure way to manage user sessions (JWT).
 
 ### Tasks:
@@ -59,6 +38,9 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 * **Documentation & Testing:**
     * [ ] Ensure OpenAPI docs (`/docs`) reflect auth endpoints.
     * [ ] Write basic unit tests for user creation/login.
+    * [x] Document the correct backend startup procedure (2023-06-25)
+        * Backend should be started using the `backend/scripts/start.sh` script, which runs database migrations before starting the application
+        * Avoid running `uvicorn` directly as it skips necessary setup stepss file
 
 ## Sprint 2: Core Shopping List API
 
@@ -97,15 +79,16 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 * [x] Add confirmation dialog when a shopping list delete icon is clicked (2025-06-24)
     * [x] Fix dashboard handler bug: define handleAddItem and handleToggleItem so dashboard renders and all handlers work (2025-06-24)
     * [x] Fix 500 error when renaming shopping cart (PUT /shopping-lists/{id}) by eagerly loading relationships in update endpoint (2025-06-24)
-* [ ] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list (Frontend)
-* [ ] Visually distinguish purchased items (e.g., strikethrough, faded color) (Frontend)
-* [ ] Show a toast or feedback when an item is marked as purchased/unpurchased (Frontend)
-* [ ] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item (Backend)
-* [ ] Add/Update tests for marking items as purchased/unpurchased (API and UI)
-* [ ] Write/expand unit and integration tests for toggling item completion (backend and frontend)
-* [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
-* [ ] Display item quantities in the shopping list UI (Frontend)
-* [ ] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
+* **General:**
+    * [ ] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list (Frontend)
+    * [ ] Visually distinguish purchased items (e.g., strikethrough, faded color) (Frontend)
+    * [ ] Show a toast or feedback when an item is marked as purchased/unpurchased (Frontend)
+    * [ ] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item (Backend)
+    * [ ] Add/Update tests for marking items as purchased/unpurchased (API and UI)
+    * [ ] Write/expand unit and integration tests for toggling item completion (backend and frontend)
+    * [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
+    * [ ] Display item quantities in the shopping list UI (Frontend)
+    * [ ] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
 
 ## Sprint 2 Extension: UI Migration to Stitch Style
 
