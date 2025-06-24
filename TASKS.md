@@ -105,6 +105,7 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 * [ ] Write/expand unit and integration tests for toggling item completion (backend and frontend)
 * [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
 * [ ] Display item quantities in the shopping list UI (Frontend)
+* [ ] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
 
 ## Sprint 3: Add Authentication using OAuth2
 * As a user, I want to log in using my Google account.
@@ -124,6 +125,10 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * [ ] Add Google OAuth2 router from `fastapi-users`.
 * **Testing:**
     * [ ] Write tests for OAuth2 login flows.
+
+# AI Automation & Smart Features
+* [ ] Implement fully automated item categorization using AI LLM (no manual category selection; category is inferred from item name/description) (2025-06-24)
+* [ ] Implement automated icon selection/generation for items using AI LLM (icon is inferred from item name/description/category) (2025-06-24)
 
 ---
 *(Further sprints would cover WebSockets, Sharing, Frontend, etc. as outlined in PLANNING.md)*
