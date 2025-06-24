@@ -92,6 +92,8 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * [x] Ensure all endpoints are protected and operate on data owned by/shared with the authenticated user.
 * **Testing:**
     * [x] Write unit/integration tests for shopping list and item API endpoints.
+* [x] Implement functionality to create a new shopping cart (2025-06-24)
+    * Implemented as `POST /shopping-lists/` in `backend/app/api/v1/endpoints/shopping_lists.py`.
 
 ## Sprint 3: Add Authentication using OAuth2
 * As a user, I want to log in using my Google account.

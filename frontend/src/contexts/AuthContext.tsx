@@ -1,8 +1,8 @@
-
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import apiClient from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -19,6 +19,7 @@ interface AuthContextType {
   login: (token: string) => void;
   logout: () => void;
   loading: boolean;
+  fetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,7 +34,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
+      
+      // Set the Authorization header for all axios requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      console.log("Initialized with token:", storedToken);
+      
       fetchUser();
     } else {
       setLoading(false);
@@ -42,8 +47,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get('/api/v1/users/me');
-      setUser(data);
+      const { data } = await apiClient.get('/api/v1/users/me');
+      // Add full_name derived from first_name and last_name
+      const userData = {
+        ...data,
+        full_name: data.first_name && data.last_name 
+          ? `${data.first_name} ${data.last_name}`
+          : data.first_name || data.last_name || ''
+      };
+      setUser(userData);
     } catch (error) {
       console.error('Failed to fetch user', error);
       logout();
@@ -53,9 +65,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = (newToken: string) => {
+    // Ensure the token is saved correctly and in the right format
     localStorage.setItem('token', newToken);
     setToken(newToken);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    
+    // This is captured by apiClient interceptor automatically
+    console.log("Token stored:", newToken);
+    
     fetchUser();
     router.push('/dashboard');
   };
@@ -64,12 +80,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
+    // No need to manually delete headers - apiClient will handle this
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading, fetchUser }}>
       {children}
     </AuthContext.Provider>
   );

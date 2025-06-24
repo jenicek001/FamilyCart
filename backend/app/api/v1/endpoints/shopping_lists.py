@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
+from sqlalchemy.orm import selectinload
 
 from app.core.fastapi_users import current_user  # Use the same dependency as users.py
 from app.models import User
@@ -10,6 +11,7 @@ from app.models.item import Item
 from app.models.category import Category
 from app.schemas.shopping_list import ShoppingListRead, ShoppingListCreate, ShoppingListUpdate
 from app.schemas.item import ItemCreate, ItemRead
+from app.schemas.user import UserRead
 from app.schemas.share import ShareRequest
 from app.api.deps import get_session
 
@@ -41,7 +43,6 @@ async def create_shopping_list(
     """
     Create new shopping list.
     """
-    # Create a new ShoppingList SQLAlchemy model instance
     db_list = ShoppingList(
         name=list_in.name,
         description=list_in.description,
@@ -50,7 +51,29 @@ async def create_shopping_list(
     session.add(db_list)
     await session.commit()
     await session.refresh(db_list)
-    return db_list
+
+    # Eagerly load owner and shared_with
+    await session.refresh(db_list, attribute_names=["owner", "shared_with", "items"])
+
+    from app.schemas.user import UserRead
+    from app.schemas.item import ItemRead
+
+    items = []
+    # Members: shared_with + owner if not already included
+    members = [UserRead.model_validate(u, from_attributes=True) for u in db_list.shared_with]
+    if db_list.owner_id:
+        members.append(UserRead.model_validate(db_list.owner, from_attributes=True))
+
+    return ShoppingListRead(
+        id=db_list.id,
+        name=db_list.name,
+        description=db_list.description,
+        owner_id=db_list.owner_id,
+        created_at=db_list.created_at,
+        updated_at=db_list.updated_at,
+        items=items,
+        members=members
+    )
 
 
 @router.get("/", response_model=List[ShoppingListRead])
@@ -62,43 +85,55 @@ async def read_shopping_lists(
     Retrieve user's shopping lists (owned and shared).
     """
     try:
-        # Get lists owned by the user
-        result = await session.execute(select(ShoppingList).where(ShoppingList.owner_id == current_user.id))
+        # Eagerly load items and shared_with for owned lists
+        result = await session.execute(
+            select(ShoppingList)
+            .where(ShoppingList.owner_id == current_user.id)
+            .options(selectinload(ShoppingList.items), selectinload(ShoppingList.shared_with))
+        )
         owned_lists = result.scalars().all()
-        
-        # Get lists shared with the user - simplified query
-        # Use a subquery approach to avoid greenlet errors
-        try:
-            # First, fetch just the IDs of lists shared with the user
-            shared_ids_result = await session.execute(
-                select(ShoppingList.id)
-                .join(ShoppingList.shared_with)
-                .where(User.id == current_user.id)
+
+        # Eagerly load items and shared_with for shared lists
+        shared_ids_result = await session.execute(
+            select(ShoppingList.id)
+            .join(ShoppingList.shared_with)
+            .where(User.id == current_user.id)
+        )
+        shared_ids = shared_ids_result.scalars().all()
+        if shared_ids:
+            shared_lists_result = await session.execute(
+                select(ShoppingList)
+                .where(ShoppingList.id.in_(shared_ids))
+                .options(selectinload(ShoppingList.items), selectinload(ShoppingList.shared_with))
             )
-            shared_ids = shared_ids_result.scalars().all()
-            
-            # Then, fetch the full lists by ID
-            if shared_ids:
-                shared_lists_result = await session.execute(
-                    select(ShoppingList).where(ShoppingList.id.in_(shared_ids))
-                )
-                shared_lists = shared_lists_result.scalars().all()
-            else:
-                shared_lists = []
-        except Exception as e:
-            print(f"Error fetching shared lists: {e}")
+            shared_lists = shared_lists_result.scalars().all()
+        else:
             shared_lists = []
-        
-        # Combine owned and shared lists
+
         lists = list(owned_lists) + list(shared_lists)
-        
-        # Return the lists without attempting to populate members
-        # This avoids the greenlet error when accessing shared_with
-        return lists
-        
+        # Build Pydantic models with items and members
+        result_models = []
+        for l in lists:
+            items = [ItemRead.model_validate(i, from_attributes=True) for i in l.items] if l.items else []
+            # Members: shared_with + owner if not already included
+            members = [UserRead.model_validate(u, from_attributes=True) for u in l.shared_with]
+            if l.owner_id != current_user.id:
+                members.append(UserRead.model_validate(l.owner, from_attributes=True))
+            result_models.append(
+                ShoppingListRead(
+                    id=l.id,
+                    name=l.name,
+                    description=l.description,
+                    owner_id=l.owner_id,
+                    created_at=l.created_at,
+                    updated_at=l.updated_at,
+                    items=items,
+                    members=members
+                )
+            )
+        return result_models
     except Exception as e:
         print(f"Error in read_shopping_lists: {e}")
-        # Re-raise the exception for proper error handling
         raise
 
 

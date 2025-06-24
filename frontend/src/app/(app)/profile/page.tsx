@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ShoppingList } from '@/types';
-import axios from 'axios';
+import apiClient from '@/lib/api';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,27 +41,42 @@ export default function ProfilePage() {
   const fetchUserLists = async () => {
     if (!token || !user) return;
     try {
-      const { data } = await axios.get<ShoppingList[]>('/api/v1/shopping-lists', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // For debugging
+      console.log("Using auth token:", token);
+      
+      const { data } = await apiClient.get<ShoppingList[]>('/api/v1/shopping-lists');
       const owned = data.filter(list => list.owner_id === user.id);
       const shared = data.filter(list => list.owner_id !== user.id);
       setOwnedLists(owned);
       setSharedLists(shared);
     } catch (error) {
       console.error("Error fetching user lists:", error);
+      console.error("Token used:", token);
       toast({ title: "Error", description: "Could not fetch your shopping lists.", variant: "destructive" });
     }
   };
-
+  
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !token) return;
     setIsUpdating(true);
 
-    const updatedData: { email?: string; full_name?: string } = {};
+    // Split the full name into first_name and last_name
+    let firstName: string | undefined;
+    let lastName: string | undefined;
+    
+    if (newFullName !== user.full_name) {
+      const nameParts = newFullName.trim().split(/\s+/);
+      if (nameParts.length > 0) {
+        firstName = nameParts[0];
+        lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined;
+      }
+    }
+
+    const updatedData: { email?: string; first_name?: string; last_name?: string } = {};
     if (newEmail !== user.email) updatedData.email = newEmail;
-    if (newFullName !== user.full_name) updatedData.full_name = newFullName;
+    if (firstName !== undefined) updatedData.first_name = firstName;
+    if (lastName !== undefined) updatedData.last_name = lastName;
 
     if (Object.keys(updatedData).length === 0) {
       toast({ title: "No changes to save." });
@@ -70,9 +85,7 @@ export default function ProfilePage() {
     }
 
     try {
-      await axios.put('/api/v1/users/me', updatedData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await apiClient.put('/api/v1/users/me', updatedData);
       toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
       if (fetchUser) {
         await fetchUser();
@@ -94,9 +107,7 @@ export default function ProfilePage() {
     if (!window.confirm("Are you sure you want to delete your account? This action is irreversible.")) return;
     
     try {
-      await axios.delete('/api/v1/users/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await apiClient.delete('/api/v1/users/me');
       toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
       logout();
     } catch (error) {

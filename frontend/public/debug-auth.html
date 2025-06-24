@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Authentication Debug</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .container { margin-bottom: 20px; }
+    pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    button { background: #4CAF50; color: white; border: none; padding: 8px 16px; 
+             border-radius: 4px; cursor: pointer; margin-right: 10px; }
+    button:hover { background: #45a049; }
+    .result { margin-top: 10px; padding: 10px; background: #f9f9f9; border-left: 4px solid #2196F3; }
+    .success { border-left-color: #4CAF50; }
+    .error { border-left-color: #F44336; }
+  </style>
+</head>
+<body>
+  <h1>API Authentication Debugger</h1>
+  <p>This page helps debug authentication and trailing slash issues.</p>
+
+  <div class="container">
+    <h2>1. Check Authentication Token</h2>
+    <button id="checkToken">Check Token</button>
+    <div id="tokenResult" class="result"></div>
+  </div>
+
+  <div class="container">
+    <h2>2. Test User Info API</h2>
+    <button id="testUserApi">Get User Info</button>
+    <div id="userApiResult" class="result"></div>
+  </div>
+  
+  <div class="container">
+    <h2>3. Test Shopping Lists API (With Slash)</h2>
+    <button id="testListsWithSlash">Get Lists (With Slash)</button>
+    <div id="listsWithSlashResult" class="result"></div>
+  </div>
+
+  <div class="container">
+    <h2>4. Test Shopping Lists API (Without Slash)</h2>
+    <button id="testListsNoSlash">Get Lists (No Slash)</button>
+    <div id="listsNoSlashResult" class="result"></div>
+  </div>
+
+  <script>
+    // Helper to show results
+    function showResult(elementId, success, data) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      el.className = success ? 'result success' : 'result error';
+    }
+
+    // Check token
+    document.getElementById('checkToken').addEventListener('click', () => {
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        showResult('tokenResult', true, { 
+          status: 'Found',
+          token_preview: token.substring(0, 15) + '...'
+        });
+      } else {
+        showResult('tokenResult', false, { 
+          status: 'Not found',
+          message: 'No token in localStorage. Please login first.'
+        });
+      }
+    });
+
+    // Test User API
+    document.getElementById('testUserApi').addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        showResult('userApiResult', false, { error: 'No token found' });
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/v1/users/me/', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        showResult('userApiResult', response.ok, {
+          status: response.status,
+          statusText: response.statusText,
+          data
+        });
+      } catch (error) {
+        showResult('userApiResult', false, {
+          error: error.message
+        });
+      }
+    });
+
+    // Test Shopping Lists API (with slash)
+    document.getElementById('testListsWithSlash').addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        showResult('listsWithSlashResult', false, { error: 'No token found' });
+        return;
+      }
+      
+      try {
+        // Use more detailed fetch options and logging
+        console.log("Making request to /api/v1/shopping-lists/ with token:", token.substring(0, 15) + '...');
+        
+        const response = await fetch('/api/v1/shopping-lists/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log("Response status:", response.status);
+        console.log("Response headers:", [...response.headers.entries()]);
+        
+        // Try to get the response text first
+        const responseText = await response.text();
+        console.log("Raw response:", responseText);
+        
+        let data;
+        try {
+          // Then try to parse it as JSON if possible
+          data = responseText ? JSON.parse(responseText) : {};
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e);
+          data = { raw: responseText };
+        }
+        
+        showResult('listsWithSlashResult', response.ok, {
+          status: response.status,
+          statusText: response.statusText,
+          data: data,
+          headers: Object.fromEntries([...response.headers.entries()])
+        });
+      } catch (error) {
+        console.error("Error fetching shopping lists with slash:", error);
+        showResult('listsWithSlashResult', false, {
+          error: error.message,
+          stack: error.stack
+        });
+      }
+    });
+
+    // Test Shopping Lists API (without slash)
+    document.getElementById('testListsNoSlash').addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        showResult('listsNoSlashResult', false, { error: 'No token found' });
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/v1/shopping-lists', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        showResult('listsNoSlashResult', response.ok, {
+          status: response.status,
+          statusText: response.statusText,
+          data
+        });
+      } catch (error) {
+        showResult('listsNoSlashResult', false, {
+          error: error.message
+        });
+      }
+    });
+  </script>
+</body>
+</html>

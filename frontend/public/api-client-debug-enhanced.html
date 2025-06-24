@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced API Client Debug</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    button {
+      background-color: #0070f3;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f0f8ff;
+      border-left: 5px solid #0070f3;
+      border-radius: 3px;
+    }
+    .error {
+      background-color: #fff0f0;
+      border-left-color: #ff0000;
+    }
+    .heading {
+      background-color: #eee;
+      padding: 10px;
+      margin-top: 30px;
+      border-radius: 5px;
+    }
+    .endpoint-result {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .success {
+      border-left: 5px solid green;
+    }
+    .failure {
+      border-left: 5px solid red;
+    }
+    .request-details {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #666;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    .tab {
+      padding: 10px 20px;
+      background-color: #eee;
+      cursor: pointer;
+      border-radius: 5px 5px 0 0;
+      margin-right: 5px;
+    }
+    .tab.active {
+      background-color: #0070f3;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Enhanced API Client Debug Tool</h1>
+  <p>This tool helps debug issues with the API client, authentication and trailing slashes.</p>
+  
+  <div class="heading">
+    <h2>Test apiClient URLs</h2>
+    <p>This will test various URLs with our custom trailing slash logic</p>
+  </div>
+  
+  <button id="test-api-client">Test URL Transformations</button>
+  <button id="test-comprehensive">Comprehensive API Tests</button>
+  <button id="test-fetch-shopping-lists">Test Fetch Shopping Lists Only</button>
+  <button id="test-network-options">Test Network Options</button>
+  
+  <div id="api-client-result" class="result"></div>
+  
+  <div class="heading">
+    <h2>Authentication Info</h2>
+  </div>
+  
+  <button id="check-token">Check Current Token</button>
+  <button id="test-direct-auth">Test Direct Auth API</button>
+  <button id="test-backend-options">Test Backend OPTIONS Request</button>
+  <button id="clear-token">Clear Token</button>
+  
+  <div id="auth-result" class="result"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Implementation of ensureTrailingSlash
+    const ensureTrailingSlash = (url) => {
+      const pathsNeedingSlash = [
+        '/api/v1/shopping-lists',
+        '/api/v1/items',
+        '/api/v1/users/me',
+      ];
+      
+      // Check if this URL starts with any path that needs a trailing slash
+      for (const path of pathsNeedingSlash) {
+        if (url === path || url.startsWith(path + '/') || url.startsWith(path + '?')) {
+          // If it already has a slash or query parameter, don't change it
+          if (url === path) {
+            return url + '/';
+          }
+        } else if (url.startsWith(path)) {
+          // This captures cases like '/api/v1/shopping-lists/123' or other subpaths
+          const restOfUrl = url.substring(path.length);
+          return `${path}/${restOfUrl}`;
+        }
+      }
+      
+      return url;
+    };
+
+    // Test URLs
+    const urlsToTest = [
+      '/api/v1/shopping-lists',
+      '/api/v1/shopping-lists/',
+      '/api/v1/shopping-lists/123',
+      '/api/v1/shopping-lists?param=value',
+      '/api/v1/users/me',
+      '/api/v1/users/me/',
+      '/api/v1/items',
+      '/api/v1/items/',
+      '/api/v1/items/123',
+    ];
+
+    // Test URL transformations
+    document.getElementById('test-api-client').addEventListener('click', () => {
+      const resultDiv = document.getElementById('api-client-result');
+      let html = '<h3>URL Transformation Tests:</h3>';
+      
+      urlsToTest.forEach(url => {
+        const transformed = ensureTrailingSlash(url);
+        const changed = url !== transformed;
+        html += `<div>
+          <strong>${url}</strong> → ${transformed} 
+          ${changed ? '<span style="color:green">(transformed)</span>' : '<span style="color:gray">(unchanged)</span>'}
+        </div>`;
+      });
+      
+      resultDiv.innerHTML = html;
+    });
+    
+    // Create apiClient function
+    const createApiClient = (options = {}) => {
+      const apiClient = axios.create({
+        timeout: options.timeout || 10000,
+        ...options
+      });
+      
+      // Add request interceptor for trailing slashes
+      apiClient.interceptors.request.use(
+        (config) => {
+          if (config.url) {
+            const originalUrl = config.url;
+            config.url = ensureTrailingSlash(config.url);
+            
+            if (originalUrl !== config.url) {
+              console.log(`API URL transformed: ${originalUrl} → ${config.url}`);
+            }
+          }
+          
+          // Add authorization header
+          const token = localStorage.getItem('token');
+          if (token && !config.headers.Authorization) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+          
+          // Log the final request details
+          console.log(`Making request: ${config.method} ${config.url}`, config);
+          
+          return config;
+        },
+        (error) => {
+          console.error('Request interceptor error:', error);
+          return Promise.reject(error);
+        }
+      );
+      
+      // Add response interceptor for better logging
+      apiClient.interceptors.response.use(
+        (response) => {
+          console.log(`Response from ${response.config.url}:`, response);
+          return response;
+        },
+        (error) => {
+          console.error(`Error response:`, error);
+          return Promise.reject(error);
+        }
+      );
+      
+      return apiClient;
+    };
+
+    // Format error details
+    const formatErrorDetails = (error) => {
+      if (!error) return 'No error details available';
+      
+      const details = {
+        message: error.message,
+        name: error.name,
+        code: error.code,
+      };
+      
+      if (error.config) {
+        details.config = {
+          url: error.config.url,
+          method: error.config.method,
+          baseURL: error.config.baseURL,
+          headers: error.config.headers ? 
+            {...error.config.headers, Authorization: error.config.headers.Authorization ? 'Bearer xxx...xxx' : undefined} : 
+            'No headers',
+          timeout: error.config.timeout
+        };
+      }
+      
+      if (error.response) {
+        details.response = {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          headers: error.response.headers,
+          data: error.response.data
+        };
+      }
+      
+      return details;
+    };
+
+    // Render results in a nice format with tabs
+    const renderEndpointResult = (container, result, index) => {
+      const div = document.createElement('div');
+      div.className = `endpoint-result ${result.error ? 'failure' : 'success'}`;
+      
+      // Create header
+      const header = document.createElement('h4');
+      if (result.error) {
+        header.innerHTML = `❌ ${result.endpoint || result.url} - ${result.error}`;
+      } else {
+        header.innerHTML = `✅ ${result.endpoint || result.url} - Status ${result.status}`;
+      }
+      div.appendChild(header);
+      
+      // Create tabs
+      const tabs = document.createElement('div');
+      tabs.className = 'tabs';
+      
+      const responseTab = document.createElement('div');
+      responseTab.className = 'tab active';
+      responseTab.textContent = 'Response';
+      responseTab.onclick = () => switchTab(index, 'response');
+      
+      const requestTab = document.createElement('div');
+      requestTab.className = 'tab';
+      requestTab.textContent = 'Request Details';
+      requestTab.onclick = () => switchTab(index, 'request');
+      
+      const rawTab = document.createElement('div');
+      rawTab.className = 'tab';
+      rawTab.textContent = 'Raw Data';
+      rawTab.onclick = () => switchTab(index, 'raw');
+      
+      tabs.appendChild(responseTab);
+      tabs.appendChild(requestTab);
+      tabs.appendChild(rawTab);
+      div.appendChild(tabs);
+      
+      // Create content sections
+      const responseContent = document.createElement('div');
+      responseContent.className = 'tab-content active';
+      responseContent.id = `response-${index}`;
+      if (result.error) {
+        responseContent.innerHTML = `<pre>${JSON.stringify(result.errorDetails || {message: result.error}, null, 2)}</pre>`;
+      } else {
+        responseContent.innerHTML = `<pre>${JSON.stringify(result.data || {}, null, 2)}</pre>`;
+      }
+      
+      const requestContent = document.createElement('div');
+      requestContent.className = 'tab-content';
+      requestContent.id = `request-${index}`;
+      requestContent.innerHTML = `
+        <div class="request-details">
+          <strong>Method:</strong> ${result.config?.method || 'GET'}<br>
+          <strong>URL:</strong> ${result.config?.url || result.url || 'Unknown'}<br>
+          <strong>Headers:</strong> Authorization header ${result.config?.headers?.Authorization ? 'present' : 'absent'}<br>
+          <strong>Timeout:</strong> ${result.config?.timeout || 'Default'}<br>
+        </div>
+      `;
+      
+      const rawContent = document.createElement('div');
+      rawContent.className = 'tab-content';
+      rawContent.id = `raw-${index}`;
+      rawContent.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+      
+      div.appendChild(responseContent);
+      div.appendChild(requestContent);
+      div.appendChild(rawContent);
+      
+      container.appendChild(div);
+    };
+
+    // Switch tabs function
+    const switchTab = (resultIndex, tabName) => {
+      const tabContents = document.querySelectorAll(`.endpoint-result:nth-child(${resultIndex + 1}) .tab-content`);
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      const tabs = document.querySelectorAll(`.endpoint-result:nth-child(${resultIndex + 1}) .tab`);
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      document.getElementById(`${tabName}-${resultIndex}`).classList.add('active');
+      tabs[tabName === 'response' ? 0 : tabName === 'request' ? 1 : 2].classList.add('active');
+    };
+
+    // Comprehensive API Test with different methods
+    document.getElementById('test-comprehensive').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('api-client-result');
+      resultDiv.innerHTML = '<h3>Running comprehensive API tests...</h3>';
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        resultDiv.innerHTML += '<div style="color:red">No authentication token found. Please login first.</div>';
+        return;
+      }
+      
+      const results = [];
+      const apiClient = createApiClient();
+      const resultsContainer = document.createElement('div');
+      
+      // Test various methods and combinations
+      try {
+        // User endpoint
+        const userResponse = await apiClient.get('/api/v1/users/me');
+        results.push({
+          endpoint: '/api/v1/users/me',
+          status: userResponse.status,
+          data: userResponse.data,
+          config: userResponse.config
+        });
+      } catch (e) {
+        results.push({
+          endpoint: '/api/v1/users/me',
+          error: e.message,
+          errorDetails: formatErrorDetails(e)
+        });
+      }
+      
+      // Shopping lists with apiClient (should add trailing slash)
+      try {
+        const shoppingListsResponse = await apiClient.get('/api/v1/shopping-lists');
+        results.push({
+          endpoint: '/api/v1/shopping-lists (with apiClient)',
+          status: shoppingListsResponse.status,
+          data: shoppingListsResponse.data,
+          config: shoppingListsResponse.config
+        });
+      } catch (e) {
+        results.push({
+          endpoint: '/api/v1/shopping-lists (with apiClient)',
+          error: e.message,
+          errorDetails: formatErrorDetails(e)
+        });
+      }
+      
+      // Shopping lists with explicit slash
+      try {
+        const shoppingListsExplicitResponse = await apiClient.get('/api/v1/shopping-lists/');
+        results.push({
+          endpoint: '/api/v1/shopping-lists/ (explicit slash)',
+          status: shoppingListsExplicitResponse.status,
+          data: shoppingListsExplicitResponse.data,
+          config: shoppingListsExplicitResponse.config
+        });
+      } catch (e) {
+        results.push({
+          endpoint: '/api/v1/shopping-lists/ (explicit slash)',
+          error: e.message,
+          errorDetails: formatErrorDetails(e)
+        });
+      }
+      
+      // Direct axios (should get 307 or error)
+      try {
+        const directResponse = await axios.get('/api/v1/shopping-lists', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          timeout: 10000,
+          validateStatus: status => true // Accept all status codes
+        });
+        results.push({
+          endpoint: '/api/v1/shopping-lists (direct axios)',
+          status: directResponse.status,
+          data: directResponse.data,
+          config: directResponse.config
+        });
+      } catch (e) {
+        results.push({
+          endpoint: '/api/v1/shopping-lists (direct axios)',
+          error: e.message,
+          errorDetails: formatErrorDetails(e)
+        });
+      }
+      
+      // Render results
+      resultDiv.innerHTML = '<h3>Comprehensive API Test Results:</h3>';
+      results.forEach((result, index) => {
+        renderEndpointResult(resultDiv, result, index);
+      });
+    });
+    
+    // Test only shopping lists endpoint
+    document.getElementById('test-fetch-shopping-lists').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('api-client-result');
+      resultDiv.innerHTML = '<h3>Testing shopping lists endpoint only...</h3>';
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        resultDiv.innerHTML += '<div style="color:red">No authentication token found. Please login first.</div>';
+        return;
+      }
+      
+      const apiClient = createApiClient();
+      const results = [];
+      
+      // Test with different methods
+      const methods = [
+        { name: 'apiClient.get', fn: async () => await apiClient.get('/api/v1/shopping-lists/') },
+        { name: 'axios with trailing slash', fn: async () => await axios.get('/api/v1/shopping-lists/', {
+          headers: { Authorization: `Bearer ${token}` },
+        }) },
+        { name: 'fetch API', fn: async () => {
+          const response = await fetch('/api/v1/shopping-lists/', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await response.json();
+          return { status: response.status, data, config: { url: '/api/v1/shopping-lists/' } };
+        }}
+      ];
+      
+      for (const method of methods) {
+        try {
+          const response = await method.fn();
+          results.push({
+            endpoint: `Shopping Lists (${method.name})`,
+            status: response.status,
+            data: response.data,
+            config: response.config
+          });
+        } catch (e) {
+          results.push({
+            endpoint: `Shopping Lists (${method.name})`,
+            error: e.message,
+            errorDetails: formatErrorDetails(e)
+          });
+        }
+      }
+      
+      // Render results
+      resultDiv.innerHTML = '<h3>Shopping Lists API Test Results:</h3>';
+      results.forEach((result, index) => {
+        renderEndpointResult(resultDiv, result, index);
+      });
+    });
+    
+    // Test network options
+    document.getElementById('test-network-options').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('api-client-result');
+      resultDiv.innerHTML = '<h3>Testing network options...</h3>';
+      
+      const results = [];
+      
+      // Test with different headers and request options
+      const testCases = [
+        { 
+          name: 'Standard Headers',
+          options: {} 
+        },
+        { 
+          name: 'Custom Content-Type',
+          options: { 
+            headers: { 'Content-Type': 'application/json' }
+          } 
+        },
+        { 
+          name: 'No Redirect',
+          options: { 
+            maxRedirects: 0
+          } 
+        },
+        {
+          name: 'Custom Accept',
+          options: {
+            headers: { 'Accept': 'application/json' }
+          }
+        }
+      ];
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        resultDiv.innerHTML += '<div style="color:red">No authentication token found. Please login first.</div>';
+        testCases.forEach(testCase => {
+          results.push({
+            endpoint: `Network Test: ${testCase.name}`,
+            error: 'No authentication token',
+            errorDetails: { message: 'Authentication token is required for these tests' }
+          });
+        });
+      } else {
+        // Run tests with different options
+        for (const testCase of testCases) {
+          const client = createApiClient(testCase.options);
+          
+          try {
+            const response = await client.get('/api/v1/users/me/');
+            results.push({
+              endpoint: `Network Test: ${testCase.name}`,
+              status: response.status,
+              data: response.data,
+              config: {
+                ...response.config,
+                headers: { ...response.config.headers, Authorization: 'Bearer xxx...xxx' }
+              }
+            });
+          } catch (e) {
+            results.push({
+              endpoint: `Network Test: ${testCase.name}`,
+              error: e.message,
+              errorDetails: formatErrorDetails(e)
+            });
+          }
+        }
+      }
+      
+      // Render results
+      resultDiv.innerHTML = '<h3>Network Options Test Results:</h3>';
+      results.forEach((result, index) => {
+        renderEndpointResult(resultDiv, result, index);
+      });
+    });
+    
+    // Check token
+    document.getElementById('check-token').addEventListener('click', () => {
+      const resultDiv = document.getElementById('auth-result');
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        resultDiv.innerHTML = `
+          <h3>Token Found:</h3>
+          <div>Token starts with: ${token.substring(0, 15)}...</div>
+          <div><strong>Full token:</strong> <pre>${token}</pre></div>
+        `;
+      } else {
+        resultDiv.innerHTML = '<h3>No authentication token found</h3>';
+      }
+    });
+    
+    // Test direct authorization
+    document.getElementById('test-direct-auth').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('auth-result');
+      resultDiv.innerHTML = '<h3>Testing direct authorization...</h3>';
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        resultDiv.innerHTML += '<div style="color:red">No authentication token found. Please login first.</div>';
+        return;
+      }
+      
+      try {
+        // Try accessing a protected endpoint directly without our apiClient
+        const response = await fetch('/api/v1/users/me/', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML += `
+            <div style="color:green">✓ Auth success! Status: ${response.status}</div>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          resultDiv.innerHTML += `
+            <div style="color:red">✗ Auth failed! Status: ${response.status}</div>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML += `<div style="color:red">✗ Error: ${error.message}</div>`;
+      }
+    });
+    
+    // Test backend OPTIONS request
+    document.getElementById('test-backend-options').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('auth-result');
+      resultDiv.innerHTML = '<h3>Testing OPTIONS request to backend...</h3>';
+      
+      try {
+        // Make OPTIONS request to see what's allowed
+        const response = await fetch('/api/v1/shopping-lists/', {
+          method: 'OPTIONS'
+        });
+        
+        const headers = {};
+        response.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+        
+        resultDiv.innerHTML += `
+          <h4>OPTIONS Response:</h4>
+          <div>Status: ${response.status}</div>
+          <div>Headers:</div>
+          <pre>${JSON.stringify(headers, null, 2)}</pre>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML += `<div style="color:red">✗ Error: ${error.message}</div>`;
+      }
+    });
+    
+    // Clear token
+    document.getElementById('clear-token').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      document.getElementById('auth-result').innerHTML = '<h3>Token cleared!</h3>';
+    });
+  </script>
+</body>
+</html>

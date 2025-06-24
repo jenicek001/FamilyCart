@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
+import apiClient from '@/lib/api';
 import type { ShoppingList, ShoppingListItem } from '@/types';
 import ShoppingListCard from '@/components/shopping/ShoppingListCard';
 import AddItemForm from '@/components/shopping/AddItemForm';
@@ -31,8 +32,9 @@ export default function DashboardPage() {
     if (!token) return;
     setIsLoading(true);
     try {
-      const { data } = await axios.get<ShoppingList[]>('/api/v1/shopping-lists');
-      setLists(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+      // Always use trailing slash to avoid 307 redirects losing auth headers
+      const { data } = await apiClient.get<ShoppingList[]>('/api/v1/shopping-lists/');
+      setLists(data.sort((a: ShoppingList, b: ShoppingList) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     } catch (error) {
       console.error("Error fetching lists: ", error);
       toast({ title: "Error", description: "Could not fetch shopping lists.", variant: "destructive" });
@@ -54,7 +56,7 @@ export default function DashboardPage() {
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
     try {
-      const { data: newList } = await axios.post<ShoppingList>('/api/v1/shopping-lists', { name: newListName });
+      const { data: newList } = await apiClient.post<ShoppingList>('/api/v1/shopping-lists', { name: newListName });
       setLists(prev => [newList, ...prev]);
       setNewListName('');
       setIsCreateListDialogOpen(false);
@@ -74,7 +76,7 @@ export default function DashboardPage() {
   const handleUpdateListName = async () => {
     if (!listToEdit || !editedListName.trim()) return;
     try {
-      const { data: updatedList } = await axios.put<ShoppingList>(
+      const { data: updatedList } = await apiClient.put<ShoppingList>(
         `/api/v1/shopping-lists/${listToEdit.id}`,
         { name: editedListName }
       );
@@ -90,7 +92,7 @@ export default function DashboardPage() {
 
   const handleDeleteList = async (listId: number) => {
     try {
-      await axios.delete(`/api/v1/shopping-lists/${listId}`);
+      await apiClient.delete(`/api/v1/shopping-lists/${listId}`);
       setLists(prev => prev.filter(l => l.id !== listId));
       toast({ title: "List Deleted", description: "The shopping list has been removed." });
     } catch (error) {
@@ -101,7 +103,7 @@ export default function DashboardPage() {
 
   const handleAddItem = async (listId: number, item: { name: string; quantity?: string; description?: string; category_name?: string; icon_name?: string }) => {
     try {
-      const { data: newItem } = await axios.post<ShoppingListItem>(
+      const { data: newItem } = await apiClient.post<ShoppingListItem>(
         `/api/v1/shopping-lists/${listId}/items`,
         item,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -128,7 +130,7 @@ export default function DashboardPage() {
     if (!item) return;
 
     try {
-      const { data: updatedItem } = await axios.put<ShoppingListItem>(
+      const { data: updatedItem } = await apiClient.put<ShoppingListItem>(
         `/api/v1/items/${itemId}`,
         { is_completed: !item.is_completed }
       );
@@ -147,7 +149,7 @@ export default function DashboardPage() {
 
   const handleDeleteItem = async (listId: number, itemId: number) => {
     try {
-      await axios.delete(`/api/v1/items/${itemId}`);
+      await apiClient.delete(`/api/v1/items/${itemId}`);
       const updatedLists = lists.map(l => {
         if (l.id === listId) {
           return { ...l, items: l.items.filter(i => i.id !== itemId) };
@@ -164,7 +166,7 @@ export default function DashboardPage() {
 
   const handleShareList = async (listId: number, email: string) => {
     try {
-      await axios.post(`/api/v1/shopping-lists/${listId}/share`, { email });
+      await apiClient.post(`/api/v1/shopping-lists/${listId}/share`, { email });
       toast({ title: "List Shared!", description: `Successfully shared with ${email}.` });
       // Optionally, refetch the list to show new members
       fetchLists();
