@@ -135,6 +135,9 @@ export default function ShoppingListCard({
                         </div>
                         <span className={`flex-1 truncate ${item.is_completed ? 'line-through text-muted-foreground' : ''}`}>
                           {item.name}
+                          {item.quantity && (
+                            <span className="ml-2 text-xs text-muted-foreground">× {item.quantity}</span>
+                          )}
                         </span>
                         {item.category && <Badge variant="outline" className="ml-2 flex-shrink-0">{item.category.name}</Badge>}
                       </div>

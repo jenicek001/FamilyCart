@@ -19,7 +19,6 @@ class ItemBase(BaseModel):
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
-    shopping_list_id: int
     category_name: Optional[str] = None # The backend will handle resolving this to a category_id
 
 # Properties to receive on item update

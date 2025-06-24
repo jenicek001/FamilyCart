@@ -96,6 +96,15 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * Implemented as `POST /shopping-lists/` in `backend/app/api/v1/endpoints/shopping_lists.py`.
 * [x] Add confirmation dialog when a shopping list delete icon is clicked (2025-06-24)
     * [x] Fix dashboard handler bug: define handleAddItem and handleToggleItem so dashboard renders and all handlers work (2025-06-24)
+    * [x] Fix 500 error when renaming shopping cart (PUT /shopping-lists/{id}) by eagerly loading relationships in update endpoint (2025-06-24)
+* [ ] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list (Frontend)
+* [ ] Visually distinguish purchased items (e.g., strikethrough, faded color) (Frontend)
+* [ ] Show a toast or feedback when an item is marked as purchased/unpurchased (Frontend)
+* [ ] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item (Backend)
+* [ ] Add/Update tests for marking items as purchased/unpurchased (API and UI)
+* [ ] Write/expand unit and integration tests for toggling item completion (backend and frontend)
+* [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
+* [ ] Display item quantities in the shopping list UI (Frontend)
 
 ## Sprint 3: Add Authentication using OAuth2
 * As a user, I want to log in using my Google account.
