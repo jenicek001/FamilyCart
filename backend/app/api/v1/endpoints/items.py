@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.core.dependencies import get_current_user
+from app.core.fastapi_users import current_user
 from app.models import User, Item, ShoppingList, Category
 from app.schemas.item import ItemRead, ItemCreate, ItemUpdate
 from app.api.deps import get_session
@@ -31,7 +31,7 @@ async def create_item(
     *,
     session: AsyncSession = Depends(get_session),
     item_in: ItemCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(current_user),
 ):
     """
     Create a new item in a shopping list.
@@ -64,7 +64,7 @@ async def create_item(
 async def read_item(
     item_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(current_user),
 ):
     """
     Get an item by ID.
@@ -85,7 +85,7 @@ async def update_item(
     session: AsyncSession = Depends(get_session),
     item_id: int,
     item_in: ItemUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(current_user),
 ):
     """
     Update an item.
@@ -112,7 +112,7 @@ async def delete_item(
     *,
     session: AsyncSession = Depends(get_session),
     item_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(current_user),
 ):
     """
     Delete an item.

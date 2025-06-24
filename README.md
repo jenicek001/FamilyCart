@@ -256,8 +256,14 @@ python scripts/init_db.py
 ### 6. Run the application
 
 ```bash
-uvicorn app.main:app --reload
+# Navigate to the backend directory
+cd backend
+
+# Run the start script which handles migrations and starts the server
+./scripts/start.sh
 ```
+
+**Important:** Always use the `scripts/start.sh` script to start the backend as it ensures database migrations are applied before starting the application. Do not run uvicorn directly.
 
 The API will be available at `http://localhost:8000`
 

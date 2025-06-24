@@ -1,4 +1,22 @@
-# Purpose of this file
+# Purpose of this file: Tracks current tasks, backlog, and sub-tasks.
+# Includes: Bullet list of active work, milestones, and anything discovered mid-process.
+# Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
+
+## Documentation & Process Improvements
+* [x] Document the correct backend startup procedure (2023-06-25)
+  * Backend should be started using the `backend/scripts/start.sh` script, which runs database migrations before starting the application
+  * Avoid running `uvicorn` directly as it skips necessary setup stepss file
+Tracks current tasks, backlog, and sub-tasks.
+Includes: Bullet list of active work, milestones, and anything discovered mid-process.
+Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
+Can prompt the LLM to automatically update and create tasks as well (through global rules).
+
+# Current Tasks
+
+## Documentation & Process Improvements
+* [x] Document the correct backend startup procedure (2023-06-25)
+  * Backend should be started using the `backend/scripts/start.sh` script, which runs database migrations before starting the application
+  * Avoid running `uvicorn` directly as it skips necessary setup stepspose of this file
 Tracks current tasks, backlog, and sub-tasks.
 Includes: Bullet list of active work, milestones, and anything discovered mid-process.
 Prompt to AI: “Update TASK.md to mark XYZ as done and add ABC as a new task.”
@@ -35,10 +53,8 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
     * [x] Setup JWT strategy for authentication.
     * [x] Fix authentication router paths for proper frontend integration (2025-06-23)
     * [x] Fix user name handling during registration (2025-06-23)
-    * [ ] Configure Google OAuth2 client ID/secret in `.env`.
-    * [ ] Add Google OAuth2 router from `fastapi-users`.
-    * [ ] Research and configure Apple OAuth2 (this may require more specific steps, like setting up an App ID, Service ID, and private key with Apple Developer).
-    * [ ] Add Apple OAuth2 router (custom or via a `fastapi-users` compatible library if available).
+    * [x] Fix authentication consistency between different API routers (2025-06-24)
+    * [x] Fix user profile name display on profile page (2025-06-23)
     * [x] Create basic protected endpoint `/api/v1/users/me` to test authentication. (2025-06-24)
 * **Documentation & Testing:**
     * [ ] Ensure OpenAPI docs (`/docs`) reflect auth endpoints.
@@ -55,27 +71,46 @@ Can prompt the LLM to automatically update and create tasks as well (through glo
 
 ### Tasks:
 * **Backend - Models & Schemas:**
-    * [ ] Define `ShoppingList` and `Item` SQLAlchemy models (`models/shopping_list.py`, `models/item.py`) with relationships to User and each other.
-    * [ ] Define Pydantic schemas for `ShoppingList` and `Item` (`schemas/`).
-    * [ ] Create Alembic migrations for these new tables and apply them.
+    * [x] Define `ShoppingList` and `Item` SQLAlchemy models (`models/shopping_list.py`, `models/item.py`) with relationships to User and each other.
+    * [x] Define Pydantic schemas for `ShoppingList` and `Item` (`schemas/`).
+    * [x] Create Alembic migrations for these new tables and apply them.
 * **Backend - CRUD Operations:**
-    * [ ] Implement CRUD functions for `ShoppingList` (`crud/crud_shopping_list.py`).
-    * [ ] Implement CRUD functions for `Item` (`crud/crud_item.py`).
+    * [x] Implement CRUD functions for `ShoppingList` (`crud/crud_shopping_list.py`). (Implemented directly in router instead)
+    * [x] Implement CRUD functions for `Item` (`crud/crud_item.py`). (Implemented directly in router instead)
 * **Backend - API Endpoints (v1):**
-    * [ ] Create API router for `shopping_lists.py`.
-        * [ ] `POST /shopping-lists/` (create list)
-        * [ ] `GET /shopping-lists/` (get user's lists)
-        * [ ] `GET /shopping-lists/{list_id}` (get specific list)
-        * [ ] `PUT /shopping-lists/{list_id}` (update list details - e.g. name)
-        * [ ] `DELETE /shopping-lists/{list_id}` (delete list)
-    * [ ] Create API router for `items.py`.
-        * [ ] `POST /shopping-lists/{list_id}/items/` (add item to list)
-        * [ ] `GET /shopping-lists/{list_id}/items/` (get items for a list)
-        * [ ] `PUT /items/{item_id}` (update item - e.g., mark as complete, change name/qty)
-        * [ ] `DELETE /items/{item_id}` (delete item)
-    * [ ] Ensure all endpoints are protected and operate on data owned by/shared with the authenticated user.
+    * [x] Create API router for `shopping_lists.py`.
+        * [x] `POST /shopping-lists/` (create list)
+        * [x] `GET /shopping-lists/` (get user's lists)
+        * [x] `GET /shopping-lists/{list_id}` (get specific list)
+        * [x] `PUT /shopping-lists/{list_id}` (update list details - e.g. name)
+        * [x] `DELETE /shopping-lists/{list_id}` (delete list)
+    * [x] Create API router for `items.py`.
+        * [x] `POST /shopping-lists/{list_id}/items/` (add item to list)
+        * [x] `GET /shopping-lists/{list_id}/items/` (get items for a list)
+        * [x] `PUT /items/{item_id}` (update item - e.g., mark as complete, change name/qty)
+        * [x] `DELETE /items/{item_id}` (delete item)
+    * [x] Ensure all endpoints are protected and operate on data owned by/shared with the authenticated user.
 * **Testing:**
-    * [ ] Write unit/integration tests for shopping list and item API endpoints.
+    * [x] Write unit/integration tests for shopping list and item API endpoints.
+
+## Sprint 3: Add Authentication using OAuth2
+* As a user, I want to log in using my Google account.
+* As a user, I want to log in using my Apple ID.
+
+### Tasks:
+* **Backend - OAuth2 Integration:**
+    * [ ] Add OAuth2 support to `fastapi-users` for Google authentication.
+    * [ ] Configure Google OAuth2 client ID/secret in `.env`.
+    * [ ] Research and configure Apple OAuth2 (this may require more specific steps, like setting up an App ID, Service ID, and private key with Apple Developer).
+    * [ ] Add OAuth2 support to `fastapi-users` for Apple ID authentication.
+    * [ ] Add Apple OAuth2 router (custom or via a `fastapi-users` compatible library if available).
+    * [ ] Configure OAuth2 clients in `core/config.py` (client IDs)
+* **Frontend - OAuth2 Login:**
+    * [ ] Update frontend login page to include buttons for Google login.
+    * [ ] Update frontend login page to include buttons for Apple ID login.
+    * [ ] Add Google OAuth2 router from `fastapi-users`.
+* **Testing:**
+    * [ ] Write tests for OAuth2 login flows.
 
 ---
 *(Further sprints would cover WebSockets, Sharing, Frontend, etc. as outlined in PLANNING.md)*
