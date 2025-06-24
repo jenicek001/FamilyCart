@@ -212,8 +212,21 @@ async def update_shopping_list(
         
     await session.commit()
     await session.refresh(shopping_list)
-    
-    return shopping_list
+
+    # Eagerly load relationships for response
+    result = await session.execute(
+        select(ShoppingList)
+        .where(ShoppingList.id == shopping_list.id)
+        .options(selectinload(ShoppingList.items), selectinload(ShoppingList.shared_with), selectinload(ShoppingList.owner))
+    )
+    shopping_list = result.scalars().first()
+
+    # Build Pydantic response with items and members
+    items = [ItemRead.model_validate(i, from_attributes=True) for i in shopping_list.items] if shopping_list.items else []
+    members = [UserRead.model_validate(u, from_attributes=True) for u in shopping_list.shared_with]
+    if shopping_list.owner_id != current_user.id:
+        members.append(UserRead.model_validate(shopping_list.owner, from_attributes=True))
+    return ShoppingListRead.model_validate(shopping_list, from_attributes=True, context={"items": items, "members": members})
 
 
 @router.delete("/{list_id}", status_code=status.HTTP_204_NO_CONTENT)
