@@ -24,7 +24,8 @@ def test_auth_flow():
         "email": test_email,
         "password": test_password,
         "first_name": "Test",
-        "last_name": "User"
+        "last_name": "User",
+        "nickname": "TestUser"
     }
     
     try:

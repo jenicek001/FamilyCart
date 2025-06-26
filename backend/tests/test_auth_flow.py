@@ -30,7 +30,8 @@ async def test_auth_flow():
             "email": test_email,
             "password": test_password,
             "first_name": "Test",
-            "last_name": "User"
+            "last_name": "User",
+            "nickname": "TestUser"
         }
         
         register_response = await client.post("/api/v1/auth/register", json=register_data)

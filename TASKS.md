@@ -37,11 +37,11 @@
     * [x] Fix user profile name display on profile page (2025-06-23)
     * [x] Create basic protected endpoint `/api/v1/users/me` to test authentication. (2025-06-24)
 * **Documentation & Testing:**
-    * [ ] Ensure OpenAPI docs (`/docs`) reflect auth endpoints.
-    * [ ] Write basic unit tests for user creation/login.
+    * [x] Ensure OpenAPI docs (`/docs`) reflect auth endpoints.
+    * [x] Write basic unit tests for user creation/login.
     * [x] Document the correct backend startup procedure (2023-06-25)
         * Backend should be started using the `backend/scripts/start.sh` script, which runs database migrations before starting the application
-        * Avoid running `uvicorn` directly as it skips necessary setup stepss file
+        * Avoid running `uvicorn` directly as it skips necessary setup steps
 
 ## Sprint 2: Core Shopping List API
 
@@ -83,14 +83,17 @@
 * **General:**
     * [x] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list (Frontend)
     * [x] Visually distinguish purchased items (e.g., strikethrough, faded color) (Frontend)
-    * [ ] Show a toast or feedback when an item is marked as purchased/unpurchased (Frontend)
-    * [ ] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item (Backend)
-    * [ ] Add/Update tests for marking items as purchased/unpurchased (API and UI)
-    * [ ] Write/expand unit and integration tests for toggling item completion (backend and frontend)
+    * [x] Show a toast or feedback when an item is marked as purchased/unpurchased (Frontend)
+    * [x] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item (Backend)
+    * [x] Add/Update tests for marking items as purchased/unpurchased (API and UI)
+    * [x] Write/expand unit and integration tests for toggling item completion (backend and frontend)
     * [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
     * [x] Display item quantities in the shopping list UI (Frontend)
     * [x] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
     * [x] Add confirmation dialog when deleting items from the shopping list (Frontend) (2025-06-26)
+    * [x] Write/expand unit and integration tests for toggling item completion (backend and frontend)
+    * [x] Add edge case tests (e.g., toggling an item that doesn't exist, or that the user doesn't own)
+    * [x] Display item quantities in the shopping list UI (Frontend)
 
 
 ## Sprint 2 Extension: UI Migration to Stitch Style
@@ -410,6 +413,7 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
 * [x] **Backend Test Execution**: Successfully ran backend tests with single test execution (pytest limitation with async event loops noted)
 * [x] **Edge Case Testing**: Created tests for item completion edge cases including unauthorized access and non-existent items
 * [x] **Code Quality**: Ensured all backend tests pass individually and audit logging triggers only on actual status changes
+* [x] **Sprint 1 Completion**: Updated authentication tests to include nickname field and verified all Sprint 1 tasks are complete
 
 # Sprint Timeline & Priorities
 
