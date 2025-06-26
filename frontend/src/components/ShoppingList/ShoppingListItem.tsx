@@ -138,7 +138,20 @@ export function ShoppingListItem({
               <span className="text-gray-400">•</span>
               <span className="text-gray-400">
                 Last modified: {formatSmartTime(item.updated_at)}
+                {item.last_modified_by && (
+                  <>
+                    {' by '}
+                  </>
+                )}
               </span>
+              {item.last_modified_by && (
+                <>
+                  <UserColorDot user={item.last_modified_by} size="sm" />
+                  <span className="text-gray-500">
+                    {item.last_modified_by.nickname || item.last_modified_by.email || 'Unknown'}
+                  </span>
+                </>
+              )}
             </div>
           </>
         )}

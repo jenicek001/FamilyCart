@@ -50,6 +50,8 @@ class ItemRead(ItemBase):
     shopping_list_id: int
     owner_id: uuid.UUID
     owner: Optional[UserBasic] = None
+    last_modified_by_id: uuid.UUID
+    last_modified_by: Optional[UserBasic] = None
     is_completed: bool
     created_at: datetime
     updated_at: datetime

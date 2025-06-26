@@ -30,7 +30,10 @@ class Item(Base):
     shopping_list: Mapped["ShoppingList"] = relationship(back_populates="items")
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    owner: Mapped["User"] = relationship()
+    owner: Mapped["User"] = relationship(foreign_keys=[owner_id])
+
+    last_modified_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    last_modified_by: Mapped["User"] = relationship(foreign_keys=[last_modified_by_id])
 
     category_id: Mapped[int | None] = mapped_column(ForeignKey("category.id"))
     category: Mapped[Optional["Category"]] = relationship(back_populates="items")

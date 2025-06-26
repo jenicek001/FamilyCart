@@ -21,6 +21,8 @@ export interface ShoppingListItem {
   shopping_list_id: number;
   owner_id: string; // UUID as string
   owner?: User | null;
+  last_modified_by_id: string; // UUID as string
+  last_modified_by?: User | null;
   created_at: string; // ISO 8601 date string
   updated_at: string; // ISO 8601 date string
   category_id?: number | null;

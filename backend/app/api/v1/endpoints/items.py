@@ -54,11 +54,12 @@ async def create_item(
         description=item_in.description,
         shopping_list_id=item_in.shopping_list_id,
         owner_id=current_user.id,
+        last_modified_by_id=current_user.id,
         category_id=category.id if category else None
     )
     session.add(db_item)
     await session.commit()
-    await session.refresh(db_item, attribute_names=["category", "owner"])
+    await session.refresh(db_item, attribute_names=["category", "owner", "last_modified_by"])
     return db_item
 
 @router.get("/{item_id}", response_model=ItemRead)
@@ -73,7 +74,7 @@ async def read_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner))
+        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner), selectinload(Item.last_modified_by))
     )
     item = result.scalars().first()
     if not item:
@@ -106,7 +107,7 @@ async def read_items_from_list(
     result = await session.execute(
         select(Item)
         .where(Item.shopping_list_id == list_id)
-        .options(selectinload(Item.category), selectinload(Item.shopping_list), selectinload(Item.owner))
+        .options(selectinload(Item.category), selectinload(Item.shopping_list), selectinload(Item.owner), selectinload(Item.last_modified_by))
     )
     items = result.scalars().all()
     return items
@@ -126,7 +127,7 @@ async def update_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner))
+        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner), selectinload(Item.last_modified_by))
     )
     db_item = result.scalars().first()
     if not db_item:
@@ -139,9 +140,12 @@ async def update_item(
     for key, value in update_data.items():
         setattr(db_item, key, value)
     
+    # Update last_modified_by when item is updated
+    db_item.last_modified_by_id = current_user.id
+    
     session.add(db_item)
     await session.commit()
-    await session.refresh(db_item, attribute_names=["category", "owner"])
+    await session.refresh(db_item, attribute_names=["category", "owner", "last_modified_by"])
     return db_item
 
 @router.delete("/{item_id}", response_model=dict)
@@ -158,7 +162,7 @@ async def delete_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.owner))
+        .options(selectinload(Item.shopping_list), selectinload(Item.owner), selectinload(Item.last_modified_by))
     )
     item = result.scalars().first()
     if not item:
