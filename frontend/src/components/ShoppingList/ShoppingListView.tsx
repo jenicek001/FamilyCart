@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { ShoppingList, Item } from '../../types';
 import { ShoppingListItem } from './ShoppingListItem';
 import { SmartSearchBar } from './SmartSearchBar';
-import { ListSwitcher } from './ListSwitcher';
+import { HeaderListSelector } from './HeaderListSelector';
 
 interface ShoppingListViewProps {
   list: ShoppingList;
@@ -72,7 +72,12 @@ export function ShoppingListView({
                 <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
               </svg>
             </div>
-            <h1 className="text-[#1B130D] text-xl font-bold leading-tight tracking-[-0.015em]">{list.name}</h1>
+            {/* Integrated List Selector */}
+            <HeaderListSelector
+              currentList={list}
+              allLists={allLists}
+              onListSelect={onSelectList || (() => {})}
+            />
           </div>
           <div className="flex items-center gap-2">
             {/* Share button */}
@@ -97,17 +102,6 @@ export function ShoppingListView({
         {/* Main content */}
         <main className="px-4 sm:px-6 lg:px-8 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col w-full max-w-2xl flex-1">
-            {/* List Switcher - shows when multiple lists exist */}
-            {allLists.length > 1 && onSelectList && (
-              <div className="mb-4 px-2">
-                <ListSwitcher 
-                  currentList={list}
-                  allLists={allLists}
-                  onListSelect={onSelectList}
-                />
-              </div>
-            )}
-
             {/* List header with progress info */}
             <div className="flex items-center justify-between px-2 pb-4 pt-2">
               <div>

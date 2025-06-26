@@ -89,6 +89,8 @@
     * [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
     * [ ] Display item quantities in the shopping list UI (Frontend)
     * [ ] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
+    * [x] Add confirmation dialog when deleting items from the shopping list (Frontend) (2025-06-26)
+
 
 ## Sprint 2 Extension: UI Migration to Stitch Style
 
@@ -659,6 +661,15 @@ The redesigned dashboard and shopping list UI should now:
 * **✅ Empty State UI**: Created EmptyState component for when no lists exist
   - Matches Stitch design with proper styling and messaging
   - Includes features preview and clear call-to-action
+* **✅ Integrated List Selector**: Created HeaderListSelector to replace separate ListSwitcher
+  - Integrated shopping list selector directly into header with cart name, icon, items count, and progress
+  - More compact UI that saves space while maintaining all functionality
+  - Shows dropdown for list switching when multiple lists exist
+* **✅ Item Deletion Confirmation**: Added confirmation dialog for deleting items
+  - Created reusable ConfirmationDialog component with variants (danger, warning, info)
+  - Integrated into ShoppingListItem with proper user feedback
+  - Prevents accidental deletion of items with clear confirmation message
+  - Follows Stitch design system with proper styling and animations
   - Integrated into EnhancedDashboard flow
 * **✅ Shopping List Icons**: Added icon support to ShoppingList type
   - Placeholder default icons (🛒, 🏪, 📝, etc.) assigned based on list ID

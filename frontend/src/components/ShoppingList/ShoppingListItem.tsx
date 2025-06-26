@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Item } from '../../types';
 import { getCategoryColor, getCategoryIcon, getCategoryColorClass } from '../../utils/categories';
+import { ConfirmationDialog } from '../ui/ConfirmationDialog';
 
 interface ShoppingListItemProps {
   item: Item;
@@ -22,6 +23,7 @@ export function ShoppingListItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
   const [editQuantity, setEditQuantity] = useState(item.quantity || 1);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const categoryColor = getCategoryColor(item.category?.name);
   const categoryIcon = getCategoryIcon(item.category?.name);
@@ -41,6 +43,19 @@ export function ShoppingListItem({
     setEditName(item.name);
     setEditQuantity(item.quantity || 1);
     setIsEditing(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete();
+    setShowDeleteConfirm(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -131,7 +146,7 @@ export function ShoppingListItem({
             <span className="material-icons text-sm">edit</span>
           </button>
           <button
-            onClick={onDelete}
+            onClick={handleDeleteClick}
             className="p-1.5 text-red-500 hover:text-red-700 transition-colors"
             title="Delete item"
           >
@@ -149,6 +164,18 @@ export function ShoppingListItem({
           className="h-6 w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer"
         />
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Item"
+        message={`Are you sure you want to delete "${item.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        variant="danger"
+      />
     </div>
   );
 }
