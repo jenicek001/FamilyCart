@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Table, Column
+from sqlalchemy import String, ForeignKey, Table, Column, DateTime
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from typing import List, TYPE_CHECKING
 from datetime import datetime
@@ -28,8 +28,10 @@ class ShoppingList(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
+    
+    # Use timezone-aware DateTime columns
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
     # Owner relationship
     owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Item } from '../../types';
 import { getCategoryColor, getCategoryIcon, getCategoryColorClass } from '../../utils/categories';
 import { formatSmartTime } from '../../utils/dateUtils';
+import { UserColorDot } from '../ui/UserBadge';
 import { ConfirmationDialog } from '../ui/ConfirmationDialog';
 
 interface ShoppingListItemProps {
@@ -129,9 +130,16 @@ export function ShoppingListItem({
             <p className={`text-sm font-normal leading-normal ${isCompleted ? 'line-through' : ''}`} style={{ color: categoryColor }}>
               {item.category?.name || 'Other'}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Added by: {item.owner?.nickname || item.owner?.email || 'Unknown'} <span className="text-gray-400">• Last modified: {formatSmartTime(item.updated_at)}</span>
-            </p>
+            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+              {item.owner && <UserColorDot user={item.owner} size="sm" />}
+              <span>
+                Added by: {item.owner?.nickname || item.owner?.email || 'Unknown'}
+              </span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-400">
+                Last modified: {formatSmartTime(item.updated_at)}
+              </span>
+            </div>
           </>
         )}
       </div>

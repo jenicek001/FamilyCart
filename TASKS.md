@@ -526,7 +526,7 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
 
 ### ✅ COMPLETED: Core Dashboard & Shopping List Redesign
 * **Visual Style Overhaul:** Updated Tailwind config, globals.css, and layout.tsx for Stitch-inspired colors, fonts (Plus Jakarta Sans), shadows, and Material Icons.
-* **Component Refactor:** 
+* **Component Refactor**: 
   - Created/updated ShoppingListView, ShoppingListItem, ShoppingListSelector, SmartSearchBar, and utility files for category handling.
   - ShoppingListView now uses a card-based design, category coloring, and Material Icons.
   - AddItemForm was removed; item addition is now handled via the search bar (SmartSearchBar).
@@ -571,49 +571,6 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
   - Removed duplicate `Toast.tsx` file that conflicted with `toast.tsx`
   - Fixed TypeScript compilation errors due to case-sensitive file system
   - Maintained shadcn/ui Radix implementation as the primary toast system
-
-### ✅ COMPLETED: Build and Testing
-* **Successful Compilation**: All features compile and build without errors
-* **Development Server**: Running successfully on localhost:9002
-* **Documentation**: Created comprehensive feature demonstration guide
-* **Task Tracking**: Updated TASKS.md with detailed completion status
-
-### Completed Features:
-* **✅ Dashboard Structure Overhaul**: Redesigned dashboard to use single list selection pattern with fullscreen mobile-friendly view
-* **✅ Stitch Design Implementation**: Updated all components to match the Stitch design system:
-  - Background color: `#FCFAF8` (warm cream)
-  - Primary accent: `#ED782A` (warm orange)
-  - Border color: `#F3ECE7` (light beige)
-  - Text color: `#1B130D` (dark brown)
-* **✅ Shopping List View Redesign**: 
-  - Matches Stitch layout exactly with proper header, search bar placement
-  - Integrated SmartSearchBar for both search and add functionality 
-  - Removed separate AddItemForm component as requested
-  - Added back button for mobile navigation
-  - Updated color scheme and styling to match Stitch
-* **✅ Shopping List Item Redesign**:
-  - Matches Stitch item structure with drag handle, category icon, content, and checkbox
-  - Added category color classes mapping function
-  - Implemented proper item layout with ownership/edit history placeholders
-  - Added hover states and proper transitions
-* **✅ Smart Search Bar Simplification**:
-  - Streamlined to match Stitch search input exactly
-  - Integrated add functionality directly in search workflow
-  - Removed complex filter dropdown in favor of dashboard-level filtering
-* **✅ Dashboard List Selector Update**:
-  - Redesigned to match Stitch header and layout
-  - Added progress bars, member previews, and proper cards
-  - Updated color scheme to match Stitch palette
-* **✅ Component Integration**: Updated EnhancedDashboard to properly handle list selection and single-list fullscreen view
-* **✅ Dashboard Page Fix**: Fixed the dashboard page export to properly render EnhancedDashboard
-
-### Technical Changes:
-* Updated `/frontend/src/app/(app)/dashboard/page.tsx` to export EnhancedDashboard
-* Completely rewrote `/frontend/src/components/ShoppingList/ShoppingListView.tsx` with Stitch structure
-* Updated `/frontend/src/components/ShoppingList/ShoppingListItem.tsx` to match Stitch item layout
-* Simplified `/frontend/src/components/ShoppingList/SmartSearchBar.tsx` to basic search + add functionality
-* Redesigned `/frontend/src/components/ShoppingList/ShoppingListSelector.tsx` with Stitch dashboard layout
-* Added `getCategoryColorClass` function to `/frontend/src/utils/categories.ts`
 
 ### Ready for Testing:
 The redesigned dashboard and shopping list UI should now:
@@ -790,3 +747,56 @@ Continue with remaining Sprint 3+ tasks:
 - ✅ No more 2-hour shift in relative time calculations
 - ✅ Recent items now correctly show "Just now", "5 minutes ago" etc.
 - ✅ Older items display full date and time in user's local timezone
+
+## 2025-06-26: Backend 500 Error Fix - Item Check/Uncheck
+
+### ❌ ISSUE IDENTIFIED: Database Timezone Mismatch
+- **Problem**: Backend 500 errors when checking/unchecking items (PUT /api/v1/items/{id})
+- **Root Cause**: Mixing timezone-naive and timezone-aware datetime objects in SQLAlchemy/asyncpg
+- **Database Schema**: Columns were `timestamp without time zone` but backend code used timezone-aware datetimes
+- **Error**: "can't subtract offset-naive and offset-aware datetimes" in SQLAlchemy operations
+
+### ✅ COMPLETED: Systematic Database Timezone Fix
+
+#### **Database Schema Update:**
+* **Created comprehensive Alembic migration** (`6000f99ab353_convert_datetime_columns_to_timezone_.py`):
+  - Converted `item.created_at` and `item.updated_at` to `timestamp with time zone`
+  - Converted `shopping_list.created_at` and `shopping_list.updated_at` to `timestamp with time zone`
+  - Used `AT TIME ZONE 'UTC'` to preserve existing data while adding timezone info
+  - Applied migration successfully with no data loss
+
+#### **SQLAlchemy Model Updates:**
+* **Updated Item model** (`backend/app/models/item.py`):
+  - Added explicit `DateTime(timezone=True)` type specification
+  - Ensures SQLAlchemy generates timezone-aware columns
+  - Maintains compatibility with `utc_now()` timezone-aware defaults
+
+* **Updated ShoppingList model** (`backend/app/models/shopping_list.py`):
+  - Added explicit `DateTime(timezone=True)` type specification  
+  - Consistent timezone handling across all datetime columns
+
+#### **Verification & Testing:**
+* **Database verification**: Confirmed schema change from PostgreSQL:
+  ```sql
+  -- Before: timestamp without time zone
+  -- After:  timestamp with time zone
+  ```
+* **Live testing**: Observed successful item update operations in backend logs:
+  ```
+  PUT /api/v1/items/6 - Status: 200 - Took: 0.0167s
+  PUT /api/v1/items/5 - Status: 200 - Took: 0.0090s  
+  ```
+* **Data integrity**: All existing timestamps preserved with proper UTC timezone
+
+#### **Technical Resolution:**
+- ✅ **Consistent datetime types**: All database columns now timezone-aware
+- ✅ **SQLAlchemy compatibility**: Models explicitly specify timezone=True
+- ✅ **Backend functionality**: Item check/uncheck operations working without errors
+- ✅ **Data preservation**: No loss of existing timestamp data during migration
+- ✅ **Production ready**: Changes tested and verified in development environment
+
+#### **Impact:**
+- **Backend stability**: No more 500 errors on item state changes
+- **User experience**: Item completion toggles work reliably
+- **Data consistency**: All datetimes properly timezone-aware throughout system
+- **Future proofing**: Foundation for reliable datetime handling across features

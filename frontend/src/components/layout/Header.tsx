@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { createUserBadge } from '@/utils/userColors';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,15 +25,8 @@ export default function Header() {
     router.push('/login');
   };
 
-  const getInitials = (name?: string | null, email?: string | null) => {
-    if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase();
-    }
-    if (email) {
-      return email.substring(0, 2).toUpperCase();
-    }
-    return "FC"; // FamilyCart
-  }
+  // Create user badge data for consistent styling
+  const userBadge = user ? createUserBadge(user) : null;
 
   return (
     <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
@@ -51,8 +45,10 @@ export default function Header() {
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-9 w-9">
                     {/* Using a service like DiceBear for avatars based on user info */}
-                    <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user.full_name || user.email}`} alt={user.full_name || user.email || "User"} />
-                    <AvatarFallback>{getInitials(user.full_name, user.email)}</AvatarFallback>
+                    <AvatarImage src={userBadge?.avatarUrl} alt={userBadge?.displayName || "User"} />
+                    <AvatarFallback className={userBadge ? `${userBadge.color.bg} ${userBadge.color.text} border ${userBadge.color.border} font-medium` : ''}>
+                      {userBadge?.initials || 'FC'}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -60,7 +56,7 @@ export default function Header() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user.full_name || 'User'}
+                      {userBadge?.displayName || 'User'}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}

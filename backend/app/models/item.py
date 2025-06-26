@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Boolean, Integer, Text
+from sqlalchemy import String, ForeignKey, Boolean, Integer, Text, DateTime
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from typing import Optional
 from datetime import datetime
@@ -21,8 +21,9 @@ class Item(Base):
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     icon_name: Mapped[str | None] = mapped_column(String(50)) # For Lucide icon name
 
-    created_at: Mapped[datetime] = mapped_column(default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
+    # Use timezone-aware DateTime columns
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
     # Relationships
     shopping_list_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"))
