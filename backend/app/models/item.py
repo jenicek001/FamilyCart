@@ -4,6 +4,7 @@ from typing import Optional
 from datetime import datetime
 
 from ..db.base import Base
+from ..utils.timezone import utc_now
 from .shopping_list import ShoppingList
 from .user import User
 from .category import Category
@@ -20,8 +21,8 @@ class Item(Base):
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     icon_name: Mapped[str | None] = mapped_column(String(50)) # For Lucide icon name
 
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
 
     # Relationships
     shopping_list_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"))

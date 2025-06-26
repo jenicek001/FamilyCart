@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Item } from '../../types';
 import { getCategoryColor, getCategoryIcon, getCategoryColorClass } from '../../utils/categories';
+import { formatSmartTime } from '../../utils/dateUtils';
 import { ConfirmationDialog } from '../ui/ConfirmationDialog';
 
 interface ShoppingListItemProps {
@@ -129,7 +130,7 @@ export function ShoppingListItem({
               {item.category?.name || 'Other'}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Added by: {item.owner?.nickname || item.owner?.email || 'Unknown'} <span className="text-gray-400">• Last modified: {new Date(item.updated_at).toLocaleDateString()}</span>
+              Added by: {item.owner?.nickname || item.owner?.email || 'Unknown'} <span className="text-gray-400">• Last modified: {formatSmartTime(item.updated_at)}</span>
             </p>
           </>
         )}

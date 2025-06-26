@@ -546,7 +546,7 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
   - Dropdown menu to switch between other lists with visual progress indicators
   - Only displays when multiple lists exist
   - Integrated seamlessly into ShoppingListView
-* **Empty State Handling**: Created comprehensive EmptyState component
+* **Empty State Handling**: Created EmptyState component
   - Beautiful welcome screen matching Stitch design system
   - Feature preview and clear call-to-action for first list creation
   - Integrated into dashboard flow for zero-list scenarios
@@ -741,3 +741,52 @@ Continue with remaining Sprint 3+ tasks:
 - List sharing and collaboration
 - Real-time synchronization
 - Additional UI polish and accessibility enhancements
+
+## 2025-06-26: Timezone Handling Systematic Fix
+
+### Problem Identified
+- **Backend Issue**: Used `datetime.utcnow()` which creates naive datetime objects without timezone information
+- **Serialization Issue**: Pydantic serialized naive datetime to ISO strings without 'Z' suffix  
+- **Frontend Issue**: JavaScript `Date` constructor assumed local timezone for strings without timezone info
+- **Result**: 2-hour shift in relative time calculations (UTC+2 timezone showing "2 hours ago" for recent items)
+
+### ✅ COMPLETED: Comprehensive Timezone Fix
+
+#### Backend Changes:
+* **Created centralized timezone utility** (`backend/app/utils/timezone.py`):
+  - `utc_now()` function returns timezone-aware UTC datetime objects
+  - `to_utc()` for converting any datetime to UTC with proper timezone info
+  - `from_timestamp()` for creating timezone-aware datetime from Unix timestamps
+
+* **Updated database models** to use timezone-aware datetime:
+  - Modified `Item` model to use `utc_now()` for `created_at` and `updated_at` fields
+  - Modified `ShoppingList` model to use `utc_now()` for timestamp fields
+  - Created Alembic migration: `d7b15d135da2_update_timezone_aware_datetime_functions.py`
+
+#### Frontend Changes:
+* **Enhanced date utilities** (`frontend/src/utils/dateUtils.ts`):
+  - `parseUTCDate()` function ensures backend date strings are properly interpreted as UTC
+  - Updated all formatting functions to handle timezone-aware dates correctly
+  - `formatSmartTime()` shows relative time for recent items, absolute time for older ones
+  - `formatDateWithTime()` displays dates in user's local timezone
+  - `formatRelativeTime()` calculates relative time correctly with UTC baseline
+  - Added `debugDateInterpretation()` function for troubleshooting timezone issues
+
+* **Updated ShoppingListItem component**:
+  - Now uses `formatSmartTime()` for intelligent time display
+  - Recent items (< 24 hours): "2 minutes ago", "1 hour ago" 
+  - Older items: "Dec 26, 2025 at 14:30" (in local timezone)
+
+### Technical Benefits:
+- ✅ **Consistent UTC storage**: All timestamps stored as timezone-aware UTC in database
+- ✅ **Proper serialization**: Backend sends ISO strings with timezone information
+- ✅ **Correct frontend parsing**: JavaScript dates parsed with proper timezone context
+- ✅ **User-friendly display**: Times shown in user's local timezone with appropriate granularity
+- ✅ **Future-proof**: Centralized utilities prevent similar issues in new features
+
+### Verification:
+- ✅ Frontend build successful with enhanced date utilities
+- ✅ Backend migration created for timezone-aware datetime functions
+- ✅ No more 2-hour shift in relative time calculations
+- ✅ Recent items now correctly show "Just now", "5 minutes ago" etc.
+- ✅ Older items display full date and time in user's local timezone
