@@ -2,89 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+  
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans;
+  }
+  
+  /* Material Icons smooth rendering */
+  .material-icons {
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Button variants following Stitch design */
+  .btn-primary {
+    @apply inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 font-medium shadow-soft;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 font-medium shadow-soft;
+  }
+  
+  .btn-outline {
+    @apply inline-flex items-center px-4 py-2 bg-transparent text-primary-600 border border-primary-600 rounded-xl hover:bg-primary-50 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 font-medium;
+  }
+  
+  /* Card variants */
+  .card {
+    @apply bg-white rounded-xl shadow-soft border border-slate-100;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-medium hover:border-slate-200;
+  }
+  
+  /* Input variants */
+  .input-primary {
+    @apply w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white;
+  }
 }
 
 @layer base {
   :root {
-    --background: 48 20% 96%; /* HSL(48, 20%, 96%) - Light beige #F8F6F1 */
-    --foreground: 48 10% 20%; /* HSL(48, 10%, 20%) - Dark gray-brown #383630 */
-    --card: 0 0% 100%; /* White for cards to make them pop */
-    --card-foreground: 48 10% 20%;
-    --popover: 0 0% 100%; /* White for popovers */
-    --popover-foreground: 48 10% 20%;
-    --primary: 48 70% 50%; /* HSL(48, 70%, 50%) - Light yellow #D1B028 */
-    --primary-foreground: 48 10% 20%; /* Dark text on primary */
-    --secondary: 48 20% 90%; /* Slightly darker than background */
-    --secondary-foreground: 48 10% 20%;
-    --muted: 48 20% 85%;
-    --muted-foreground: 48 10% 40%; /* Muted text */
-    --accent: 18 70% 45%; /* HSL(18, 70%, 45%) - Orange #D15D28 */
-    --accent-foreground: 0 0% 100%; /* White text on accent */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 48 20% 88%; /* Border color related to background, slightly darker */
-    --input: 48 20% 92%; /* Input background, slightly different from main bg */
-    --ring: 48 70% 50%; /* Ring color to match primary */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 48 15% 92%; /* Slightly darker beige for sidebar */
-    --sidebar-foreground: 48 10% 20%;
-    --sidebar-primary: 48 70% 50%; /* Match primary */
-    --sidebar-primary-foreground: 48 10% 20%;
-    --sidebar-accent: 18 70% 45%; /* Match accent */
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 48 15% 85%;
-    --sidebar-ring: 48 70% 50%;
-  }
-
-  .dark {
-    /* Keeping dark mode variables, but primary focus is light mode as per design */
-    --background: 48 10% 15%; /* Darker beige/brown */
-    --foreground: 48 20% 90%; /* Light beige text */
-    --card: 48 10% 18%;
-    --card-foreground: 48 20% 90%;
-    --popover: 48 10% 18%;
-    --popover-foreground: 48 20% 90%;
-    --primary: 48 70% 50%; /* Same primary yellow */
-    --primary-foreground: 48 10% 15%; /* Dark text on yellow */
-    --secondary: 48 10% 25%;
-    --secondary-foreground: 48 20% 90%;
-    --muted: 48 10% 30%;
-    --muted-foreground: 48 20% 70%;
-    --accent: 18 70% 45%; /* Same accent orange */
-    --accent-foreground: 0 0% 100%; /* White text on orange */
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 48 10% 35%;
-    --input: 48 10% 25%;
-    --ring: 48 70% 50%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 48 10% 12%;
-    --sidebar-foreground: 48 20% 90%;
-    --sidebar-primary: 48 70% 50%;
-    --sidebar-primary-foreground: 48 10% 15%;
-    --sidebar-accent: 18 70% 45%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 48 10% 25%;
-    --sidebar-ring: 48 70% 50%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
+    --radius: 0.75rem;
   }
 }

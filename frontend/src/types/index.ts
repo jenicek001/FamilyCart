@@ -23,10 +23,14 @@ export interface ShoppingListItem {
   updated_at: string; // ISO 8601 date string
   category_id?: number | null;
   category?: Category | null;
-  quantity?: string | null;
+  quantity?: number | null;
   description?: string | null;
+  notes?: string | null;
   icon_name?: string | null;
 }
+
+// Alias for compatibility
+export type Item = ShoppingListItem;
 
 export interface ShoppingList {
   id: number;
@@ -34,6 +38,7 @@ export interface ShoppingList {
   owner_id: number;
   created_at: string; // ISO 8601 date string
   updated_at: string; // ISO 8601 date string
+  icon?: string | null; // Shopping list icon (placeholder for future AI generation)
   items: ShoppingListItem[];
   members: User[];
 }
