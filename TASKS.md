@@ -125,27 +125,26 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
     * [x] Use Material Icons for all UI elements (2025-01-27)
     * [x] Map each category to a unique icon and color (2025-01-27)
 * **Accessibility & Responsiveness:**
-    * [ ] Ensure all interactive elements have ARIA labels and visible focus states
-    * [ ] Use Tailwind’s responsive classes for all layouts and components
+    * [x] Ensure all interactive elements have ARIA labels and visible focus states
+    * [x] Use Tailwind's responsive classes for all layouts and components
 * **Reusable Components:**
-    * [ ] Abstract repeated UI patterns (cards, buttons, dropdowns, etc.) into reusable components
+    * [x] Abstract repeated UI patterns (cards, buttons, dropdowns, etc.) into reusable components
 * **Testing & QA:**
-    * [ ] Test new UI on all target devices and browsers
-    * [ ] Check accessibility (keyboard navigation, screen reader support)
+    * [x] Test new UI on all target devices and browsers
+    * [x] Check accessibility (keyboard navigation, screen reader support)
 * **Documentation:**
-    * [ ] Update README.md with new setup instructions, design tokens, and component usage
-    * [ ] Document any new or changed components
+    * [x] Update README.md with new setup instructions, design tokens, and component usage
+    * [x] Document any new or changed components
 * **Iterative Rollout:**
-    * [ ] Migrate one feature/page at a time, starting with shopping list
+    * [x] Migrate one feature/page at a time, starting with shopping list
     * [ ] Get user feedback after each major migration step
 
 ### Success Criteria:
-- [ ] All main screens use Stitch layout, color, and icon style
-- [ ] Shopping list UI matches Stitch sample (cards, icons, checked items, etc.)
-- [ ] All components are responsive and accessible
-- [ ] Design tokens and reusable components are documented
+- [x] All main screens use Stitch layout, color, and icon style
+- [x] Shopping list UI matches Stitch sample (cards, icons, checked items, etc.)
+- [x] All components are responsive and accessible
+- [x] Design tokens and reusable components are documented
 - [ ] User feedback is positive on new UI
-
 
 ## Sprint 3: Item Completion & UI Enhancement
 
@@ -160,7 +159,7 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
     * [x] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list
     * [x] Visually distinguish purchased items (e.g., strikethrough, faded color)
     * [x] Show a toast or feedback when an item is marked as purchased/unpurchased
-    * [x] Display item quantities in the shopping list UI
+    * [x] Display item quantities in the shopping list UI (Frontend)
     * [x] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.)
 * **Backend - Item Status Management:**
     * [x] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item

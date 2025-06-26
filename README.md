@@ -351,6 +351,71 @@ Focus on automatic item categorization, icon assignment, and category standardiz
 
 See [TASKS.md](./TASKS.md) for detailed sprint planning and task tracking.
 
+## Design System & UI Components
+
+FamilyCart uses a modern, Stitch-inspired design system built with Tailwind CSS and Radix UI components.
+
+### Design Tokens
+
+#### Typography
+- **Primary Font**: Plus Jakarta Sans (headings and interface)
+- **Secondary Font**: Noto Sans (body text and descriptions)
+- **Code Font**: Monospace (code blocks and technical content)
+
+#### Color Palette
+- **Primary Colors**: Modern blue and accent colors with proper contrast ratios
+- **Category Colors**: Each item category has unique colors and Material Icons
+- **Status Colors**: Success, warning, error, and neutral states
+- **Dark/Light Mode**: Full theme support with CSS custom properties
+
+#### Spacing & Layout
+- **Grid System**: Responsive grid with consistent spacing utilities
+- **Border Radius**: Rounded corners following modern design trends
+- **Shadows**: Layered shadow system for depth and hierarchy
+- **Container**: Centered, max-width containers with responsive breakpoints
+
+### Component Library
+
+#### Core Components
+- **Button**: Multiple variants (default, destructive, outline, ghost, link) with size options
+- **Card**: Container component for grouped content with proper spacing
+- **Input**: Form inputs with validation states and accessibility features
+- **Dialog**: Modal dialogs and confirmation prompts
+- **Dropdown**: Menu and select components with keyboard navigation
+- **Toast**: Notification system for user feedback
+
+#### Shopping List Components
+- **ShoppingListView**: Main container with search, filters, and item management
+- **ShoppingListItem**: Card-based item display with completion status, editing, and actions
+- **SmartSearchBar**: Intelligent search with category filtering and quick add functionality
+- **HeaderListSelector**: Multi-list navigation and selection interface
+
+#### Specialized Components
+- **UserBadge**: User avatar and information display
+- **ConfirmationDialog**: Reusable confirmation prompts with variants
+- **Material Icons**: Comprehensive icon system integrated throughout the UI
+
+### Accessibility Features
+- **ARIA Labels**: All interactive elements include proper accessibility labels
+- **Focus States**: Visible focus indicators for keyboard navigation
+- **Color Contrast**: WCAG-compliant color ratios for text and backgrounds
+- **Screen Reader Support**: Semantic HTML and proper heading hierarchy
+- **Keyboard Navigation**: Full keyboard accessibility for all features
+
+### Responsive Design
+- **Mobile First**: Design system optimized for mobile devices
+- **Breakpoints**: sm (640px), md (768px), lg (1024px), xl (1280px), 2xl (1536px)
+- **Flexible Layouts**: Components adapt gracefully across all screen sizes
+- **Touch Targets**: Proper sizing for touch interactions on mobile devices
+
+### Development Guidelines
+- **Component Reusability**: All UI patterns abstracted into reusable components
+- **Consistent Styling**: Centralized design tokens prevent style inconsistencies
+- **Performance**: Optimized for fast loading and smooth interactions
+- **Maintainability**: Well-documented components with clear prop interfaces
+
+For implementation details, see the `/frontend/src/components/ui/` directory and `tailwind.config.ts`.
+
 ## API Documentation
 
 - Swagger UI: `http://localhost:8000/docs`
