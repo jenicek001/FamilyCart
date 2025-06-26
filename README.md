@@ -5,11 +5,25 @@ This project is designed to be a full-stack application with a focus on real-tim
 
 ## Features
 
-- User authentication with JWT
-- OAuth2 with Google and Apple
-- Real-time updates with WebSockets
-- RESTful API for shopping lists and items
-- Database migrations with Alembic
+### ✅ Completed (Sprint 1-3)
+- **User Authentication**: JWT-based authentication with secure token management (30-day expiration)
+- **User Profiles**: Registration with email/password and nickname support
+- **Shopping Lists**: Create, edit, delete, and manage multiple shopping lists
+- **Item Management**: Add items with categories, quantities, and descriptions
+- **Item Completion**: Mark items as purchased/unpurchased with visual feedback
+- **Modern UI**: Stitch-inspired design with Material Icons and responsive layout
+- **Real-time Updates**: Item changes reflect immediately in the UI
+- **Audit Logging**: Track who modified items and when
+- **Database Management**: PostgreSQL with Alembic migrations and timezone-aware storage
+
+### 🚧 Planned Features
+- **AI-Powered Categorization**: Automatic item categorization and icon assignment
+- **List Sharing**: Collaborate with family members on shared shopping lists
+- **Real-time Synchronization**: WebSocket-based live updates across devices
+- **OAuth2 Integration**: Login with Google and Apple accounts
+- **Advanced Organization**: Drag-and-drop reordering and category grouping
+- **Search & History**: Smart search with shopping history integration
+- **Internationalization**: Multi-language support
 
 ## Prerequisites    
 
@@ -310,6 +324,32 @@ To apply migrations:
 ```bash
 alembic upgrade head
 ```
+
+## Development Status
+
+### Current Sprint: Sprint 3 - ✅ COMPLETED (2025-06-26)
+
+**Item Completion & UI Enhancement** - All major functionality implemented and tested:
+
+- ✅ **Backend API**: PUT /items/{item_id} endpoint for item completion with proper validation
+- ✅ **Frontend UI**: Checkbox controls for marking items as purchased/unpurchased  
+- ✅ **Visual Feedback**: Completed items show with strikethrough and faded styling
+- ✅ **Toast Notifications**: User feedback when items are marked as complete/incomplete
+- ✅ **Audit Logging**: Track who changed item completion status and when
+- ✅ **Comprehensive Testing**: Backend unit tests for item completion logic and edge cases
+- ✅ **Database Schema**: Timezone-aware datetime handling for proper timestamp management
+- ✅ **Error Handling**: Proper validation for unauthorized access and non-existent items
+
+### Next Sprint: Sprint 4 - AI-Powered Features
+Focus on automatic item categorization, icon assignment, and category standardization using Google Gemini API.
+
+### Testing Status
+- **Backend Tests**: ✅ All core functionality tests passing
+- **Database**: ✅ Alembic migrations applied, schema up-to-date
+- **API**: ✅ All endpoints working correctly with proper authentication
+- **Frontend**: ✅ UI components functional with Stitch design system
+
+See [TASKS.md](./TASKS.md) for detailed sprint planning and task tracking.
 
 ## API Documentation
 

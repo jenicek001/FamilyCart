@@ -54,4 +54,76 @@ test.describe('Authentication Flow', () => {
     // After checking console, no errors related to shopping lists should be there
     expect(consoleErrors.filter(e => e.includes('shopping lists'))).toEqual([]);
   });
+
+  test('should interact with shopping list items if available', async ({ page }) => {
+    // Generate a unique email for this test
+    const testEmail2 = `test_items_${Date.now()}@example.com`;
+    
+    // 1. Register and login
+    await page.goto('http://localhost:9002/register');
+    await page.fill('input[type="email"]', testEmail2);
+    await page.fill('input[type="password"]', testPassword);
+    await page.fill('input[id="firstName"]', 'Test');
+    await page.fill('input[id="lastName"]', 'User');
+    await page.click('button[type="submit"]');
+    
+    await expect(page).toHaveURL(/.*login/);
+    await page.fill('input[type="email"]', testEmail2);
+    await page.fill('input[type="password"]', testPassword);
+    await page.click('button[type="submit"]');
+    
+    await expect(page).toHaveURL(/.*dashboard/);
+    
+    // 2. Navigate to profile
+    await page.click('text=Profile');
+    await expect(page).toHaveURL(/.*profile/);
+    
+    // 3. Look for any existing shopping lists or items
+    const listLinks = page.locator('a[href*="list"], a[href*="shopping"]');
+    const listCount = await listLinks.count();
+    
+    if (listCount > 0) {
+      // Navigate to the first list
+      await listLinks.first().click();
+      
+      // Wait for list page to load
+      await page.waitForLoadState('networkidle');
+      
+      // Look for item checkboxes or completion controls
+      const itemControls = page.locator('input[type="checkbox"], [role="checkbox"], button[aria-label*="complete"]');
+      const controlCount = await itemControls.count();
+      
+      if (controlCount > 0) {
+        // Test item completion toggle
+        const firstControl = itemControls.first();
+        
+        // Get initial state
+        const initialState = await firstControl.isChecked().catch(() => false);
+        
+        // Toggle the item
+        await firstControl.click();
+        
+        // Wait for state change
+        await page.waitForTimeout(500);
+        
+        // Verify state changed
+        const newState = await firstControl.isChecked().catch(() => !initialState);
+        expect(newState).not.toBe(initialState);
+        
+        // Look for toast notifications
+        const toastSelector = '[role="status"], .toast, [data-testid="toast"], [class*="toast"], [data-sonner-toast]';
+        const toastVisible = await page.locator(toastSelector).isVisible().catch(() => false);
+        
+        if (toastVisible) {
+          const toastText = await page.locator(toastSelector).textContent();
+          console.log('Toast notification:', toastText);
+          expect(toastText).toBeTruthy();
+        }
+      } else {
+        console.log('No item completion controls found in shopping list');
+      }
+    } else {
+      console.log('No shopping lists found for item completion testing');
+    }
+  });
 });

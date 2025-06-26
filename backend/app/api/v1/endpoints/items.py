@@ -3,6 +3,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+import logging
 
 from app.core.fastapi_users import current_user
 from app.models import User, Item, ShoppingList, Category
@@ -10,6 +11,7 @@ from app.schemas.item import ItemRead, ItemCreate, ItemUpdate, ItemCreateStandal
 from app.api.deps import get_session
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 async def get_or_create_category(name: Optional[str], session: AsyncSession) -> Optional[Category]:
     """Find an existing category or create a new one."""
@@ -136,12 +138,24 @@ async def update_item(
     if db_item.shopping_list.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to update this item")
 
+    # Store original values for audit logging
+    original_is_completed = db_item.is_completed
+    
     update_data = item_in.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_item, key, value)
     
     # Update last_modified_by when item is updated
     db_item.last_modified_by_id = current_user.id
+    
+    # Audit logging for item completion status changes
+    if 'is_completed' in update_data and original_is_completed != db_item.is_completed:
+        status_text = "completed" if db_item.is_completed else "uncompleted"
+        logger.info(
+            f"Item status changed - User: {current_user.email} | "
+            f"Item ID: {db_item.id} | Item: '{db_item.name}' | "
+            f"Status: {status_text} | List: '{db_item.shopping_list.name}'"
+        )
     
     session.add(db_item)
     await session.commit()
