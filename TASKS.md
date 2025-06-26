@@ -1,4 +1,5 @@
-# TASKS.md - Purpose of this file: Tracks current tasks, backlog, and sub-tasks.
+# TASKS.md
+## Purpose of this file: Tracks current tasks, backlog, and sub-tasks.
 * Tracks current tasks, backlog, and sub-tasks.
 * Includes: Bullet list of active work, milestones, and anything discovered mid-process.
 * Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
@@ -747,6 +748,36 @@ Continue with remaining Sprint 3+ tasks:
 - ✅ No more 2-hour shift in relative time calculations
 - ✅ Recent items now correctly show "Just now", "5 minutes ago" etc.
 - ✅ Older items display full date and time in user's local timezone
+
+## 2025-06-26: JWT Token Configuration Fix
+
+### ❌ ISSUE IDENTIFIED: Very Short JWT Token Lifetime
+- **Problem**: JWT tokens expired after only 1 hour, causing 401 unauthorized errors when users returned to the app
+- **Impact**: Poor user experience - family members had to re-login frequently while shopping
+- **Root Cause**: `lifetime_seconds=3600` (1 hour) in JWT strategy configuration
+
+### ✅ COMPLETED: Extended JWT Token Lifetime & Auto-Logout
+* **Increased Token Lifetime**: Extended JWT tokens from 1 hour to 30 days (2,592,000 seconds)
+  - Updated `/backend/app/core/auth.py` JWT strategy lifetime
+  - Updated `/backend/app/core/config.py` to match (43,200 minutes = 30 days)
+  - Appropriate for family shopping app where users should stay logged in for weeks
+* **Enhanced Frontend Token Handling**: 
+  - Added automatic token expiration detection in API client interceptor
+  - Enhanced 401 error handling to clear expired tokens and redirect to login
+  - Updated AuthContext to properly handle token expiration scenarios
+  - Added user-friendly logging for token expiration debugging
+* **Improved User Experience**:
+  - Users now stay logged in for 30 days instead of 1 hour
+  - Automatic cleanup when tokens do expire (graceful logout)
+  - No more unexpected 401 errors during normal app usage
+  - Smooth transition back to login when authentication is truly needed
+
+### **Technical Details:**
+- **Before**: `lifetime_seconds=3600` (1 hour)
+- **After**: `lifetime_seconds=2592000` (30 days)
+- **Security**: Still secure with JWT expiration, but appropriate for family use case
+- **UX**: No more frequent re-logins, users can shop across multiple sessions
+- **Error Handling**: Graceful token expiration handling with automatic cleanup
 
 ## 2025-06-26: Backend 500 Error Fix - Item Check/Uncheck
 

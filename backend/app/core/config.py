@@ -30,7 +30,8 @@ class Settings(BaseSettings):
     # fastapi-users & JWT
     SECRET_KEY: str = "a_very_secret_key"  # CHANGE THIS!
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    # Set to 30 days for family shopping app (users should stay logged in for weeks)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days = 30 * 24 * 60 minutes
 
     # OAuth Google
     GOOGLE_OAUTH_CLIENT_ID: Optional[str] = None

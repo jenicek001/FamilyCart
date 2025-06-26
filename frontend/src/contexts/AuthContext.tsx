@@ -49,9 +49,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           : data.first_name || data.last_name || ''
       };
       setUser(userData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch user', error);
-      logout();
+      
+      // Handle token expiration specifically
+      if (error.response?.status === 401) {
+        console.warn('User fetch failed with 401 - token likely expired');
+        logout(); // This will clear token and redirect
+      } else {
+        // For other errors, still logout to be safe
+        logout();
+      }
     } finally {
       setLoading(false);
     }
