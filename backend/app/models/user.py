@@ -15,6 +15,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     # Profile information
     first_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
     last_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    nickname: Mapped[str | None] = mapped_column(String(50), nullable=True)
     
     # Relationships
     owned_shopping_lists: Mapped[List["ShoppingList"]] = relationship(
@@ -30,6 +31,13 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email='{self.email}')>"
+    
+    @property
+    def display_name(self) -> str:
+        """Returns the user's display name (nickname if available, otherwise full name or email)."""
+        if self.nickname:
+            return self.nickname
+        return self.full_name
     
     @property
     def full_name(self) -> str:

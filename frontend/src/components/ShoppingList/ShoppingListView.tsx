@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { ShoppingList, Item } from '../../types';
+import { ShoppingList, Item, ItemCreate } from '../../types';
 import { ShoppingListItem } from './ShoppingListItem';
 import { SmartSearchBar } from './SmartSearchBar';
 import { HeaderListSelector } from './HeaderListSelector';
@@ -11,7 +11,7 @@ interface ShoppingListViewProps {
   allLists?: ShoppingList[];
   onUpdateItem: (itemId: number, updates: Partial<Item>) => Promise<void>;
   onDeleteItem: (itemId: number) => Promise<void>;
-  onAddItem: (item: Omit<Item, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onAddItem: (item: ItemCreate) => Promise<void>;
   onBackToSelector?: () => void;
   onSelectList?: (list: ShoppingList) => void;
 }
@@ -123,9 +123,7 @@ export function ShoppingListView({
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
                 categories={categories}
-                onAddItem={async (itemData) => {
-                  await onAddItem({ ...itemData, shopping_list_id: list.id });
-                }}
+                onAddItem={onAddItem}
                 placeholder="Search items or type to add new..."
               />
             </div>

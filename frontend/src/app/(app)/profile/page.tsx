@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, UserCircle, Mail, LogOut, Trash2 } from 'lucide-react';
+import { Loader2, Save, UserCircle, Mail, LogOut, Trash2, User } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, token, loading, logout, fetchUser } = useAuth();
@@ -21,6 +21,7 @@ export default function ProfilePage() {
   
   const [newFullName, setNewFullName] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newNickname, setNewNickname] = useState('');
 
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -34,6 +35,7 @@ export default function ProfilePage() {
     if (user) {
       setNewFullName(user.full_name || '');
       setNewEmail(user.email || '');
+      setNewNickname(user.nickname || '');
       fetchUserLists();
     }
   }, [user, loading, router]);
@@ -59,6 +61,13 @@ export default function ProfilePage() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !token) return;
+    
+    // Validate required fields
+    if (!newNickname.trim()) {
+      toast({ title: "Validation Error", description: "Nickname is required.", variant: "destructive" });
+      return;
+    }
+    
     setIsUpdating(true);
 
     // Split the full name into first_name and last_name
@@ -73,10 +82,11 @@ export default function ProfilePage() {
       }
     }
 
-    const updatedData: { email?: string; first_name?: string; last_name?: string } = {};
+    const updatedData: { email?: string; first_name?: string; last_name?: string; nickname?: string } = {};
     if (newEmail !== user.email) updatedData.email = newEmail;
     if (firstName !== undefined) updatedData.first_name = firstName;
     if (lastName !== undefined) updatedData.last_name = lastName;
+    if (newNickname !== (user.nickname || '')) updatedData.nickname = newNickname;
 
     if (Object.keys(updatedData).length === 0) {
       toast({ title: "No changes to save." });
@@ -146,9 +156,19 @@ export default function ProfilePage() {
                   <AvatarFallback>{(user.full_name || user.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-xl font-semibold">{user.full_name || 'New User'}</h2>
+                  <h2 className="text-xl font-semibold">{user.nickname || user.full_name || 'New User'}</h2>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nickname"><User className="inline-block mr-2 h-4 w-4"/>Nickname *</Label>
+                <Input 
+                  id="nickname" 
+                  value={newNickname} 
+                  onChange={(e) => setNewNickname(e.target.value)} 
+                  placeholder="Your nickname"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fullName"><UserCircle className="inline-block mr-2 h-4 w-4"/>Full Name</Label>

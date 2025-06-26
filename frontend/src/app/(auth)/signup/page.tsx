@@ -17,6 +17,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,6 +34,13 @@ export default function SignupPage() {
       });
       return;
     }
+    if (!nickname.trim()) {
+      toast({
+        title: "Nickname is required",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsLoading(true);
     try {
       // Split fullName into first_name and last_name
@@ -45,6 +53,7 @@ export default function SignupPage() {
         password,
         first_name: firstName,
         last_name: lastName,
+        nickname: nickname.trim(),
       });
 
       const params = new URLSearchParams();
@@ -92,6 +101,21 @@ export default function SignupPage() {
                   placeholder="Your Name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="pl-10"
+                />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nickname">Nickname *</Label>
+             <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="nickname"
+                  type="text"
+                  placeholder="How would you like to be called?"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
                   required
                   className="pl-10"
                 />

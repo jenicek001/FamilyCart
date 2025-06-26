@@ -11,6 +11,15 @@ class CategoryRead(BaseModel):
     class Config:
         from_attributes = True
 
+# A simple schema for User to be used in ItemRead (to avoid circular imports)
+class UserBasic(BaseModel):
+    id: uuid.UUID
+    email: str
+    nickname: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 # Shared properties
 class ItemBase(BaseModel):
     name: str
@@ -20,6 +29,11 @@ class ItemBase(BaseModel):
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
     category_name: Optional[str] = None # The backend will handle resolving this to a category_id
+    icon_name: Optional[str] = None
+
+# Properties to receive on item creation via standalone endpoint (requires shopping_list_id)
+class ItemCreateStandalone(ItemCreate):
+    shopping_list_id: int
 
 # Properties to receive on item update
 class ItemUpdate(BaseModel):
@@ -35,6 +49,7 @@ class ItemRead(ItemBase):
     id: int
     shopping_list_id: int
     owner_id: uuid.UUID
+    owner: Optional[UserBasic] = None
     is_completed: bool
     created_at: datetime
     updated_at: datetime

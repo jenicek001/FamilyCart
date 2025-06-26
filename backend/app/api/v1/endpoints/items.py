@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.fastapi_users import current_user
 from app.models import User, Item, ShoppingList, Category
-from app.schemas.item import ItemRead, ItemCreate, ItemUpdate
+from app.schemas.item import ItemRead, ItemCreate, ItemUpdate, ItemCreateStandalone
 from app.api.deps import get_session
 
 router = APIRouter()
@@ -31,7 +31,7 @@ async def get_or_create_category(name: Optional[str], session: AsyncSession) -> 
 async def create_item(
     *,
     session: AsyncSession = Depends(get_session),
-    item_in: ItemCreate,
+    item_in: ItemCreateStandalone,
     current_user: User = Depends(current_user),
 ):
     """
@@ -58,7 +58,7 @@ async def create_item(
     )
     session.add(db_item)
     await session.commit()
-    await session.refresh(db_item)
+    await session.refresh(db_item, attribute_names=["category", "owner"])
     return db_item
 
 @router.get("/{item_id}", response_model=ItemRead)
@@ -73,7 +73,7 @@ async def read_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.category))
+        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner))
     )
     item = result.scalars().first()
     if not item:
@@ -106,7 +106,7 @@ async def read_items_from_list(
     result = await session.execute(
         select(Item)
         .where(Item.shopping_list_id == list_id)
-        .options(selectinload(Item.category), selectinload(Item.shopping_list))
+        .options(selectinload(Item.category), selectinload(Item.shopping_list), selectinload(Item.owner))
     )
     items = result.scalars().all()
     return items
@@ -126,7 +126,7 @@ async def update_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.category))
+        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner))
     )
     db_item = result.scalars().first()
     if not db_item:
@@ -141,7 +141,7 @@ async def update_item(
     
     session.add(db_item)
     await session.commit()
-    await session.refresh(db_item)
+    await session.refresh(db_item, attribute_names=["category", "owner"])
     return db_item
 
 @router.delete("/{item_id}", response_model=dict)
@@ -158,7 +158,7 @@ async def delete_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list))
+        .options(selectinload(Item.shopping_list), selectinload(Item.owner))
     )
     item = result.scalars().first()
     if not item:

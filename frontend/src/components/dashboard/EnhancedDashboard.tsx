@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import apiClient from '@/lib/api';
-import type { ShoppingList, Item } from '@/types';
+import type { ShoppingList, Item, ItemCreate } from '@/types';
 import { ShoppingListSelector } from '@/components/ShoppingList/ShoppingListSelector';
 import { ShoppingListView } from '@/components/ShoppingList/ShoppingListView';
 import { EmptyState } from '@/components/ShoppingList/EmptyState';
@@ -164,16 +164,11 @@ export default function EnhancedDashboard() {
     }
   };
 
-  const handleAddItem = async (item: Omit<Item, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleAddItem = async (item: ItemCreate) => {
     if (!selectedList) return;
     
     try {
-      const { data } = await apiClient.post<Item>(`/api/v1/shopping-lists/${selectedList.id}/items/`, {
-        name: item.name,
-        quantity: item.quantity?.toString() || null,
-        description: item.description || null,
-        category_name: item.category?.name || null  // Send category_name instead of category_id
-      });
+      const { data } = await apiClient.post<Item>(`/api/v1/shopping-lists/${selectedList.id}/items/`, item);
       
       // Add the item to the selected list
       setSelectedList(prev => ({

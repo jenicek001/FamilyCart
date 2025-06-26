@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { getAllCategories, inferCategory } from '../../utils/categories';
-import { Item } from '../../types';
+import { ItemCreate } from '../../types';
 
 interface SmartSearchBarProps {
   searchQuery: string;
@@ -10,7 +10,7 @@ interface SmartSearchBarProps {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
   categories: string[];
-  onAddItem?: (item: Omit<Item, 'id' | 'created_at' | 'updated_at' | 'shopping_list_id'>) => Promise<void>;
+  onAddItem?: (item: ItemCreate) => Promise<void>;
   placeholder?: string;
 }
 
@@ -59,16 +59,9 @@ export function SmartSearchBar({
     
     await onAddItem({
       name: searchQuery.trim(),
-      quantity: 1,
-      category: { 
-        id: 0,
-        name: suggestedCategory 
-      },
-      is_completed: false,
-      owner_id: 0,
-      category_id: null,
+      quantity: '1',
+      category_name: suggestedCategory,
       description: null,
-      notes: null,
       icon_name: null
     });
 

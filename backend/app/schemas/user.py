@@ -10,6 +10,7 @@ class UserRead(schemas.BaseUser[UUID]):
     """Schema for reading user information."""
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    nickname: Optional[str] = None
 
     class Config:
         from_attributes = True # Replaces orm_mode = True in Pydantic v2
@@ -19,9 +20,11 @@ class UserCreate(schemas.BaseUserCreate):
     """Schema for creating a new user."""
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    nickname: str  # Made mandatory
 
 
 class UserUpdate(schemas.BaseUserUpdate):
     """Schema for updating an existing user."""
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    nickname: Optional[str] = None

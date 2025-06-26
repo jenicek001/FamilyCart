@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.fastapi_users import fastapi_users, current_user
+from app.core.users import get_user_manager, UserManager
 from app.schemas.user import UserRead, UserUpdate
 from app.models.user import User
 
@@ -13,22 +14,25 @@ router.include_router(
     tags=["users"],
 )
 
-# Custom routes to support DELETE and PUT methods for the /me endpoint
 @router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT, tags=["users"])
-async def delete_current_user(user: User = Depends(current_user)):
+async def delete_current_user(
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(get_user_manager)
+):
     """
     Delete the current authenticated user.
     """
-    await fastapi_users.user_manager.delete(user)
+    await user_manager.delete(user)
     return None
 
 @router.put("/users/me", response_model=UserRead, tags=["users"])
 async def update_current_user(
     user_update: UserUpdate,
-    user: User = Depends(current_user)
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(get_user_manager)
 ):
     """
     Update the current authenticated user with PUT method (maps to PATCH).
     """
-    return await fastapi_users.user_manager.update(user_update, user)
+    return await user_manager.update(user_update, user)
 

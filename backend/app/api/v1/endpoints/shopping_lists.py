@@ -91,6 +91,7 @@ async def read_shopping_lists(
             .where(ShoppingList.owner_id == current_user.id)
             .options(
                 selectinload(ShoppingList.items).selectinload(Item.category),
+                selectinload(ShoppingList.items).selectinload(Item.owner),
                 selectinload(ShoppingList.shared_with)
             )
         )
@@ -109,6 +110,7 @@ async def read_shopping_lists(
                 .where(ShoppingList.id.in_(shared_ids))
                 .options(
                     selectinload(ShoppingList.items).selectinload(Item.category),
+                    selectinload(ShoppingList.items).selectinload(Item.owner),
                     selectinload(ShoppingList.shared_with)
                 )
             )
@@ -316,7 +318,7 @@ async def create_item_for_list(
     await session.commit()
     await session.refresh(db_item)
     # Eagerly load relationships for response
-    await session.refresh(db_item, attribute_names=["category"])
+    await session.refresh(db_item, attribute_names=["category", "owner"])
     return db_item
 
 
@@ -357,7 +359,7 @@ async def read_items_from_list(
             )
     # Eagerly load category for all items
     result = await session.execute(
-        select(Item).where(Item.shopping_list_id == list_id).options(selectinload(Item.category), selectinload(Item.shopping_list))
+        select(Item).where(Item.shopping_list_id == list_id).options(selectinload(Item.category), selectinload(Item.shopping_list), selectinload(Item.owner))
     )
     items = result.scalars().all()
     return items

@@ -80,15 +80,15 @@
     * [x] Fix dashboard handler bug: define handleAddItem and handleToggleItem so dashboard renders and all handlers work (2025-06-24)
     * [x] Fix 500 error when renaming shopping cart (PUT /shopping-lists/{id}) by eagerly loading relationships in update endpoint (2025-06-24)
 * **General:**
-    * [ ] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list (Frontend)
-    * [ ] Visually distinguish purchased items (e.g., strikethrough, faded color) (Frontend)
+    * [x] Add UI control (checkbox/button) to mark an item as purchased/unpurchased in the shopping list (Frontend)
+    * [x] Visually distinguish purchased items (e.g., strikethrough, faded color) (Frontend)
     * [ ] Show a toast or feedback when an item is marked as purchased/unpurchased (Frontend)
     * [ ] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item (Backend)
     * [ ] Add/Update tests for marking items as purchased/unpurchased (API and UI)
     * [ ] Write/expand unit and integration tests for toggling item completion (backend and frontend)
     * [ ] Add edge case tests (e.g., toggling an item that doesn’t exist, or that the user doesn’t own)
-    * [ ] Display item quantities in the shopping list UI (Frontend)
-    * [ ] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
+    * [x] Display item quantities in the shopping list UI (Frontend)
+    * [x] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.) (2025-06-24)
     * [x] Add confirmation dialog when deleting items from the shopping list (Frontend) (2025-06-26)
 
 
@@ -683,3 +683,61 @@ The redesigned dashboard and shopping list UI should now:
   - Persists list selection changes
   - Handles empty state properly
   - Passes all necessary props to child components
+
+## 2025-06-26: Nickname Support Implementation
+
+### ✅ COMPLETED: User Profile Nickname Support
+* **Backend Schema Updates**: Updated User model and schemas to include nickname field
+  - Added `nickname` field to UserRead, UserCreate, and UserUpdate schemas
+  - Made nickname mandatory for new user registrations (required in UserCreate)
+  - Updated existing users with default nicknames (first name or email prefix)
+  - Added database constraint to ensure new users must have non-empty nicknames
+* **Database Migration**: Created and applied Alembic migration to update schema
+  - Migration sets default nicknames for existing users without one
+  - Adds check constraint to prevent empty nicknames for new users
+  - Verified all existing users now have nicknames in database
+* **API Integration**: Updated backend endpoints to properly handle nickname
+  - Fixed FastAPI Users integration issue with user manager dependency injection
+  - Updated item API endpoints to eagerly load owner relationship with nickname
+  - Created separate ItemCreate and ItemCreateStandalone schemas for different endpoints
+  - Fixed 422 error in item creation by removing shopping_list_id from nested endpoint schema
+* **Frontend Profile Page**: Added nickname field to user profile editing
+  - Added nickname input field with required validation
+  - Updated form submission to include nickname in profile updates  
+  - Made nickname mandatory with client-side validation
+  - Updated user display to show nickname in profile header
+* **Frontend Registration**: Added nickname field to user registration
+  - Added required nickname field to signup form
+  - Updated registration API call to include nickname
+  - Added client-side validation for nickname requirement
+* **Frontend Types**: Updated User interface to include nickname field
+  - Fixed User type to use string ID (UUID) instead of number
+  - Updated AuthContext to use User type from types file
+  - Fixed ShoppingList owner_id type to be string (UUID)
+* **Item Owner Display**: Successfully implemented nickname display in shopping list items
+  - Updated ShoppingListItem component to show owner nickname in "Added by" field
+  - Falls back to email if nickname not available, then "Unknown"
+  - Backend properly returns owner information with nickname in item API responses
+
+### ✅ COMPLETED: API Testing and Validation
+* **Successfully tested item creation**: API returns items with owner nickname information
+* **Verified database consistency**: All users have nicknames, new constraint prevents empty values
+* **Confirmed frontend-backend integration**: Nickname flows properly through all layers
+* **Fixed schema conflicts**: Resolved shopping_list_id requirement issues between different endpoints
+
+### Current Status
+All nickname functionality is now complete and working:
+- ✅ New users must provide a nickname during registration
+- ✅ Existing users have been assigned default nicknames  
+- ✅ Profile page allows editing nickname (mandatory field)
+- ✅ Shopping list items display owner nicknames in "Added by" field
+- ✅ API endpoints properly return owner information with nicknames
+- ✅ Database constraints prevent empty nicknames for new accounts
+
+### Next Steps
+Continue with remaining Sprint 3+ tasks:
+- Item completion UI improvements
+- AI features implementation  
+- List sharing and collaboration
+- Real-time synchronization
+- Additional UI polish and accessibility enhancements

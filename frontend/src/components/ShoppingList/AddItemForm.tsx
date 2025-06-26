@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Item } from '../../types';
+import { ItemCreate } from '../../types';
 import { getAllCategories, inferCategory } from '../../utils/categories';
 
 interface AddItemFormProps {
-  onSubmit: (item: Omit<Item, 'id' | 'created_at' | 'updated_at' | 'shopping_list_id'>) => Promise<void>;
+  onSubmit: (item: ItemCreate) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -25,16 +25,9 @@ export function AddItemForm({ onSubmit, onCancel }: AddItemFormProps) {
       const finalCategory = category || inferCategory(name);
       await onSubmit({
         name: name.trim(),
-        quantity: quantity || 1,
-        category: { 
-          id: 0, // This will be handled by the backend
-          name: finalCategory 
-        },
-        notes: notes.trim() || null,
-        is_completed: false,
-        owner_id: 0, // This will be set by the backend
-        category_id: null,
-        description: null,
+        quantity: String(quantity || 1),
+        category_name: finalCategory,
+        description: notes.trim() || null,
         icon_name: null
       });
       
