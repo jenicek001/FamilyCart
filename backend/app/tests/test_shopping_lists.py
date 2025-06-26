@@ -10,13 +10,13 @@ from app.core.fastapi_users import current_user
 
 # Shared fixture for creating test data
 @pytest.fixture
-async def test_shopping_list(test_db: AsyncSession, test_user: User):
+async def test_shopping_list(test_db: AsyncSession, test_user: dict):
     """Create a test shopping list with items."""
     # Create a shopping list
     shopping_list = ShoppingList(
         name="Test Shopping List",
         description="This is a test shopping list",
-        owner_id=test_user.id
+        owner_id=test_user["id"]
     )
     test_db.add(shopping_list)
     await test_db.commit()
@@ -34,7 +34,7 @@ async def test_shopping_list(test_db: AsyncSession, test_user: User):
         quantity="1",
         description="First test item",
         shopping_list_id=shopping_list.id,
-        owner_id=test_user.id,
+        owner_id=test_user["id"],
         category_id=category.id
     )
     
@@ -43,7 +43,7 @@ async def test_shopping_list(test_db: AsyncSession, test_user: User):
         quantity="2",
         description="Second test item",
         shopping_list_id=shopping_list.id,
-        owner_id=test_user.id,
+        owner_id=test_user["id"],
         category_id=category.id
     )
     

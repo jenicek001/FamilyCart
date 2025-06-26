@@ -5,6 +5,7 @@ import { ShoppingList, Item, ItemCreate } from '../../types';
 import { ShoppingListItem } from './ShoppingListItem';
 import { SmartSearchBar } from './SmartSearchBar';
 import { HeaderListSelector } from './HeaderListSelector';
+import { useToast } from '../../hooks/use-toast';
 
 interface ShoppingListViewProps {
   list: ShoppingList;
@@ -27,6 +28,7 @@ export function ShoppingListView({
 }: ShoppingListViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { toast } = useToast();
 
   // Group items by completion status and filter
   const { pendingItems, completedItems } = useMemo(() => {
@@ -48,7 +50,27 @@ export function ShoppingListView({
   }, [list.items]);
 
   const handleToggleComplete = async (item: Item) => {
-    await onUpdateItem(item.id, { is_completed: !item.is_completed });
+    try {
+      await onUpdateItem(item.id, { is_completed: !item.is_completed });
+      
+      // Show toast feedback based on completion status
+      const wasCompleted = item.is_completed;
+      const isNowCompleted = !wasCompleted;
+      
+      toast({
+        title: isNowCompleted ? "Item completed!" : "Item unchecked!",
+        description: `"${item.name}" has been ${isNowCompleted ? 'marked as completed' : 'unchecked'}`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error toggling item completion:', error);
+      toast({
+        title: "Error",
+        description: `Failed to update "${item.name}". Please try again.`,
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
   };
 
   return (
