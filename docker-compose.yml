@@ -40,6 +40,24 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:8.0-alpine
+    container_name: familycart-redis
+    env_file:
+      - ./backend/.env
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
@@ -53,4 +71,4 @@ services:
 
 volumes:
   postgres_data:
-  # pgadmin_data:
+  redis_data:
