@@ -4,11 +4,12 @@ import type { ShoppingList, ShoppingListItem, User } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, XCircle, Edit3, Trash2, Users, CalendarDays, ShoppingBasket, ChevronDown, ChevronUp, icons, Apple, Beef, Milk } from 'lucide-react';
+import { CheckCircle2, Circle, XCircle, Edit3, Trash2, Users, CalendarDays, ShoppingBasket, ChevronDown, ChevronUp, icons, Apple, Beef, Milk, Info } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import AddItemForm from './AddItemForm';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ShoppingListCardProps {
   list: ShoppingList;
@@ -133,12 +134,29 @@ export default function ShoppingListCard({
                         <div className="w-6 mr-3 flex-shrink-0">
                           {getItemIcon(item)}
                         </div>
-                        <span className={`flex-1 truncate ${item.is_completed ? 'line-through text-muted-foreground' : ''}`}>
-                          {item.name}
+                        <div className={`flex-1 truncate flex items-center ${item.is_completed ? 'line-through text-muted-foreground' : ''}`}>
+                          <span>{item.standardized_name || item.name}</span>
                           {item.quantity && (
                             <span className="ml-2 text-xs text-muted-foreground">× {item.quantity}</span>
                           )}
-                        </span>
+                           {item.translations && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 ml-2 text-muted-foreground cursor-pointer flex-shrink-0" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="font-bold">Original: {item.name}</p>
+                                  <ul className="list-disc list-inside">
+                                    {Object.entries(item.translations).map(([lang, text]) => (
+                                      <li key={lang}><strong>{lang}:</strong> {text}</li>
+                                    ))}
+                                  </ul>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                         {item.category && <Badge variant="outline" className="ml-2 flex-shrink-0">{item.category.name}</Badge>}
                       </div>
                       <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={() => onDeleteItem(list.id, item.id)}>

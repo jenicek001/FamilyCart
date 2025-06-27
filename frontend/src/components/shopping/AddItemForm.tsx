@@ -113,74 +113,79 @@ export default function AddItemForm({ listId, onAddItem }: AddItemFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-card shadow">
-      <h3 className="text-lg font-medium font-headline">Add New Item</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="itemName">Item Name</Label>
-          <Input
-            id="itemName"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            placeholder="e.g., Apples"
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="quantity">Quantity</Label>
-          <Input
-            id="quantity"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="e.g., 1 kg, 2 packs"
-          />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="description">Description (Optional)</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Any specific details, like 'Granny Smith' or 'Lactose-free'"
-          rows={2}
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-muted/40">
+      <div className="space-y-2">
+        <Label htmlFor={`item-name-${listId}`}>Item Name</Label>
+        <Input 
+          id={`item-name-${listId}`}
+          placeholder="e.g., Organic Milk" 
+          value={itemName}
+          onChange={(e) => setItemName(e.target.value)}
+          required 
         />
       </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="category">Category (Optional)</Label>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor={`quantity-${listId}`}>Quantity</Label>
+          <Input 
+            id={`quantity-${listId}`}
+            placeholder="e.g., 1 gallon" 
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor={`category-${listId}`}>Category (Optional)</Label>
           <div className="flex items-center gap-2">
-            <Input
-              id="category"
+            <Input 
+              id={`category-${listId}`}
+              placeholder="e.g., Dairy" 
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g., Produce"
             />
-            <Button type="button" variant="outline" size="icon" onClick={handleSuggestCategory} disabled={isCategorizing || !itemName} aria-label="Suggest Category">
-              {isCategorizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-            </Button>
-          </div>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="icon">Icon (Optional)</Label>
-          <div className="flex items-center gap-2">
-             <div className="relative w-full">
-              <Input
-                id="icon"
-                value={iconName}
-                onChange={(e) => setIconName(e.target.value)}
-                placeholder="e.g., apple"
-              />
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <DynamicIcon name={iconName} className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </div>
-            <Button type="button" variant="outline" size="icon" onClick={handleSuggestIcon} disabled={isSuggestingIcon || !itemName} aria-label="Suggest Icon">
-              {isSuggestingIcon ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            <Button type="button" size="sm" onClick={handleSuggestCategory} disabled={isCategorizing || !itemName} className="w-48 shrink-0">
+              {isCategorizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
+              Suggest Category
             </Button>
           </div>
         </div>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={`description-${listId}`}>Description (Optional)</Label>
+        <Textarea 
+          id={`description-${listId}`}
+          placeholder="Any specific details..." 
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Icon (Optional)</Label>
+        <div className="flex items-center gap-2">
+          <Input 
+            id={`icon-${listId}`}
+            placeholder="e.g., 'milk' or 'apple'"
+            value={iconName}
+            onChange={(e) => setIconName(e.target.value)}
+            className="w-full"
+          />
+          <Button type="button" size="sm" onClick={handleSuggestIcon} disabled={isSuggestingIcon || !itemName} className="w-48 shrink-0">
+            {isSuggestingIcon ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            Suggest Icon
+          </Button>
+        </div>
+        {iconName && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+             <span className="font-medium">Preview:</span>
+            <DynamicIcon name={iconName} className="h-5 w-5" />
+            <span>{iconName}</span>
+          </div>
+        )}
+      </div>
+
       <Button type="submit" className="w-full">
         <PlusCircle className="mr-2 h-4 w-4" /> Add Item
       </Button>

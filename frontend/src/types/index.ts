@@ -17,6 +17,8 @@ export interface Category {
 export interface ShoppingListItem {
   id: number;
   name: string;
+  standardized_name?: string | null;
+  translations?: Record<string, string> | null;
   is_completed: boolean;
   shopping_list_id: number;
   owner_id: string; // UUID as string
