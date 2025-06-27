@@ -3,6 +3,7 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
+import logging
 
 from app.core.fastapi_users import current_user  # Use the same dependency as users.py
 from app.models import User
@@ -16,6 +17,7 @@ from app.schemas.share import ShareRequest
 from app.api.deps import get_session
 from app.services.ai_service import ai_service
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 async def get_or_create_category(name: str, session: AsyncSession) -> Category:
@@ -312,24 +314,61 @@ async def create_item_for_list(
         existing_categories = categories_result.scalars().all()
         category_names = [cat.name for cat in existing_categories]
         
-        # Get AI suggestions for the item
-        category_name = await ai_service.suggest_category_async(item_in.name, category_names)
-        if category_name:
-            category = await get_or_create_category(category_name, session)
-            
-        # Get standardized name and translations
-        standardization_result = await ai_service.standardize_and_translate_item_name(item_in.name)
-        standardized_name = standardization_result.get("standardized_name")
-        translations = standardization_result.get("translations", {})
+        # OPTIMIZED: Run AI calls in parallel with timeout
+        import asyncio
         
-        # Get icon suggestion
-        if category:
-            icon_name = await ai_service.suggest_icon(item_in.name, category.name)
+        # Start category and translation tasks in parallel
+        category_task = asyncio.create_task(
+            ai_service.suggest_category_async(item_in.name, category_names)
+        )
+        translation_task = asyncio.create_task(
+            ai_service.standardize_and_translate_item_name(item_in.name)
+        )
+        
+        # Wait for both with timeout (max 10 seconds each)
+        try:
+            category_name, standardization_result = await asyncio.wait_for(
+                asyncio.gather(category_task, translation_task, return_exceptions=True),
+                timeout=15.0  # Max 15 seconds for both calls
+            )
+            
+            # Handle category result
+            if isinstance(category_name, Exception):
+                logger.error(f"Category suggestion failed: {category_name}")
+                category_name = None
+            elif category_name:
+                category = await get_or_create_category(category_name, session)
+                
+            # Handle translation result
+            if isinstance(standardization_result, Exception):
+                logger.error(f"Translation failed: {standardization_result}")
+                standardization_result = {}
+            
+            standardized_name = standardization_result.get("standardized_name") if standardization_result else None
+            translations = standardization_result.get("translations", {}) if standardization_result else {}
+            
+            # Get icon suggestion only if we have a category (can't parallelize this one)
+            if category:
+                try:
+                    icon_name = await asyncio.wait_for(
+                        ai_service.suggest_icon(item_in.name, category.name),
+                        timeout=10.0  # Max 10 seconds for icon
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning(f"Icon suggestion timed out for item '{item_in.name}'")
+                    icon_name = "shopping_cart"  # Default fallback
+                except Exception as e:
+                    logger.error(f"Icon suggestion failed: {e}")
+                    icon_name = "shopping_cart"  # Default fallback
+                    
+        except asyncio.TimeoutError:
+            logger.warning(f"AI processing timed out for item '{item_in.name}' - using fallbacks")
+            category_name = None
+            standardized_name = None
+            translations = {}
             
     except Exception as e:
         # Log the error but continue with item creation
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Error during AI processing for item '{item_in.name}': {e}")
         
         # Fallback: use provided category if any
