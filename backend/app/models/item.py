@@ -1,4 +1,5 @@
 from sqlalchemy import String, ForeignKey, Boolean, Integer, Text, DateTime
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from typing import Optional
 from datetime import datetime
@@ -16,6 +17,8 @@ class Item(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    standardized_name: Mapped[str | None] = mapped_column(String(100))
+    translations: Mapped[dict | None] = mapped_column(JSONB)
     quantity: Mapped[str | None] = mapped_column(String(50))
     description: Mapped[str | None] = mapped_column(Text)
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)

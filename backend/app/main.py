@@ -7,6 +7,7 @@ from app.api.v1.endpoints import items as items_v1_router
 from app.api.v1.endpoints import ai as ai_v1_router  # Import the new AI router
 from app.api.v1.ws import notifications as ws_v1_router # WebSocket router
 from app.core.config import settings
+from app.core.cache import cache_service
 from app.api.middleware import LoggingMiddleware
 from app.api.auth_logging import AuthLoggingMiddleware
 from app.api.cors import setup_cors_middleware  # Import CORS setup
@@ -40,6 +41,14 @@ app.include_router(ai_v1_router.router, prefix=settings.API_V1_STR, tags=["ai"])
 
 # Include WebSocket router for v1
 app.include_router(ws_v1_router.router, prefix=settings.API_V1_STR + "/ws", tags=["websockets"])
+
+@app.on_event("startup")
+async def startup_event():
+    await cache_service.setup()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await cache_service.close()
 
 # Root endpoint
 @app.get("/")

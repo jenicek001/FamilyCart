@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -25,6 +25,8 @@ class ItemBase(BaseModel):
     name: str
     quantity: Optional[str] = None
     description: Optional[str] = None
+    standardized_name: Optional[str] = None
+    translations: Optional[dict[str, str]] = None
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
@@ -43,6 +45,8 @@ class ItemUpdate(BaseModel):
     is_completed: Optional[bool] = None
     category_id: Optional[int] = None
     icon_name: Optional[str] = None
+    standardized_name: Optional[str] = None
+    translations: Optional[dict[str, str]] = None
 
 # Properties to return to client
 class ItemRead(ItemBase):
@@ -57,6 +61,8 @@ class ItemRead(ItemBase):
     updated_at: datetime
     category: Optional[CategoryRead] = None
     icon_name: Optional[str] = None
+    standardized_name: Optional[str] = None
+    translations: Optional[dict[str, str]] = None
 
     class Config:
         from_attributes = True

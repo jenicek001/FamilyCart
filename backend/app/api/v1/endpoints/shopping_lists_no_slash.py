@@ -29,8 +29,8 @@ async def get_shopping_lists_no_slash(
     Special handler for /api/v1/shopping-lists without trailing slash
     to avoid 307 redirects that lose auth headers.
     """
-    logger.info(f"No-slash GET endpoint called by {current_user.email}")
-    logger.info(f"Request headers: {request.headers}")
+    logger.debug(f"No-slash GET endpoint called by {current_user.email}")
+    logger.debug(f"Request headers: {request.headers}")
     
     # Call the original handler directly
     return await read_shopping_lists(session=session, current_user=current_user)
@@ -48,8 +48,8 @@ async def create_shopping_list_no_slash(
     Special handler for POST /api/v1/shopping-lists without trailing slash
     to avoid 307 redirects that lose auth headers.
     """
-    logger.info(f"No-slash POST endpoint called by {current_user.email}")
-    logger.info(f"Request headers: {request.headers}")
+    logger.debug(f"No-slash POST endpoint called by {current_user.email}")
+    logger.debug(f"Request headers: {request.headers}")
     
     # Call the original handler directly
     return await create_shopping_list(session=session, list_in=list_in, current_user=current_user)

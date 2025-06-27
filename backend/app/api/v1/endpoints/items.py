@@ -9,6 +9,7 @@ from app.core.fastapi_users import current_user
 from app.models import User, Item, ShoppingList, Category
 from app.schemas.item import ItemRead, ItemCreate, ItemUpdate, ItemCreateStandalone
 from app.api.deps import get_session
+from app.services.ai_service import ai_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -48,16 +49,33 @@ async def create_item(
     if shopping_list.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to add items to this list")
 
-    category = await get_or_create_category(item_in.category_name, session)
+    category_name = item_in.category_name
+    if not category_name:
+        category_name = await ai_service.suggest_category(item_in.name, session)
+
+    category = await get_or_create_category(category_name, session)
+
+    icon_name = item_in.icon_name
+    if not icon_name:
+        cat_name_for_icon = category_name if category_name else "Uncategorized"
+        icon_name = await ai_service.suggest_icon(item_in.name, cat_name_for_icon)
+
+    # Standardize and translate item name
+    standardization_result = await ai_service.standardize_and_translate_item_name(item_in.name)
+    standardized_name = standardization_result.get("standardized_name")
+    translations = standardization_result.get("translations")
 
     db_item = Item(
         name=item_in.name,
+        standardized_name=standardized_name,
+        translations=translations,
         quantity=item_in.quantity,
         description=item_in.description,
         shopping_list_id=item_in.shopping_list_id,
         owner_id=current_user.id,
         last_modified_by_id=current_user.id,
-        category_id=category.id if category else None
+        category_id=category.id if category else None,
+        icon_name=icon_name,
     )
     session.add(db_item)
     await session.commit()
@@ -142,6 +160,32 @@ async def update_item(
     original_is_completed = db_item.is_completed
     
     update_data = item_in.dict(exclude_unset=True)
+
+    # If item name is updated, suggest new category and icon if not provided
+    if 'name' in update_data:
+        category_name_for_icon = "Uncategorized"
+        
+        # Suggest category if not provided
+        if 'category_id' not in update_data:
+            suggested_category_name = await ai_service.suggest_category(update_data['name'], session)
+            category = await get_or_create_category(suggested_category_name, session)
+            if category:
+                db_item.category_id = category.id
+            category_name_for_icon = suggested_category_name
+        elif db_item.category:
+             # Category is not being updated, but we need its name for icon suggestion
+             category_name_for_icon = db_item.category.name
+
+        # Suggest icon if not provided
+        if 'icon_name' not in update_data:
+            new_icon_name = await ai_service.suggest_icon(update_data['name'], category_name_for_icon)
+            db_item.icon_name = new_icon_name
+
+        # Standardize and translate the new item name
+        standardization_result = await ai_service.standardize_and_translate_item_name(update_data['name'])
+        db_item.standardized_name = standardization_result.get("standardized_name")
+        db_item.translations = standardization_result.get("translations")
+
     for key, value in update_data.items():
         setattr(db_item, key, value)
     

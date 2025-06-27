@@ -46,6 +46,21 @@ class Settings(BaseSettings):
     # AI APIs
     OPENAI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
+    GEMINI_MODEL_NAME: str = "gemini-2.5-flash"  # Using a cost-effective and fast model
+
+    # Redis
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_PASSWORD: Optional[str] = None
+    REDIS_URL: Optional[str] = None
+
+    @model_validator(mode='after')
+    def get_redis_url(self) -> 'Settings':
+        if self.REDIS_PASSWORD:
+            self.REDIS_URL = f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        else:
+            self.REDIS_URL = f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        return self
 
     class Config:
         # Pydantic-settings will automatically load environment variables from the .env file.

@@ -14,6 +14,7 @@ from app.schemas.item import ItemCreate, ItemRead
 from app.schemas.user import UserRead
 from app.schemas.share import ShareRequest
 from app.api.deps import get_session
+from app.services.ai_service import ai_service
 
 router = APIRouter()
 
@@ -279,6 +280,7 @@ async def create_item_for_list(
 ):
     """
     Add an item to a specific shopping list.
+    Uses AI to automatically categorize items and standardize names.
     """
     # Extract all needed scalar values from current_user at the very start
     user_id = current_user.id
@@ -298,20 +300,54 @@ async def create_item_for_list(
             detail="Shopping list not found or you don't have access"
         )
     
-    # Process category if provided
+    # Use AI to suggest category and standardize name
     category = None
-    if item_in.category_name:
-        category = await get_or_create_category(item_in.category_name, session)
+    standardized_name = None
+    translations = None
+    icon_name = None
     
-    # Create new item
+    try:
+        # Get existing categories for AI context
+        categories_result = await session.execute(select(Category))
+        existing_categories = categories_result.scalars().all()
+        category_names = [cat.name for cat in existing_categories]
+        
+        # Get AI suggestions for the item
+        category_name = await ai_service.suggest_category_async(item_in.name, category_names)
+        if category_name:
+            category = await get_or_create_category(category_name, session)
+            
+        # Get standardized name and translations
+        standardization_result = await ai_service.standardize_and_translate_item_name(item_in.name)
+        standardized_name = standardization_result.get("standardized_name")
+        translations = standardization_result.get("translations", {})
+        
+        # Get icon suggestion
+        if category:
+            icon_name = await ai_service.suggest_icon(item_in.name, category.name)
+            
+    except Exception as e:
+        # Log the error but continue with item creation
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error during AI processing for item '{item_in.name}': {e}")
+        
+        # Fallback: use provided category if any
+        if item_in.category_name:
+            category = await get_or_create_category(item_in.category_name, session)
+    
+    # Create new item with AI-enhanced data
     db_item = Item(
         name=item_in.name,
         quantity=item_in.quantity,
         description=item_in.description,
         shopping_list_id=list_id,
         owner_id=user_id,
+        last_modified_by_id=user_id,
         category_id=category.id if category else None,
-        icon_name=item_in.icon_name if hasattr(item_in, 'icon_name') else None
+        icon_name=icon_name or (item_in.icon_name if hasattr(item_in, 'icon_name') else None),
+        standardized_name=standardized_name,
+        translations=translations
     )
     
     session.add(db_item)
