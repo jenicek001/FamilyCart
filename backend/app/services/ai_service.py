@@ -4,7 +4,9 @@ from typing import Dict, Any
 import google.generativeai as genai
 from app.core.config import settings
 from sqlalchemy.orm import Session
-from app.crud.crud_category import category as crud_category
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.models.category import Category
 from app.core.cache import cache_service
 
 # Configure logging
@@ -50,13 +52,13 @@ class AIService:
             # or re-raise the exception.
             return "Error: Could not generate text."
 
-    async def suggest_category(self, item_name: str, db: Session) -> str:
+    async def suggest_category(self, item_name: str, db: AsyncSession) -> str:
         """
         Suggests a category for a given item name using the AI model.
 
         Args:
             item_name (str): The name of the item.
-            db (Session): The database session.
+            db (AsyncSession): The async database session.
 
         Returns:
             str: The suggested category name.
@@ -67,7 +69,9 @@ class AIService:
             logger.info(f"Cache hit for category suggestion: {item_name} -> {cached_category}")
             return cached_category
 
-        existing_categories = crud_category.get_multi(db, limit=1000)
+        # Use async SQLAlchemy to get existing categories
+        result = await db.execute(select(Category).limit(1000))
+        existing_categories = result.scalars().all()
         category_names = [category.name for category in existing_categories]
 
         prompt = f"""

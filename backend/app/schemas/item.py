@@ -1,6 +1,6 @@
 import uuid
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, field_validator
+from typing import Optional, Union
 from datetime import datetime
 
 # A simple schema for Category to be used in ItemRead
@@ -27,6 +27,16 @@ class ItemBase(BaseModel):
     description: Optional[str] = None
     standardized_name: Optional[str] = None
     translations: Optional[dict[str, str]] = None
+    
+    @field_validator('quantity', mode='before')
+    @classmethod
+    def convert_quantity_to_string(cls, v):
+        """Convert quantity to string if it's a number"""
+        if v is None:
+            return v
+        if isinstance(v, (int, float)):
+            return str(v)
+        return v
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
@@ -47,6 +57,16 @@ class ItemUpdate(BaseModel):
     icon_name: Optional[str] = None
     standardized_name: Optional[str] = None
     translations: Optional[dict[str, str]] = None
+    
+    @field_validator('quantity', mode='before')
+    @classmethod
+    def convert_quantity_to_string(cls, v):
+        """Convert quantity to string if it's a number"""
+        if v is None:
+            return v
+        if isinstance(v, (int, float)):
+            return str(v)
+        return v
 
 # Properties to return to client
 class ItemRead(ItemBase):

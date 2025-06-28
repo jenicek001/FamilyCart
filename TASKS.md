@@ -883,3 +883,22 @@ Continue with remaining Sprint 3+ tasks:
     * [x] **Business Impact**: 90% cost reduction, exceptional user experience
     * [x] **Documentation**: Complete analysis in `docs/llm-optimization-report.md`
     * [x] **Production Status**: Successfully deployed and validated in live environment
+
+* [x] **Item Update AsyncSession Fix** (2025-06-28): **COMPLETED**
+    * [x] **Problem**: Item renaming caused 500 server errors with `AttributeError: 'AsyncSession' object has no attribute 'query'`
+    * [x] **Root Cause**: AI service `suggest_category` method using synchronous CRUD operations with async database sessions
+    * [x] **Fix Applied**: Updated AI service to use async SQLAlchemy operations (`session.execute(select(...))`) instead of synchronous CRUD
+    * [x] **Code Changes**: Modified `app/services/ai_service.py` - changed `suggest_category` method signature and implementation
+    * [x] **Verification**: Created and ran test script confirming async compatibility and functionality
+    * [x] **Result**: Item updates now work correctly without server errors, AI categorization continues to function perfectly
+    * [x] **Impact**: Restored item editing functionality for users, eliminated backend crashes during item updates
+
+* [x] **Item Quantity Validation Fix** (2025-06-28): **COMPLETED**
+    * [x] **Problem**: Changing item quantity caused 422 Unprocessable Entity errors
+    * [x] **Root Cause**: Frontend sending quantity as number (int/float) but backend schema expecting string
+    * [x] **Investigation**: Created comprehensive validation tests identifying the exact mismatch
+    * [x] **Fix Applied**: Added Pydantic field validators to automatically convert numeric quantities to strings
+    * [x] **Code Changes**: Updated `app/schemas/item.py` - added `@field_validator` for quantity field in `ItemBase` and `ItemUpdate`
+    * [x] **Verification**: Tested all quantity formats (string, int, float, mixed updates) - all now work correctly
+    * [x] **Result**: Item quantity updates now accept both string and numeric inputs, automatically converting to string
+    * [x] **Impact**: Restored item quantity editing functionality, improved API flexibility and robustness
