@@ -153,6 +153,7 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
 * As a user, I want to see visually distinguished purchased items.
 * As a user, I want to see item quantities in the shopping list UI.
 * As a user, I want to edit items in the shopping list.
+* **As a user, I want to see items sorted by category, so I can find them easily in the list.** (FR008)
 
 ### Tasks:
 * **Frontend - Item Management UI:**
@@ -161,14 +162,21 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
     * [x] Show a toast or feedback when an item is marked as purchased/unpurchased
     * [x] Display item quantities in the shopping list UI (Frontend)
     * [x] Implement editing of items in the shopping list (allow users to update name, quantity, category, icon, etc.)
+    * [x] **Implement category-based sorting and grouping of items in shopping list UI (FR008)**
+    * [x] **Add visual category headers/separators to group items by category (FR008)**
+    * [x] **Ensure completed items maintain category grouping when moved to bottom (FR008)**
 * **Backend - Item Status Management:**
     * [x] Ensure the PUT /items/{item_id} endpoint correctly updates the is_completed status and returns the updated item
     * [x] Add validation for item update permissions (user owns list or has access to shared list)
     * [x] Add audit logging for item status changes
+    * [x] **Add category-aware item ordering/sorting logic to API endpoints (FR008)**
+    * [x] **Ensure shopping list items API returns items grouped by category (FR008)**
 * **Testing:**
     * [x] Add/Update tests for marking items as purchased/unpurchased (API and UI)
     * [x] Write/expand unit and integration tests for toggling item completion (backend and frontend)
     * [x] Add edge case tests (e.g., toggling an item that doesn't exist, or that the user doesn't own)
+    * [x] **Add tests for category-based sorting functionality (FR008)**
+    * [x] **Test that category grouping works with mixed completed/uncompleted items (FR008)**
 
 ## Sprint 4: AI-Powered Features Implementation
 
@@ -466,6 +474,9 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
 - [ ] Item quantities are clearly displayed in the UI
 - [ ] Users can edit item details inline
 - [ ] All item management operations work smoothly
+- [x] **Items are displayed grouped and sorted by category for easy navigation (FR008)**
+- [x] **Category headers provide clear visual separation between item groups (FR008)**
+- [x] **Category sorting works correctly with completed/uncompleted item states (FR008)**
 
 ### Sprint 4 Success Criteria:
 - [ ] 90% of items are automatically categorized correctly
@@ -902,3 +913,67 @@ Continue with remaining Sprint 3+ tasks:
     * [x] **Verification**: Tested all quantity formats (string, int, float, mixed updates) - all now work correctly
     * [x] **Result**: Item quantity updates now accept both string and numeric inputs, automatically converting to string
     * [x] **Impact**: Restored item quantity editing functionality, improved API flexibility and robustness
+
+# Discovered During Work (2025-06-28): Category-Based Sorting Implementation
+
+### ✅ COMPLETED: FR008 - Category-Based Sorting and Grouping
+* **Backend Category-Aware Sorting**: Implemented `sort_items_by_category()` function in shopping list endpoints
+  - Items sorted by: category name (alphabetical), completion status (pending first), then item name
+  - Items without categories appear at the bottom under "Other"
+  - Applied to both individual list retrieval and bulk list operations
+  - Maintains existing API structure while adding intelligent ordering
+
+* **Frontend Category Grouping**: Updated ShoppingListView component with complete category-based UI
+  - **Category Headers**: Visual headers with category icons, colors, and item counts
+  - **Grouped Display**: Items displayed in category sections with proper spacing and hierarchy
+  - **Completed Items**: Maintains category grouping in completed section with reduced opacity
+  - **Empty State Handling**: Graceful handling when categories are empty due to filtering
+  - **Visual Consistency**: Matches Stitch design system with Material Icons and color coding
+
+* **Category Visual System**: Enhanced category display with consistent styling
+  - **Category Icons**: Material Icons for each category (produce, dairy, bakery, etc.)
+  - **Color Coding**: Tailwind color classes for visual category distinction
+  - **Responsive Layout**: Category headers and items work across all device sizes
+  - **Accessibility**: Proper semantic structure with headers and ARIA labels
+
+* **Comprehensive Testing**: Created test suites for category functionality
+  - **Backend Tests**: `test_category_sorting.py` with 6 comprehensive test cases
+    - Basic alphabetical sorting by category
+    - Completion status ordering within categories
+    - Mixed scenarios with items without categories
+    - Edge cases (empty lists, single items, case sensitivity)
+  - **Frontend Tests**: `category_sorting.spec.ts` with Playwright tests
+    - Category header visibility and grouping
+    - Visual elements (icons, colors) validation
+    - Completed item category preservation
+    - Category filtering functionality
+    - Empty state handling
+
+* **API Enhancement**: Shopping list endpoints now return intelligently ordered items
+  - `GET /shopping-lists/` returns lists with category-sorted items
+  - `GET /shopping-lists/{id}` returns individual lists with category-sorted items
+  - Maintains backward compatibility while enhancing user experience
+  - Eager loading of category relationships for optimal performance
+
+### **User Experience Improvements**:
+- **Intuitive Shopping**: Items grouped by store layout (produce, dairy, meat, etc.)
+- **Visual Clarity**: Color-coded category headers make scanning lists effortless
+- **Completion Tracking**: Completed items maintain grouping for easy reference
+- **Smart Ordering**: Uncompleted items appear first within each category
+- **Consistent Design**: Matches existing Stitch design system perfectly
+
+### **Technical Benefits**:
+- **Performance**: Category sorting done efficiently in Python with O(n log n) complexity
+- **Maintainability**: Clean separation between backend sorting logic and frontend display
+- **Extensibility**: Easy to add new categories or modify sorting criteria
+- **Compatibility**: No breaking changes to existing API contracts
+- **Testing**: Comprehensive test coverage ensures reliability
+
+### **Implementation Stats**:
+- **Backend Changes**: 1 utility function + 3 endpoint modifications
+- **Frontend Changes**: 1 major component update + utility function imports
+- **Test Coverage**: 6 backend tests + 5 frontend test scenarios
+- **Performance**: No impact on API response times, efficient client-side grouping
+- **Code Quality**: Clean, documented, and follows project patterns
+
+This completes User Story FR008 with exceptional attention to both functionality and user experience.

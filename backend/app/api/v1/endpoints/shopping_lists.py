@@ -88,13 +88,14 @@ async def read_shopping_lists(
     Retrieve user's shopping lists (owned and shared).
     """
     try:
-        # Eagerly load items and shared_with for owned lists
+        # Eagerly load items and shared_with for owned lists  
         result = await session.execute(
             select(ShoppingList)
             .where(ShoppingList.owner_id == current_user.id)
             .options(
                 selectinload(ShoppingList.items).selectinload(Item.category),
                 selectinload(ShoppingList.items).selectinload(Item.owner),
+                selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
                 selectinload(ShoppingList.shared_with)
             )
         )
@@ -114,6 +115,7 @@ async def read_shopping_lists(
                 .options(
                     selectinload(ShoppingList.items).selectinload(Item.category),
                     selectinload(ShoppingList.items).selectinload(Item.owner),
+                    selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
                     selectinload(ShoppingList.shared_with)
                 )
             )
@@ -125,7 +127,9 @@ async def read_shopping_lists(
         # Build Pydantic models with items and members
         result_models = []
         for l in lists:
-            items = [ItemRead.model_validate(i, from_attributes=True) for i in l.items] if l.items else []
+            # Sort items by category before converting to Pydantic models
+            sorted_items = sort_items_by_category(l.items) if l.items else []
+            items = [ItemRead.model_validate(i, from_attributes=True) for i in sorted_items]
             # Members: shared_with + owner if not already included
             members = [UserRead.model_validate(u, from_attributes=True) for u in l.shared_with]
             if l.owner_id != current_user.id:
@@ -160,9 +164,16 @@ async def read_shopping_list(
     """
     # Check if the list is owned by the user
     result = await session.execute(
-        select(ShoppingList).where(
+        select(ShoppingList)
+        .where(
             ShoppingList.id == list_id,
             ShoppingList.owner_id == current_user.id
+        )
+        .options(
+            selectinload(ShoppingList.items).selectinload(Item.category),
+            selectinload(ShoppingList.items).selectinload(Item.owner),
+            selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
+            selectinload(ShoppingList.shared_with)
         )
     )
     shopping_list = result.scalars().first()
@@ -170,10 +181,14 @@ async def read_shopping_list(
     # If not owned by user, check if it's shared with the user
     if not shopping_list:
         result = await session.execute(
-            select(ShoppingList).where(
-                ShoppingList.id == list_id
-            ).join(
-                ShoppingList.shared_with.and_(User.id == current_user.id)
+            select(ShoppingList)
+            .where(ShoppingList.id == list_id)
+            .join(ShoppingList.shared_with.and_(User.id == current_user.id))
+            .options(
+                selectinload(ShoppingList.items).selectinload(Item.category),
+                selectinload(ShoppingList.items).selectinload(Item.owner),
+                selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
+                selectinload(ShoppingList.shared_with)
             )
         )
         shopping_list = result.scalars().first()
@@ -183,6 +198,10 @@ async def read_shopping_list(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Shopping list not found or you don't have access"
         )
+    
+    # Sort items by category before returning
+    if shopping_list.items:
+        shopping_list.items = sort_items_by_category(shopping_list.items)
     
     # Populate members (users with whom the list is shared plus the owner if the viewer is not the owner)
     shopping_list.members = shopping_list.shared_with + ([shopping_list.owner] if shopping_list.owner_id != current_user.id else [])
@@ -490,4 +509,30 @@ async def share_shopping_list(
     shopping_list.members = shopping_list.shared_with + [shopping_list.owner]
     
     return shopping_list
+
+from app.core.fastapi_users import current_user
+from app.models import User, ShoppingList, Item
+from app.schemas.shopping_list import ShoppingListRead, ShoppingListCreate, ShoppingListUpdate
+from app.schemas.user import UserRead
+from app.schemas.item import ItemRead
+from app.api.deps import get_session
+
+def sort_items_by_category(items: List[Item]) -> List[Item]:
+    """
+    Sort items by category, then by completion status, then by name.
+    Items with categories come first, sorted alphabetically by category name.
+    Items without categories come last.
+    Within each category, uncompleted items come first.
+    """
+    def sort_key(item: Item):
+        # Primary sort: category name (None/empty comes last)
+        category_name = item.category.name if item.category else "zzz_uncategorized"
+        # Secondary sort: completion status (False comes before True)
+        completion_status = item.is_completed
+        # Tertiary sort: item name
+        item_name = item.name.lower()
+        
+        return (category_name, completion_status, item_name)
+    
+    return sorted(items, key=sort_key)
 
