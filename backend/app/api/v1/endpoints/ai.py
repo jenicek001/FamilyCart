@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import google.generativeai as genai
-from app.core.config import settings
 from app.core.dependencies import get_current_user
 from app.models import User
+from app.services.ai_service import ai_service
 
 router = APIRouter()
 
@@ -21,9 +20,29 @@ class IconSuggestionRequest(BaseModel):
 class IconSuggestionResponse(BaseModel):
     icon_name: str # e.g., 'shopping-cart', 'milk', 'apple'
 
-# Configure Google Gemini client
-if settings.GOOGLE_API_KEY:
-    genai.configure(api_key=settings.GOOGLE_API_KEY)
+class AIProviderStatusResponse(BaseModel):
+    provider_name: str
+    model_name: str
+    status: str
+    error: Optional[str] = None
+    rate_limit_detected: Optional[bool] = None
+    fallback_available: Optional[bool] = None
+
+@router.get("/ai/status", response_model=AIProviderStatusResponse)
+async def get_ai_status():
+    """
+    Get the current AI provider status and configuration.
+    """
+    try:
+        provider_info = ai_service.get_provider_info()
+        return AIProviderStatusResponse(**provider_info)
+    except Exception as e:
+        return AIProviderStatusResponse(
+            provider_name="unknown",
+            model_name="unknown",
+            status="error",
+            error=str(e)
+        )
 
 @router.post("/ai/categorize-item", response_model=ItemCategorizationResponse)
 async def categorize_item(
@@ -31,16 +50,10 @@ async def categorize_item(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Suggests a category for a given shopping list item name using Google Gemini.
+    Suggests a category for a given shopping list item name using the configured AI provider.
     """
-    if not settings.GOOGLE_API_KEY:
-        raise HTTPException(
-            status_code=500,
-            detail="Google API key is not configured on the server.",
-        )
-
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Use the AI service with the provider pattern
         prompt = f"""
         You are an expert at organizing shopping lists.
         Based on the item name, suggest a single, concise category.
@@ -51,11 +64,11 @@ async def categorize_item(
         Category:
         """
 
-        response = model.generate_content(prompt)
-        category = response.text.strip()
+        response = await ai_service.generate_text(prompt)
+        category = response.strip()
         return ItemCategorizationResponse(category_name=category)
     except Exception as e:
-        print(f"Error calling Google Gemini: {e}")
+        print(f"Error calling AI provider: {e}")
         raise HTTPException(
             status_code=500, detail="Failed to get category suggestion from AI."
         )
@@ -66,39 +79,15 @@ async def suggest_icon(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Suggests a Lucide icon name for a given shopping list item using Google Gemini.
+    Suggests a Material Design icon name for a given shopping list item using the configured AI provider.
     """
-    if not settings.GOOGLE_API_KEY:
-        raise HTTPException(
-            status_code=500,
-            detail="Google API key is not configured on the server.",
-        )
-
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = f"""
-        You are an expert in UI design and iconography.
-        Based on the item name and its category, suggest a single, relevant icon name from the 'lucide-react' icon library.
-        Return only the icon name in kebab-case (e.g., 'shopping-cart', 'milk', 'beef', 'apple'). Do not include any extra text, explanation, or punctuation.
-
-        Here are some examples:
-        - Item: "Milk", Category: "Dairy & Eggs" -> milk
-        - Item: "Sirloin Steak", Category: "Meat & Seafood" -> beef
-        - Item: "Granny Smith Apples", Category: "Produce" -> apple
-        - Item: "Sourdough Bread", Category: "Bakery" -> bread
-        - Item: "Dish Soap", Category: "Household" -> soap
-        - Item: "Paper Towels", Category: "Household" -> paperclip
-
-        Item: "{request.item_name}"
-        Category: "{request.category_name or ''}"
-        Icon name:
-        """
-
-        response = model.generate_content(prompt)
-        icon_name = response.text.strip()
+        # Use the standardized AI service method for icon suggestion
+        category_name = request.category_name or "General"
+        icon_name = await ai_service.suggest_icon(request.item_name, category_name)
         return IconSuggestionResponse(icon_name=icon_name)
     except Exception as e:
-        print(f"Error calling Google Gemini: {e}")
+        print(f"Error calling AI provider: {e}")
         raise HTTPException(
             status_code=500, detail="Failed to get icon suggestion from AI."
         )

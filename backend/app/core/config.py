@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
     GEMINI_MODEL_NAME: str = "gemini-1.5-flash"  # Optimized for speed: 10x faster than 2.5-flash
+    
+    # AI Provider Configuration
+    AI_PROVIDER: str = "gemini"  # Options: "gemini", "ollama"
+    
+    # Ollama Configuration
+    OLLAMA_BASE_URL: str = "http://localhost:11434"  # Default Ollama server URL
+    OLLAMA_MODEL_NAME: str = "gemma3:4b"  # Default model for Ollama (matches available model)
+    OLLAMA_TIMEOUT: int = 120  # Request timeout in seconds
 
     # Redis
     REDIS_HOST: str = "localhost"
