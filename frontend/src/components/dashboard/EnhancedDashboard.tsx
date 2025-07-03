@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import apiClient from '@/lib/api';
 import type { ShoppingList, Item, ItemCreate } from '@/types';
 import { ShoppingListSelector } from '@/components/ShoppingList/ShoppingListSelector';
-import { ShoppingListView } from '@/components/ShoppingList/ShoppingListView';
+import { RealtimeShoppingList } from '@/components/ShoppingList/RealtimeShoppingList';
 import { EmptyState } from '@/components/ShoppingList/EmptyState';
 import { useToast } from '@/hooks/use-toast';
 import { setLastActiveListId, getLastActiveListId } from '@/utils/localStorage';
@@ -233,7 +233,7 @@ export default function EnhancedDashboard() {
       {lists.length === 0 ? (
         <EmptyState onCreateList={() => setIsCreateListDialogOpen(true)} />
       ) : selectedList ? (
-        <ShoppingListView
+        <RealtimeShoppingList
           list={selectedList}
           allLists={lists}
           onUpdateItem={handleUpdateItem}
@@ -241,6 +241,66 @@ export default function EnhancedDashboard() {
           onAddItem={handleAddItem}
           onBackToSelector={handleBackToSelector}
           onSelectList={handleSelectList}
+          onListUpdate={(listId, updatedData) => {
+            // Update the list in both lists array and selectedList
+            setLists(prev => prev.map(list => 
+              list.id === listId ? { ...list, ...updatedData } : list
+            ));
+            if (selectedList.id === listId) {
+              setSelectedList(prev => ({ ...prev!, ...updatedData }));
+            }
+          }}
+          onItemUpdate={(listId, item) => {
+            // Update the item in both lists array and selectedList
+            setLists(prev => prev.map(list => 
+              list.id === listId 
+                ? {
+                    ...list,
+                    items: list.items.map(i => i.id === item.id ? item : i)
+                  }
+                : list
+            ));
+            if (selectedList.id === listId) {
+              setSelectedList(prev => ({
+                ...prev!,
+                items: prev!.items.map(i => i.id === item.id ? item : i)
+              }));
+            }
+          }}
+          onItemDelete={(listId, itemId) => {
+            // Remove the item from both lists array and selectedList
+            setLists(prev => prev.map(list => 
+              list.id === listId 
+                ? {
+                    ...list,
+                    items: list.items.filter(i => i.id !== itemId)
+                  }
+                : list
+            ));
+            if (selectedList.id === listId) {
+              setSelectedList(prev => ({
+                ...prev!,
+                items: prev!.items.filter(i => i.id !== itemId)
+              }));
+            }
+          }}
+          onItemCreate={(listId, item) => {
+            // Add the item to both lists array and selectedList
+            setLists(prev => prev.map(list => 
+              list.id === listId 
+                ? {
+                    ...list,
+                    items: [...list.items, item]
+                  }
+                : list
+            ));
+            if (selectedList.id === listId) {
+              setSelectedList(prev => ({
+                ...prev!,
+                items: [...prev!.items, item]
+              }));
+            }
+          }}
         />
       ) : (
         <ShoppingListSelector

@@ -7,3 +7,4 @@ export { HeaderListSelector } from './HeaderListSelector';
 export { EmptyState } from './EmptyState';
 export { AddItemForm } from './AddItemForm';
 export { SearchAndFilter } from './SearchAndFilter';
+export { RealtimeShoppingList } from './RealtimeShoppingList';
