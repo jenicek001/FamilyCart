@@ -16,6 +16,7 @@ from app.schemas.user import UserRead
 from app.schemas.share import ShareRequest
 from app.api.deps import get_session
 from app.services.ai_service import ai_service
+from app.services.websocket_service import websocket_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -256,7 +257,22 @@ async def update_shopping_list(
     members = [UserRead.model_validate(u, from_attributes=True) for u in shopping_list.shared_with]
     if shopping_list.owner_id != current_user.id:
         members.append(UserRead.model_validate(shopping_list.owner, from_attributes=True))
-    return ShoppingListRead.model_validate(shopping_list, from_attributes=True, context={"items": items, "members": members})
+    
+    list_read = ShoppingListRead.model_validate(shopping_list, from_attributes=True, context={"items": items, "members": members})
+    
+    # Send real-time notification to list members
+    try:
+        list_data = list_read.model_dump(mode='json')
+        await websocket_service.notify_list_updated(
+            list_id=list_id,
+            list_data=list_data,
+            user_id=str(current_user.id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket notification for list update: {e}")
+        logger.exception("Full exception details:")
+    
+    return list_read
 
 
 @router.delete("/{list_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -287,6 +303,15 @@ async def delete_shopping_list(
     # Delete the shopping list
     await session.delete(shopping_list)
     await session.commit()
+    
+    # Send real-time notification to list members about deletion
+    try:
+        await websocket_service.notify_list_deleted(
+            list_id=list_id,
+            user_id=str(current_user.id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket notification for list deletion: {e}")
     
     return None
 
@@ -413,6 +438,20 @@ async def create_item_for_list(
     await session.refresh(db_item)
     # Eagerly load relationships for response
     await session.refresh(db_item, attribute_names=["category", "owner"])
+    
+    # Send real-time notification to list members
+    try:
+        from app.schemas.item import ItemRead
+        item_data = ItemRead.model_validate(db_item, from_attributes=True).model_dump(mode='json')
+        await websocket_service.notify_item_created(
+            list_id=list_id,
+            item_data=item_data,
+            user_id=str(user_id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket notification for item creation: {e}")
+        logger.exception("Full exception details:")
+    
     return db_item
 
 
@@ -507,6 +546,20 @@ async def share_shopping_list(
     
     # Populate members
     shopping_list.members = shopping_list.shared_with + [shopping_list.owner]
+    
+    # Send real-time notification to list members
+    try:
+        from app.schemas.shopping_list import ShoppingListRead
+        list_data = ShoppingListRead.model_validate(shopping_list, from_attributes=True).model_dump(mode='json')
+        await websocket_service.notify_list_shared(
+            list_id=list_id,
+            list_data=list_data,
+            new_member_email=share_data.email,
+            user_id=str(current_user.id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket notification for list sharing: {e}")
+        logger.exception("Full exception details:")
     
     return shopping_list
 

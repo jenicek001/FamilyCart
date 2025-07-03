@@ -48,6 +48,28 @@ class GeminiProvider(AIProvider):
         """Get the provider name."""
         return "gemini"
 
+    def _is_rate_limit_error(self, error: Exception) -> bool:
+        """
+        Check if the error indicates a rate limit or quota has been reached.
+        
+        Args:
+            error: The exception to check
+            
+        Returns:
+            bool: True if this is a rate limit error that should trigger fallback
+        """
+        error_str = str(error).lower()
+        rate_limit_indicators = [
+            "rate limit",
+            "quota exceeded",
+            "too many requests", 
+            "429",
+            "resource exhausted",
+            "rate_limit_exceeded",
+            "current quota"
+        ]
+        return any(indicator in error_str for indicator in rate_limit_indicators)
+
     @property
     def model_name(self) -> str:
         """Get the model name."""
@@ -185,6 +207,9 @@ class GeminiProvider(AIProvider):
             return suggested_category
         except Exception as e:
             logger.error(f"Error suggesting category with Gemini: {e}")
+            # Re-raise rate limit and quota errors so fallback service can handle them
+            if self._is_rate_limit_error(e):
+                raise e
             return "Uncategorized"
 
     async def suggest_icon(self, item_name: str, category_name: str) -> str:
@@ -256,6 +281,9 @@ class GeminiProvider(AIProvider):
             return "shopping_cart"
         except Exception as e:
             logger.error(f"Error suggesting icon with Gemini: {e}")
+            # Re-raise rate limit and quota errors so fallback service can handle them
+            if self._is_rate_limit_error(e):
+                raise e
             return "shopping_cart"
 
     async def standardize_and_translate_item_name(self, item_name: str) -> Dict[str, Any]:
@@ -336,4 +364,7 @@ class GeminiProvider(AIProvider):
             return {"standardized_name": item_name, "translations": {}}
         except Exception as e:
             logger.error(f"Error standardizing and translating item name with Gemini: {e}")
+            # Re-raise rate limit and quota errors so fallback service can handle them
+            if self._is_rate_limit_error(e):
+                raise e
             return {"standardized_name": item_name, "translations": {}}

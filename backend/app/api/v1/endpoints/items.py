@@ -10,6 +10,7 @@ from app.models import User, Item, ShoppingList, Category
 from app.schemas.item import ItemRead, ItemCreate, ItemUpdate, ItemCreateStandalone
 from app.api.deps import get_session
 from app.services.ai_service import ai_service
+from app.services.websocket_service import websocket_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -204,6 +205,20 @@ async def update_item(
     session.add(db_item)
     await session.commit()
     await session.refresh(db_item, attribute_names=["category", "owner", "last_modified_by"])
+    
+    # Send real-time notification to list members
+    try:
+        from app.schemas.item import ItemRead
+        item_data = ItemRead.model_validate(db_item, from_attributes=True).model_dump(mode='json')
+        await websocket_service.notify_item_updated(
+            list_id=db_item.shopping_list_id,
+            item_data=item_data,
+            user_id=str(current_user.id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket notification for item update: {e}")
+        logger.exception("Full exception details:")
+    
     return db_item
 
 @router.delete("/{item_id}", response_model=dict)
@@ -231,7 +246,22 @@ async def delete_item(
     if owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this item")
 
+    # Store list_id before deletion for WebSocket notification
+    list_id = item.shopping_list_id
+    item_id_for_notification = item.id
+    
     await session.delete(item)
     await session.commit()
+    
+    # Send real-time notification to list members
+    try:
+        await websocket_service.notify_item_deleted(
+            list_id=list_id,
+            item_id=item_id_for_notification,
+            user_id=str(current_user.id)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket notification for item deletion: {e}")
+    
     return {"message": "Item deleted successfully"}
 

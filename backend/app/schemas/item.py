@@ -19,6 +19,10 @@ class UserBasic(BaseModel):
 
     class Config:
         from_attributes = True
+        # Serialize UUIDs as strings to avoid JSON serialization issues
+        json_encoders = {
+            uuid.UUID: str
+        }
 
 # Shared properties
 class ItemBase(BaseModel):
@@ -86,3 +90,8 @@ class ItemRead(ItemBase):
 
     class Config:
         from_attributes = True
+        # Serialize UUIDs as strings to avoid JSON serialization issues
+        json_encoders = {
+            uuid.UUID: str,
+            datetime: lambda v: v.isoformat() if v else None
+        }

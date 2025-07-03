@@ -1,36 +1,272 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, Query, Depends
+from typing import Dict, List, Optional, Set
+import json
+import jwt
+import logging
+from datetime import datetime, UTC
+from uuid import UUID
 
+from app.core.config import settings
+from app.models import User
+from app.api.deps import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
-class ConnectionManager:
+class UUIDJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles UUID objects"""
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            return str(obj)
+        return super().default(obj)
+
+class ListConnectionManager:
+    """
+    Enhanced WebSocket connection manager for shopping list real-time updates.
+    Manages connections per shopping list (room-based) with JWT authentication.
+    """
     def __init__(self):
-        self.active_connections: list[WebSocket] = []
+        # Dictionary mapping list_id -> set of (websocket, user_id) tuples
+        self.list_connections: Dict[int, Set[tuple]] = {}
+        # Dictionary mapping websocket -> (user_id, list_id) for cleanup
+        self.websocket_registry: Dict[WebSocket, tuple] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def authenticate_user(self, token: str, session: AsyncSession) -> Optional[User]:
+        """Authenticate user from JWT token"""
+        try:
+            # First try to decode without audience validation to check the token structure
+            unverified_payload = jwt.decode(
+                token, 
+                settings.SECRET_KEY, 
+                algorithms=[settings.ALGORITHM],
+                options={"verify_aud": False}
+            )
+            
+            # Get the audience from the token to handle both string and array formats
+            token_audience = unverified_payload.get("aud")
+            expected_audience = "fastapi-users:auth"
+            
+            # Validate audience manually to handle both string and array formats
+            if isinstance(token_audience, list):
+                if expected_audience not in token_audience:
+                    logger.warning(f"JWT audience validation failed: expected '{expected_audience}' in {token_audience}")
+                    return None
+            elif isinstance(token_audience, str):
+                if token_audience != expected_audience:
+                    logger.warning(f"JWT audience validation failed: expected '{expected_audience}', got '{token_audience}'")
+                    return None
+            else:
+                logger.warning(f"JWT audience validation failed: invalid audience format {type(token_audience)}")
+                return None
+            
+            # Now decode with proper audience validation (using the format from the token)
+            if isinstance(token_audience, list):
+                # If token has array audience, validate against the array
+                payload = jwt.decode(
+                    token, 
+                    settings.SECRET_KEY, 
+                    algorithms=[settings.ALGORITHM],
+                    audience=token_audience
+                )
+            else:
+                # If token has string audience, validate against the string
+                payload = jwt.decode(
+                    token, 
+                    settings.SECRET_KEY, 
+                    algorithms=[settings.ALGORITHM],
+                    audience=expected_audience
+                )
+            
+            user_id: str = payload.get("sub")
+            if not user_id:
+                logger.warning("JWT token missing 'sub' claim")
+                return None
+            
+            # Get user from database
+            result = await session.execute(select(User).where(User.id == user_id))
+            user = result.scalars().first()
+            
+            if not user:
+                logger.warning(f"User with ID {user_id} not found in database")
+                return None
+                
+            return user
+        except jwt.PyJWTError as e:
+            logger.warning(f"JWT authentication failed: {e}")
+            return None
+
+    async def verify_list_access(self, user: User, list_id: int, session: AsyncSession) -> bool:
+        """Check if user has access to the shopping list"""
+        from app.models import ShoppingList
+        
+        # Check if user owns the list or it's shared with them
+        result = await session.execute(
+            select(ShoppingList).where(
+                ShoppingList.id == list_id,
+                ShoppingList.owner_id == user.id
+            )
+        )
+        if result.scalars().first():
+            return True
+            
+        # Check if list is shared with user
+        result = await session.execute(
+            select(ShoppingList)
+            .where(ShoppingList.id == list_id)
+            .join(ShoppingList.shared_with.and_(User.id == user.id))
+        )
+        return result.scalars().first() is not None
+
+    async def connect(self, websocket: WebSocket, user: User, list_id: int):
+        """Connect user to a specific shopping list room"""
         await websocket.accept()
-        self.active_connections.append(websocket)
+        
+        # Add to list connections
+        if list_id not in self.list_connections:
+            self.list_connections[list_id] = set()
+        
+        connection_tuple = (websocket, user.id)
+        self.list_connections[list_id].add(connection_tuple)
+        
+        # Register websocket for cleanup
+        self.websocket_registry[websocket] = (user.id, list_id)
+        
+        logger.info(f"User {user.nickname} connected to list {list_id}")
+        
+        # Send welcome message
+        await self.send_to_websocket(websocket, {
+            "type": "connection_established",
+            "message": f"Connected to list {list_id}",
+            "timestamp": datetime.now(UTC).isoformat()
+        })
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+    async def disconnect(self, websocket: WebSocket):
+        """Disconnect websocket and clean up"""
+        if websocket not in self.websocket_registry:
+            return
+            
+        user_id, list_id = self.websocket_registry[websocket]
+        
+        # Remove from list connections
+        connection_tuple = (websocket, user_id)
+        if list_id in self.list_connections:
+            self.list_connections[list_id].discard(connection_tuple)
+            # Clean up empty list connection groups
+            if not self.list_connections[list_id]:
+                del self.list_connections[list_id]
+        
+        # Remove from registry
+        del self.websocket_registry[websocket]
+        
+        logger.info(f"User {user_id} disconnected from list {list_id}")
 
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send_to_websocket(self, websocket: WebSocket, data: dict):
+        """Send data to a specific websocket with proper UUID serialization"""
+        try:
+            json_data = json.dumps(data, cls=UUIDJSONEncoder)
+            await websocket.send_text(json_data)
+        except Exception as e:
+            logger.error(f"Error sending to websocket: {e}")
+            # Log the data that failed to serialize for debugging
+            logger.debug(f"Failed data: {data}")
 
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
+    async def broadcast_to_list(self, list_id: int, data: dict, exclude_user_id: Optional[str] = None):
+        """Broadcast message to all users connected to a specific list"""
+        if list_id not in self.list_connections:
+            return
+        
+        disconnected_websockets = []
+        
+        for websocket, user_id in list(self.list_connections[list_id]):
+            # Skip the user who triggered the update
+            if exclude_user_id and user_id == exclude_user_id:
+                continue
+                
+            try:
+                await self.send_to_websocket(websocket, data)
+            except Exception as e:
+                logger.error(f"Error broadcasting to user {user_id}: {e}")
+                disconnected_websockets.append(websocket)
+        
+        # Clean up disconnected websockets
+        for websocket in disconnected_websockets:
+            await self.disconnect(websocket)
 
-manager = ConnectionManager()
+    async def broadcast_item_change(self, list_id: int, event_type: str, item_data: dict, user_id: str):
+        """Broadcast item changes to list members"""
+        message = {
+            "type": "item_change",
+            "event_type": event_type,  # "created", "updated", "deleted"
+            "list_id": list_id,
+            "item": item_data,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "user_id": user_id
+        }
+        await self.broadcast_to_list(list_id, message, exclude_user_id=user_id)
 
-@router.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    await manager.connect(websocket)
+    async def broadcast_list_change(self, list_id: int, event_type: str, list_data: dict, user_id: str):
+        """Broadcast list changes to list members"""
+        message = {
+            "type": "list_change", 
+            "event_type": event_type,  # "updated", "shared", "member_removed"
+            "list_id": list_id,
+            "list": list_data,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "user_id": user_id
+        }
+        await self.broadcast_to_list(list_id, message, exclude_user_id=user_id)
+
+# Global connection manager instance
+connection_manager = ListConnectionManager()
+
+@router.websocket("/lists/{list_id}")
+async def websocket_list_endpoint(
+    websocket: WebSocket,
+    list_id: int,
+    token: str = Query(...),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    WebSocket endpoint for real-time updates on a specific shopping list.
+    Requires JWT authentication via query parameter.
+    """
+    # Authenticate user
+    user = await connection_manager.authenticate_user(token, session)
+    if not user:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    # Verify list access
+    has_access = await connection_manager.verify_list_access(user, list_id, session)
+    if not has_access:
+        await websocket.close(code=status.WS_1003_UNSUPPORTED_DATA)
+        return
+
+    # Connect to list room
+    await connection_manager.connect(websocket, user, list_id)
+    
     try:
         while True:
+            # Handle incoming messages (ping/pong, heartbeat)
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await connection_manager.send_to_websocket(websocket, {
+                        "type": "pong", 
+                        "timestamp": datetime.now(UTC).isoformat()
+                    })
+            except json.JSONDecodeError:
+                logger.warning(f"Invalid JSON from user {user.id}: {data}")
+                
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        await connection_manager.disconnect(websocket)
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user.id}: {e}")
+        await connection_manager.disconnect(websocket)
+
+# Export the connection manager for use in other parts of the application
+__all__ = ["connection_manager", "router"]
 

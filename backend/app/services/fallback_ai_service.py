@@ -80,15 +80,14 @@ class FallbackAIService:
         ]
         return any(indicator in error_str for indicator in rate_limit_indicators)
 
-    async def _try_with_fallback(self, operation_name: str, primary_func, fallback_func, *args, **kwargs):
+    async def _try_with_fallback(self, operation_name: str, primary_func, fallback_func):
         """
         Try an operation with the primary provider, fallback to Ollama if needed.
         
         Args:
             operation_name: Name of the operation for logging
-            primary_func: Function to call on primary provider
-            fallback_func: Function to call on fallback provider
-            *args, **kwargs: Arguments to pass to the functions
+            primary_func: Async function to call on primary provider
+            fallback_func: Async function to call on fallback provider
             
         Returns:
             Result from either primary or fallback provider
@@ -99,7 +98,7 @@ class FallbackAIService:
             if time.time() < self._rate_limit_reset_time:
                 logger.info(f"Rate limit still active, using fallback for {operation_name}")
                 if self.fallback_provider:
-                    return await fallback_func(*args, **kwargs)
+                    return await fallback_func()
                 else:
                     raise Exception("Both primary and fallback providers are unavailable")
 
@@ -107,7 +106,7 @@ class FallbackAIService:
         if self.primary_provider:
             try:
                 logger.debug(f"Attempting {operation_name} with primary provider")
-                result = await primary_func(*args, **kwargs)
+                result = await primary_func()
                 
                 # Reset rate limit flag on successful operation
                 if self._rate_limit_detected:
@@ -129,13 +128,13 @@ class FallbackAIService:
                     logger.error(f"Rate limit detected for primary provider, switching to fallback")
                     
                     # Cache the rate limit status
-                    await cache_service.set("gemini_rate_limit_detected", True, expire=3600)
+                    await cache_service.set("gemini_rate_limit_detected", "true", expire=3600)
                 
                 # Try fallback provider
                 if self.fallback_provider:
                     try:
                         logger.info(f"Attempting {operation_name} with fallback provider")
-                        result = await fallback_func(*args, **kwargs)
+                        result = await fallback_func()
                         logger.info(f"Fallback provider succeeded for {operation_name}")
                         return result
                     except Exception as fallback_error:
@@ -147,7 +146,7 @@ class FallbackAIService:
             # No primary provider, try fallback
             if self.fallback_provider:
                 logger.info(f"No primary provider available, using fallback for {operation_name}")
-                return await fallback_func(*args, **kwargs)
+                return await fallback_func()
             else:
                 raise Exception("No AI providers available")
 
@@ -161,11 +160,13 @@ class FallbackAIService:
         Returns:
             str: The generated text.
         """
-        return await self._try_with_fallback(
-            "text generation",
-            lambda: self.primary_provider.generate_text(prompt),
-            lambda: self.fallback_provider.generate_text(prompt)
-        )
+        async def primary_func():
+            return await self.primary_provider.generate_text(prompt)
+        
+        async def fallback_func():
+            return await self.fallback_provider.generate_text(prompt)
+        
+        return await self._try_with_fallback("text generation", primary_func, fallback_func)
 
     async def suggest_category(self, item_name: str, db: AsyncSession) -> str:
         """
@@ -178,11 +179,13 @@ class FallbackAIService:
         Returns:
             str: The suggested category name.
         """
-        return await self._try_with_fallback(
-            "category suggestion",
-            lambda: self.primary_provider.suggest_category(item_name, db),
-            lambda: self.fallback_provider.suggest_category(item_name, db)
-        )
+        async def primary_func():
+            return await self.primary_provider.suggest_category(item_name, db)
+        
+        async def fallback_func():
+            return await self.fallback_provider.suggest_category(item_name, db)
+        
+        return await self._try_with_fallback("category suggestion", primary_func, fallback_func)
 
     async def suggest_category_async(self, item_name: str, category_names: List[str]) -> str:
         """
@@ -195,11 +198,13 @@ class FallbackAIService:
         Returns:
             str: The suggested category name.
         """
-        return await self._try_with_fallback(
-            "category suggestion async",
-            lambda: self.primary_provider.suggest_category_async(item_name, category_names),
-            lambda: self.fallback_provider.suggest_category_async(item_name, category_names)
-        )
+        async def primary_func():
+            return await self.primary_provider.suggest_category_async(item_name, category_names)
+        
+        async def fallback_func():
+            return await self.fallback_provider.suggest_category_async(item_name, category_names)
+        
+        return await self._try_with_fallback("category suggestion async", primary_func, fallback_func)
 
     async def suggest_icon(self, item_name: str, category_name: str) -> str:
         """
@@ -212,11 +217,13 @@ class FallbackAIService:
         Returns:
             str: The suggested icon name.
         """
-        return await self._try_with_fallback(
-            "icon suggestion",
-            lambda: self.primary_provider.suggest_icon(item_name, category_name),
-            lambda: self.fallback_provider.suggest_icon(item_name, category_name)
-        )
+        async def primary_func():
+            return await self.primary_provider.suggest_icon(item_name, category_name)
+        
+        async def fallback_func():
+            return await self.fallback_provider.suggest_icon(item_name, category_name)
+        
+        return await self._try_with_fallback("icon suggestion", primary_func, fallback_func)
 
     async def standardize_and_translate_item_name(self, item_name: str) -> Dict[str, Any]:
         """
@@ -228,11 +235,13 @@ class FallbackAIService:
         Returns:
             Dict[str, Any]: A dictionary containing the standardized name and translations.
         """
-        return await self._try_with_fallback(
-            "standardization and translation",
-            lambda: self.primary_provider.standardize_and_translate_item_name(item_name),
-            lambda: self.fallback_provider.standardize_and_translate_item_name(item_name)
-        )
+        async def primary_func():
+            return await self.primary_provider.standardize_and_translate_item_name(item_name)
+        
+        async def fallback_func():
+            return await self.fallback_provider.standardize_and_translate_item_name(item_name)
+        
+        return await self._try_with_fallback("standardization and translation", primary_func, fallback_func)
 
     def get_provider_info(self) -> dict:
         """

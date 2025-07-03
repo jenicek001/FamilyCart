@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.api.v1.endpoints import auth as auth_v1_router
 from app.api.v1.endpoints import users as users_v1_router
@@ -17,7 +18,29 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application lifespan handler for startup and shutdown events.
+    Replaces the deprecated @app.on_event decorators.
+    """
+    # Startup
+    await cache_service.setup()
+    
+    # Initialize WebSocket service with connection manager
+    from app.services.websocket_service import websocket_service
+    from app.api.v1.ws.notifications import connection_manager
+    websocket_service.set_connection_manager(connection_manager)
+    
+    logger.info("Application startup complete")
+    
+    yield
+    
+    # Shutdown
+    await cache_service.close()
+    logger.info("Application shutdown complete")
+
+app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan)
 
 # Add custom middleware for better error logging
 app.add_middleware(LoggingMiddleware)
@@ -41,14 +64,6 @@ app.include_router(ai_v1_router.router, prefix=settings.API_V1_STR, tags=["ai"])
 
 # Include WebSocket router for v1
 app.include_router(ws_v1_router.router, prefix=settings.API_V1_STR + "/ws", tags=["websockets"])
-
-@app.on_event("startup")
-async def startup_event():
-    await cache_service.setup()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await cache_service.close()
 
 # Root endpoint
 @app.get("/")

@@ -29,3 +29,8 @@ class ShoppingListRead(ShoppingListBase):
 
     class Config:
         from_attributes = True
+        # Serialize UUIDs as strings to avoid JSON serialization issues
+        json_encoders = {
+            uuid.UUID: str,
+            datetime: lambda v: v.isoformat() if v else None
+        }

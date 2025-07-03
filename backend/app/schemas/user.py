@@ -14,6 +14,10 @@ class UserRead(schemas.BaseUser[UUID]):
 
     class Config:
         from_attributes = True # Replaces orm_mode = True in Pydantic v2
+        # Serialize UUIDs as strings to avoid JSON serialization issues
+        json_encoders = {
+            UUID: str
+        }
 
 
 class UserCreate(schemas.BaseUserCreate):
