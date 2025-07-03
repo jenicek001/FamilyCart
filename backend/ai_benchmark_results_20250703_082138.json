@@ -1,0 +1,1111 @@
+{
+  "metadata": {
+    "timestamp": "2025-07-03T08:21:38.013430",
+    "runs": 1,
+    "timeout": 90,
+    "test_items": [
+      "organic apples",
+      "whole milk",
+      "chicken breast",
+      "sourdough bread",
+      "frozen pizza",
+      "olive oil",
+      "orange juice",
+      "shampoo",
+      "paper towels",
+      "greek yogurt",
+      "salmon fillet",
+      "avocados",
+      "ice cream",
+      "pasta sauce",
+      "toilet paper"
+    ],
+    "gemini_model": "gemini-1.5-flash",
+    "ollama_model": "gemma3:4b",
+    "ollama_server": "http://localhost:11434"
+  },
+  "gemini_results": [
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "organic apples",
+      "response_time": 0.5287308692932129,
+      "success": true,
+      "response": "Produce",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "organic apples",
+      "response_time": 0.7425525188446045,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "organic apples",
+      "response_time": 0.7593128681182861,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Apples\",\n  \"translations\": {\n    \"es\": \"Manzanas\",\n    \"fr\": \"Pommes\",\n    \"de\": \"\\u00c4pfel\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "organic apples",
+      "response_time": 0.405001163482666,
+      "success": true,
+      "response": "Organic apples are apples grown without synthetic pesticides, herbicides, or fertilizers.\n",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "whole milk",
+      "response_time": 0.41854262351989746,
+      "success": true,
+      "response": "Dairy",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "whole milk",
+      "response_time": 0.11352896690368652,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "whole milk",
+      "response_time": 0.05523204803466797,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"whole milk\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "whole milk",
+      "response_time": 0.04450106620788574,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "chicken breast",
+      "response_time": 0.040297746658325195,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "chicken breast",
+      "response_time": 0.12264084815979004,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "chicken breast",
+      "response_time": 0.044312477111816406,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"chicken breast\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "chicken breast",
+      "response_time": 0.05290818214416504,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "sourdough bread",
+      "response_time": 0.04552912712097168,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "sourdough bread",
+      "response_time": 0.1232144832611084,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "sourdough bread",
+      "response_time": 0.06821560859680176,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"sourdough bread\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "sourdough bread",
+      "response_time": 0.03714466094970703,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "frozen pizza",
+      "response_time": 0.04434823989868164,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "frozen pizza",
+      "response_time": 0.46297764778137207,
+      "success": true,
+      "response": "local_pizza",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "frozen pizza",
+      "response_time": 0.04259753227233887,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"frozen pizza\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "frozen pizza",
+      "response_time": 0.47989654541015625,
+      "success": true,
+      "response": "Frozen pizza is a pre-made pizza, sold frozen, that can be baked at home for a quick and convenient meal.\n",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "olive oil",
+      "response_time": 0.03881216049194336,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "olive oil",
+      "response_time": 0.6387326717376709,
+      "success": true,
+      "response": "kitchen",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "olive oil",
+      "response_time": 0.824432373046875,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Olive Oil\",\n  \"translations\": {\n    \"es\": \"Aceite de oliva\",\n    \"fr\": \"Huile d'olive\",\n    \"de\": \"Oliven\\u00f6l\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "olive oil",
+      "response_time": 0.037595510482788086,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "orange juice",
+      "response_time": 0.44254183769226074,
+      "success": true,
+      "response": "Beverages",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "orange juice",
+      "response_time": 0.7762563228607178,
+      "success": true,
+      "response": "local_cafe",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "orange juice",
+      "response_time": 0.7216768264770508,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Orange Juice\",\n  \"translations\": {\n    \"es\": \"Zumo de naranja\",\n    \"fr\": \"Jus d'orange\",\n    \"de\": \"Orangensaft\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "orange juice",
+      "response_time": 0.043013811111450195,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "shampoo",
+      "response_time": 0.03891253471374512,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "shampoo",
+      "response_time": 0.11469769477844238,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "shampoo",
+      "response_time": 0.05794167518615723,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"shampoo\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "shampoo",
+      "response_time": 0.05435514450073242,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "paper towels",
+      "response_time": 0.04865574836730957,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "paper towels",
+      "response_time": 0.11059308052062988,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "paper towels",
+      "response_time": 0.03756141662597656,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"paper towels\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "paper towels",
+      "response_time": 0.042726755142211914,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "greek yogurt",
+      "response_time": 0.039321184158325195,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "greek yogurt",
+      "response_time": 0.10849618911743164,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "greek yogurt",
+      "response_time": 0.05585169792175293,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"greek yogurt\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "greek yogurt",
+      "response_time": 0.04456353187561035,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "salmon fillet",
+      "response_time": 0.046944618225097656,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "salmon fillet",
+      "response_time": 0.11421036720275879,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "salmon fillet",
+      "response_time": 0.040468692779541016,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"salmon fillet\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "salmon fillet",
+      "response_time": 0.038413286209106445,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "avocados",
+      "response_time": 0.04680800437927246,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "avocados",
+      "response_time": 0.11052680015563965,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "avocados",
+      "response_time": 0.04727888107299805,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"avocados\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "avocados",
+      "response_time": 0.03917741775512695,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "ice cream",
+      "response_time": 0.04031181335449219,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "ice cream",
+      "response_time": 0.11192464828491211,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "ice cream",
+      "response_time": 0.04086613655090332,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"ice cream\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "ice cream",
+      "response_time": 0.039917707443237305,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "pasta sauce",
+      "response_time": 0.0461277961730957,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "pasta sauce",
+      "response_time": 0.11974573135375977,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "pasta sauce",
+      "response_time": 0.034516334533691406,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"pasta sauce\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "pasta sauce",
+      "response_time": 0.03611946105957031,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "toilet paper",
+      "response_time": 0.035675764083862305,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "toilet paper",
+      "response_time": 0.10903143882751465,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "toilet paper",
+      "response_time": 0.03767275810241699,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"toilet paper\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "toilet paper",
+      "response_time": 0.039684295654296875,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    }
+  ],
+  "ollama_results": [
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "organic apples",
+      "response_time": 1.851917028427124,
+      "success": true,
+      "response": "Produce",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "organic apples",
+      "response_time": 4.291788339614868,
+      "success": true,
+      "response": "eco",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "organic apples",
+      "response_time": 6.596973657608032,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Apples\",\n  \"translations\": {\n    \"es\": \"Manzanas\",\n    \"fr\": \"Pommes\",\n    \"de\": \"\\u00c4pfel\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "organic apples",
+      "response_time": 1.4841670989990234,
+      "success": true,
+      "response": "Organic apples are crisp, flavorful fruits grown without synthetic pesticides or fertilizers, offering a healthier and more sustainable snacking option.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "whole milk",
+      "response_time": 2.1001131534576416,
+      "success": true,
+      "response": "Dairy",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "whole milk",
+      "response_time": 4.497767686843872,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "whole milk",
+      "response_time": 6.413986921310425,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Milk\",\n  \"translations\": {\n    \"es\": \"Leche\",\n    \"fr\": \"Lait\",\n    \"de\": \"Milch\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "whole milk",
+      "response_time": 1.8044941425323486,
+      "success": true,
+      "response": "Whole milk is a nutrient-rich dairy product, typically around 3.25% fat, known for its creamy texture and rich flavor.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "chicken breast",
+      "response_time": 2.0865912437438965,
+      "success": true,
+      "response": "Meat",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "chicken breast",
+      "response_time": 4.291496992111206,
+      "success": true,
+      "response": "kitchen",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "chicken breast",
+      "response_time": 6.989300727844238,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Chicken Breast\",\n  \"translations\": {\n    \"es\": \"Pechuga de pollo\",\n    \"fr\": \"Poitrine de poulet\",\n    \"de\": \"H\\u00e4hnchenbrust\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "chicken breast",
+      "response_time": 1.8305046558380127,
+      "success": true,
+      "response": "A chicken breast is a versatile, lean cut of poultry, typically sold boneless and skinless, and frequently used in a wide variety of recipes.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "sourdough bread",
+      "response_time": 2.2070157527923584,
+      "success": true,
+      "response": "Bakery",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "sourdough bread",
+      "response_time": 4.539010286331177,
+      "success": true,
+      "response": "bakery_dining",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "sourdough bread",
+      "response_time": 6.3818700313568115,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Bread\",\n  \"translations\": {\n    \"es\": \"Pan\",\n    \"fr\": \"Pain\",\n    \"de\": \"Brot\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "sourdough bread",
+      "response_time": 1.6465048789978027,
+      "success": true,
+      "response": "Sourdough bread is a tangy, chewy loaf made with a naturally fermented starter, resulting in a complex flavor and distinctive crust.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "frozen pizza",
+      "response_time": 2.169656276702881,
+      "success": true,
+      "response": "Frozenfoods",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "frozen pizza",
+      "response_time": 4.464018821716309,
+      "success": true,
+      "response": "local_pizza",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "frozen pizza",
+      "response_time": 6.2245800495147705,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Pizza\",\n  \"translations\": {\n    \"es\": \"Pizza\",\n    \"fr\": \"Pizza\",\n    \"de\": \"Pizza\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "frozen pizza",
+      "response_time": 1.5621531009674072,
+      "success": true,
+      "response": "A frozen pizza is a convenient, pre-baked pizza that requires only thawing and baking to enjoy a satisfying, classic meal.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "olive oil",
+      "response_time": 2.1629223823547363,
+      "success": true,
+      "response": "Pantry",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "olive oil",
+      "response_time": 4.6024229526519775,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "olive oil",
+      "response_time": 6.789970874786377,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Olive Oil\",\n  \"translations\": {\n    \"es\": \"Aceite de oliva\",\n    \"fr\": \"Huile d'olive\",\n    \"de\": \"Oliven\\u00f6l\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "olive oil",
+      "response_time": 1.552793264389038,
+      "success": true,
+      "response": "Olive oil, a rich, fruity liquid extracted from olives, is a staple cooking ingredient prized for its flavor and healthy fats.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "orange juice",
+      "response_time": 2.1527814865112305,
+      "success": true,
+      "response": "Beverage",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "orange juice",
+      "response_time": 4.687464952468872,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "orange juice",
+      "response_time": 7.048206567764282,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Orange Juice\",\n  \"translations\": {\n    \"es\": \"Zumo de naranja\",\n    \"fr\": \"Jus d'orange\",\n    \"de\": \"Orangensaft\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "orange juice",
+      "response_time": 1.6027445793151855,
+      "success": true,
+      "response": "Orange juice is a refreshing, citrusy beverage made from the juice of oranges, typically enjoyed cold and often served with pulp.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "shampoo",
+      "response_time": 2.1939704418182373,
+      "success": true,
+      "response": "Toiletries",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "shampoo",
+      "response_time": 4.3906614780426025,
+      "success": true,
+      "response": "brush",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "shampoo",
+      "response_time": 6.716843128204346,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Shampoo\",\n  \"translations\": {\n    \"es\": \"Champ\\u00fa\",\n    \"fr\": \"Shampoing\",\n    \"de\": \"Shampoo\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "shampoo",
+      "response_time": 1.507524013519287,
+      "success": true,
+      "response": "Shampoo is a liquid cleanser formulated to wash hair, removing dirt, oil, and buildup for cleanliness and shine.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "paper towels",
+      "response_time": 2.1424365043640137,
+      "success": true,
+      "response": "Paper",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "paper towels",
+      "response_time": 4.596479177474976,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "paper towels",
+      "response_time": 6.848256826400757,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Paper towels\",\n  \"translations\": {\n    \"es\": \"Papel de cocina\",\n    \"fr\": \"Essuie-tout\",\n    \"de\": \"K\\u00fcchenpapier\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "paper towels",
+      "response_time": 1.4571568965911865,
+      "success": true,
+      "response": "Paper towels are absorbent, disposable squares of paper used for cleaning spills, drying hands, and various household tasks.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "greek yogurt",
+      "response_time": 2.1475789546966553,
+      "success": true,
+      "response": "Dairy",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "greek yogurt",
+      "response_time": 4.607451438903809,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "greek yogurt",
+      "response_time": 6.743487596511841,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Yogurt\",\n  \"translations\": {\n    \"es\": \"Yogur\",\n    \"fr\": \"Yaourt\",\n    \"de\": \"Joghurt\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "greek yogurt",
+      "response_time": 1.8472039699554443,
+      "success": true,
+      "response": "Greek yogurt is a thick, creamy, and protein-packed dairy product made by straining regular yogurt, resulting in a tangy flavor and a denser texture.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "salmon fillet",
+      "response_time": 2.1625571250915527,
+      "success": true,
+      "response": "Seafood",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "salmon fillet",
+      "response_time": 4.61807918548584,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "salmon fillet",
+      "response_time": 7.2592573165893555,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Salmon fillet\",\n  \"translations\": {\n    \"es\": \"Filete de salm\\u00f3n\",\n    \"fr\": \"Filet de saumon\",\n    \"de\": \"Lachsfilet\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "salmon fillet",
+      "response_time": 2.2772107124328613,
+      "success": true,
+      "response": "A salmon fillet is a delicious, pale pink to orange-hued cut of salmon, typically skinless and boneless, perfect for grilling, baking, or pan-searing.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "avocados",
+      "response_time": 2.13961124420166,
+      "success": true,
+      "response": "Produce",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "avocados",
+      "response_time": 4.6149773597717285,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "avocados",
+      "response_time": 6.905142545700073,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Avocados\",\n  \"translations\": {\n    \"es\": \"Aguacates\",\n    \"fr\": \"Avocats\",\n    \"de\": \"Avocados\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "avocados",
+      "response_time": 2.166562557220459,
+      "success": true,
+      "response": "Avocados are creamy, nutrient-rich fruits with a distinctive green skin and a buttery, flavorful flesh, often enjoyed as a healthy snack or ingredient in various dishes.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "ice cream",
+      "response_time": 2.2243518829345703,
+      "success": true,
+      "response": "Dessert",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "ice cream",
+      "response_time": 4.5042030811309814,
+      "success": true,
+      "response": "icecream",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "ice cream",
+      "response_time": 6.68060564994812,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Ice Cream\",\n  \"translations\": {\n    \"es\": \"Helado\",\n    \"fr\": \"Glace\",\n    \"de\": \"Eis\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "ice cream",
+      "response_time": 1.8032057285308838,
+      "success": true,
+      "response": "Ice cream is a frozen dessert, typically sweet and creamy, enjoyed in a variety of flavors and served in cones, cups, or bars.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "pasta sauce",
+      "response_time": 2.230175733566284,
+      "success": true,
+      "response": "Condiments",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "pasta sauce",
+      "response_time": 4.654538869857788,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "pasta sauce",
+      "response_time": 6.736161470413208,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Pasta Sauce\",\n  \"translations\": {\n    \"es\": \"Salsa de pasta\",\n    \"fr\": \"Sauce tomate\",\n    \"de\": \"Pasta Sauce\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "pasta sauce",
+      "response_time": 1.9304027557373047,
+      "success": true,
+      "response": "Pasta sauce is a concentrated tomato-based sauce, typically seasoned with herbs and spices, designed to be simmered with pasta for a flavorful and satisfying meal.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "toilet paper",
+      "response_time": 2.1632699966430664,
+      "success": true,
+      "response": "Hygiene",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "toilet paper",
+      "response_time": 4.682147741317749,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "toilet paper",
+      "response_time": 6.907198667526245,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Toilet Paper\",\n  \"translations\": {\n    \"es\": \"Papel higi\\u00e9nico\",\n    \"fr\": \"Essuie-tout\",\n    \"de\": \"Toilettenpapier\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "toilet paper",
+      "response_time": 1.235788106918335,
+      "success": true,
+      "response": "Toilet paper is a soft, absorbent paper product used for personal hygiene after using the toilet.",
+      "error": ""
+    }
+  ]
+}

@@ -1,0 +1,1111 @@
+{
+  "metadata": {
+    "timestamp": "2025-07-03T08:12:59.953520",
+    "runs": 1,
+    "timeout": 60,
+    "test_items": [
+      "organic apples",
+      "whole milk",
+      "chicken breast",
+      "sourdough bread",
+      "frozen pizza",
+      "olive oil",
+      "orange juice",
+      "shampoo",
+      "paper towels",
+      "greek yogurt",
+      "salmon fillet",
+      "avocados",
+      "ice cream",
+      "pasta sauce",
+      "toilet paper"
+    ],
+    "gemini_model": "gemini-1.5-flash",
+    "ollama_model": "gemma3:4b",
+    "ollama_server": "http://localhost:11434"
+  },
+  "gemini_results": [
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "organic apples",
+      "response_time": 0.561255931854248,
+      "success": true,
+      "response": "Produce",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "organic apples",
+      "response_time": 0.8688564300537109,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "organic apples",
+      "response_time": 0.7306389808654785,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Apples\",\n  \"translations\": {\n    \"es\": \"Manzanas\",\n    \"fr\": \"Pommes\",\n    \"de\": \"\\u00c4pfel\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "organic apples",
+      "response_time": 0.40287137031555176,
+      "success": true,
+      "response": "Organic apples are apples grown without synthetic pesticides, herbicides, or fertilizers.\n",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "whole milk",
+      "response_time": 0.3632934093475342,
+      "success": true,
+      "response": "Dairy",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "whole milk",
+      "response_time": 0.7452375888824463,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "whole milk",
+      "response_time": 0.6900448799133301,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Milk\",\n  \"translations\": {\n    \"es\": \"Leche\",\n    \"fr\": \"Lait\",\n    \"de\": \"Milch\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "whole milk",
+      "response_time": 0.4851961135864258,
+      "success": true,
+      "response": "Whole milk is a dairy product containing all its natural fat, providing a creamy texture and rich flavor.\n",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "chicken breast",
+      "response_time": 0.3084537982940674,
+      "success": true,
+      "response": "Meat",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "chicken breast",
+      "response_time": 0.7022478580474854,
+      "success": true,
+      "response": "local_grocery_store",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "chicken breast",
+      "response_time": 0.842104434967041,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"Chicken Breast\",\n  \"translations\": {\n    \"es\": \"Pechuga de pollo\",\n    \"fr\": \"Poitrine de poulet\",\n    \"de\": \"H\\u00e4hnchenbrust\"\n  }\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "chicken breast",
+      "response_time": 0.5137746334075928,
+      "success": true,
+      "response": "Chicken breast is a lean, boneless cut of chicken meat popular for its versatility in cooking.\n",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "sourdough bread",
+      "response_time": 0.3495628833770752,
+      "success": true,
+      "response": "Bakery",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "sourdough bread",
+      "response_time": 0.16032791137695312,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "sourdough bread",
+      "response_time": 0.042693138122558594,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"sourdough bread\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "sourdough bread",
+      "response_time": 0.06325602531433105,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "frozen pizza",
+      "response_time": 0.04395890235900879,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "frozen pizza",
+      "response_time": 0.12207293510437012,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "frozen pizza",
+      "response_time": 0.05310320854187012,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"frozen pizza\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "frozen pizza",
+      "response_time": 0.04924368858337402,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "olive oil",
+      "response_time": 0.043474674224853516,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "olive oil",
+      "response_time": 0.1286909580230713,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "olive oil",
+      "response_time": 0.04470372200012207,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"olive oil\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "olive oil",
+      "response_time": 0.05260324478149414,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "orange juice",
+      "response_time": 0.0462343692779541,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "orange juice",
+      "response_time": 0.11829710006713867,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "orange juice",
+      "response_time": 0.0384368896484375,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"orange juice\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "orange juice",
+      "response_time": 0.04419898986816406,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "shampoo",
+      "response_time": 0.04664778709411621,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "shampoo",
+      "response_time": 0.1254889965057373,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "shampoo",
+      "response_time": 0.04911684989929199,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"shampoo\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "shampoo",
+      "response_time": 0.045732736587524414,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "paper towels",
+      "response_time": 0.0480649471282959,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "paper towels",
+      "response_time": 0.12652349472045898,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "paper towels",
+      "response_time": 0.05260634422302246,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"paper towels\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "paper towels",
+      "response_time": 0.04752230644226074,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "greek yogurt",
+      "response_time": 0.05386066436767578,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "greek yogurt",
+      "response_time": 0.12769651412963867,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "greek yogurt",
+      "response_time": 0.05362725257873535,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"greek yogurt\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "greek yogurt",
+      "response_time": 0.03969287872314453,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "salmon fillet",
+      "response_time": 0.049250125885009766,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "salmon fillet",
+      "response_time": 0.11392831802368164,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "salmon fillet",
+      "response_time": 0.051409006118774414,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"salmon fillet\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "salmon fillet",
+      "response_time": 0.0467219352722168,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "avocados",
+      "response_time": 0.05103659629821777,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "avocados",
+      "response_time": 0.11749601364135742,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "avocados",
+      "response_time": 0.05436587333679199,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"avocados\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "avocados",
+      "response_time": 0.042349815368652344,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "ice cream",
+      "response_time": 0.0477452278137207,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "ice cream",
+      "response_time": 0.13014912605285645,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "ice cream",
+      "response_time": 0.042746782302856445,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"ice cream\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "ice cream",
+      "response_time": 0.03859686851501465,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "pasta sauce",
+      "response_time": 0.04152512550354004,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "pasta sauce",
+      "response_time": 0.11919069290161133,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "pasta sauce",
+      "response_time": 0.03799724578857422,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"pasta sauce\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "pasta sauce",
+      "response_time": 0.04226207733154297,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "categorization",
+      "item_name": "toilet paper",
+      "response_time": 0.04430961608886719,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "icon_suggestion",
+      "item_name": "toilet paper",
+      "response_time": 0.11921501159667969,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "standardization",
+      "item_name": "toilet paper",
+      "response_time": 0.04825925827026367,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"toilet paper\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Gemini",
+      "operation": "text_generation",
+      "item_name": "toilet paper",
+      "response_time": 0.04851269721984863,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    }
+  ],
+  "ollama_results": [
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "organic apples",
+      "response_time": 0.04676055908203125,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "organic apples",
+      "response_time": 0.11756587028503418,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "organic apples",
+      "response_time": 0.045925140380859375,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"organic apples\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "organic apples",
+      "response_time": 0.05020403861999512,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "whole milk",
+      "response_time": 0.03868913650512695,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "whole milk",
+      "response_time": 0.11804604530334473,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "whole milk",
+      "response_time": 0.05274605751037598,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"whole milk\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "whole milk",
+      "response_time": 0.04656791687011719,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "chicken breast",
+      "response_time": 0.05636882781982422,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "chicken breast",
+      "response_time": 0.10878443717956543,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "chicken breast",
+      "response_time": 0.037422895431518555,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"chicken breast\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "chicken breast",
+      "response_time": 0.047383785247802734,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "sourdough bread",
+      "response_time": 0.04148411750793457,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "sourdough bread",
+      "response_time": 0.1262047290802002,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "sourdough bread",
+      "response_time": 0.053154706954956055,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"sourdough bread\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "sourdough bread",
+      "response_time": 0.0478060245513916,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "frozen pizza",
+      "response_time": 0.04121088981628418,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "frozen pizza",
+      "response_time": 0.1345374584197998,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "frozen pizza",
+      "response_time": 0.04008126258850098,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"frozen pizza\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "frozen pizza",
+      "response_time": 0.03755497932434082,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "olive oil",
+      "response_time": 0.03625202178955078,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "olive oil",
+      "response_time": 0.08964395523071289,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "olive oil",
+      "response_time": 0.0504603385925293,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"olive oil\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "olive oil",
+      "response_time": 0.0351409912109375,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "orange juice",
+      "response_time": 0.04133868217468262,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "orange juice",
+      "response_time": 0.07382869720458984,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "orange juice",
+      "response_time": 0.034900665283203125,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"orange juice\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "orange juice",
+      "response_time": 0.04634261131286621,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "shampoo",
+      "response_time": 0.03974747657775879,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "shampoo",
+      "response_time": 0.07862305641174316,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "shampoo",
+      "response_time": 0.05338740348815918,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"shampoo\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "shampoo",
+      "response_time": 0.040070533752441406,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "paper towels",
+      "response_time": 0.03916144371032715,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "paper towels",
+      "response_time": 0.09635066986083984,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "paper towels",
+      "response_time": 0.03653764724731445,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"paper towels\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "paper towels",
+      "response_time": 0.048751115798950195,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "greek yogurt",
+      "response_time": 0.03587603569030762,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "greek yogurt",
+      "response_time": 0.08608436584472656,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "greek yogurt",
+      "response_time": 0.03504133224487305,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"greek yogurt\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "greek yogurt",
+      "response_time": 0.038782358169555664,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "salmon fillet",
+      "response_time": 0.03789162635803223,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "salmon fillet",
+      "response_time": 0.07277226448059082,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "salmon fillet",
+      "response_time": 0.041243553161621094,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"salmon fillet\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "salmon fillet",
+      "response_time": 0.038544416427612305,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "avocados",
+      "response_time": 0.04041910171508789,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "avocados",
+      "response_time": 0.07086014747619629,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "avocados",
+      "response_time": 0.0334172248840332,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"avocados\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "avocados",
+      "response_time": 0.033141374588012695,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "ice cream",
+      "response_time": 0.04323387145996094,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "ice cream",
+      "response_time": 0.07967400550842285,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "ice cream",
+      "response_time": 0.034398794174194336,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"ice cream\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "ice cream",
+      "response_time": 0.0361323356628418,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "pasta sauce",
+      "response_time": 0.04083991050720215,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "pasta sauce",
+      "response_time": 0.07227516174316406,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "pasta sauce",
+      "response_time": 0.03889060020446777,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"pasta sauce\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "pasta sauce",
+      "response_time": 0.049460411071777344,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "categorization",
+      "item_name": "toilet paper",
+      "response_time": 0.04126882553100586,
+      "success": true,
+      "response": "Uncategorized",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "icon_suggestion",
+      "item_name": "toilet paper",
+      "response_time": 0.09174704551696777,
+      "success": true,
+      "response": "shopping_cart",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "standardization",
+      "item_name": "toilet paper",
+      "response_time": 0.03198814392089844,
+      "success": true,
+      "response": "{\n  \"standardized_name\": \"toilet paper\",\n  \"translations\": {}\n}",
+      "error": ""
+    },
+    {
+      "provider": "Ollama",
+      "operation": "text_generation",
+      "item_name": "toilet paper",
+      "response_time": 0.03698372840881348,
+      "success": true,
+      "response": "Error: Could not generate text.",
+      "error": ""
+    }
+  ]
+}
