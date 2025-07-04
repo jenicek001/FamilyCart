@@ -118,13 +118,20 @@ async def read_item(
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner), selectinload(Item.last_modified_by))
+        .options(
+            selectinload(Item.shopping_list).selectinload(ShoppingList.shared_with),
+            selectinload(Item.category), 
+            selectinload(Item.owner), 
+            selectinload(Item.last_modified_by)
+        )
     )
     item = result.scalars().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     
-    if item.shopping_list.owner_id != current_user.id:
+    # Check if user has permission to view items in this shopping list
+    # Allow both owner and shared users to view items
+    if item.shopping_list.owner_id != current_user.id and current_user not in item.shopping_list.shared_with:
          raise HTTPException(status_code=403, detail="Not authorized to view this item")
 
     return item
@@ -138,14 +145,19 @@ async def read_items_from_list(
     """
     Get all items from a specific shopping list.
     """
-    # Check if the shopping list exists and belongs to the user
+    # Check if the shopping list exists and if user has access to it
     result = await session.execute(
-        select(ShoppingList).where(ShoppingList.id == list_id)
+        select(ShoppingList)
+        .where(ShoppingList.id == list_id)
+        .options(selectinload(ShoppingList.shared_with))
     )
     shopping_list = result.scalars().first()
     if not shopping_list:
         raise HTTPException(status_code=404, detail="Shopping list not found")
-    if shopping_list.owner_id != current_user.id:
+    
+    # Check if user has permission to view items in this shopping list
+    # Allow both owner and shared users to view items
+    if shopping_list.owner_id != current_user.id and current_user not in shopping_list.shared_with:
         raise HTTPException(status_code=403, detail="Not authorized to view items in this list")
     # Eagerly load category for all items
     result = await session.execute(
@@ -167,17 +179,24 @@ async def update_item(
     """
     Update an item.
     """
-    # Eagerly load shopping_list relationship
+    # Eagerly load shopping_list relationship including shared_with
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.category), selectinload(Item.owner), selectinload(Item.last_modified_by))
+        .options(
+            selectinload(Item.shopping_list).selectinload(ShoppingList.shared_with),
+            selectinload(Item.category), 
+            selectinload(Item.owner), 
+            selectinload(Item.last_modified_by)
+        )
     )
     db_item = result.scalars().first()
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
     
-    if db_item.shopping_list.owner_id != current_user.id:
+    # Check if user has permission to update items in this shopping list
+    # Allow both owner and shared users to update items
+    if db_item.shopping_list.owner_id != current_user.id and current_user not in db_item.shopping_list.shared_with:
         raise HTTPException(status_code=403, detail="Not authorized to update this item")
 
     # Store original values for audit logging
@@ -254,19 +273,23 @@ async def delete_item(
     """
     Delete an item.
     """
-    # Eagerly load shopping_list relationship
+    # Eagerly load shopping_list relationship including shared_with
     result = await session.execute(
         select(Item)
         .where(Item.id == item_id)
-        .options(selectinload(Item.shopping_list), selectinload(Item.owner), selectinload(Item.last_modified_by))
+        .options(
+            selectinload(Item.shopping_list).selectinload(ShoppingList.shared_with),
+            selectinload(Item.owner), 
+            selectinload(Item.last_modified_by)
+        )
     )
     item = result.scalars().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Extract owner_id early to avoid lazy loading
-    owner_id = item.shopping_list.owner_id if item.shopping_list else None
-    if owner_id != current_user.id:
+    # Check if user has permission to delete items in this shopping list
+    # Allow both owner and shared users to delete items
+    if item.shopping_list.owner_id != current_user.id and current_user not in item.shopping_list.shared_with:
         raise HTTPException(status_code=403, detail="Not authorized to delete this item")
 
     # Store list_id before deletion for WebSocket notification
