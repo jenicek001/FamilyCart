@@ -15,11 +15,37 @@ from app.schemas.item import ItemCreate, ItemRead
 from app.schemas.user import UserRead
 from app.schemas.share import ShareRequest
 from app.api.deps import get_session
+from app.services.notification_service import send_list_invitation_email
 from app.services.ai_service import ai_service
 from app.services.websocket_service import websocket_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+async def get_shopping_list_by_id(
+    list_id: int,
+    session: AsyncSession,
+    current_user: User,
+):
+    """
+    Helper function to retrieve a ShoppingList by ID,
+    ensuring current_user is owner or shared member.
+    """
+    result = await session.execute(
+        select(ShoppingList)
+        .where(ShoppingList.id == list_id)
+        .options(
+            selectinload(ShoppingList.shared_with),
+            selectinload(ShoppingList.items),
+            selectinload(ShoppingList.owner)
+        )
+    )
+    shopping_list = result.scalars().first()
+    if not shopping_list:
+        raise HTTPException(status_code=404, detail="Shopping list not found")
+    if shopping_list.owner_id != current_user.id and current_user not in shopping_list.shared_with:
+        raise HTTPException(status_code=403, detail="Not authorized to access this list")
+    return shopping_list
 
 async def get_or_create_category(name: str, session: AsyncSession) -> Category:
     """Find an existing category or create a new one."""
@@ -155,7 +181,6 @@ async def read_shopping_lists(
 
 @router.get("/{list_id}", response_model=ShoppingListRead)
 async def read_shopping_list(
-    *,
     list_id: int,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
@@ -163,13 +188,12 @@ async def read_shopping_list(
     """
     Get a specific shopping list by ID.
     """
-    # Check if the list is owned by the user
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    # Eagerly load related data for the authorized shopping_list
     result = await session.execute(
         select(ShoppingList)
-        .where(
-            ShoppingList.id == list_id,
-            ShoppingList.owner_id == current_user.id
-        )
+        .where(ShoppingList.id == shopping_list.id)
         .options(
             selectinload(ShoppingList.items).selectinload(Item.category),
             selectinload(ShoppingList.items).selectinload(Item.owner),
@@ -178,27 +202,6 @@ async def read_shopping_list(
         )
     )
     shopping_list = result.scalars().first()
-    
-    # If not owned by user, check if it's shared with the user
-    if not shopping_list:
-        result = await session.execute(
-            select(ShoppingList)
-            .where(ShoppingList.id == list_id)
-            .join(ShoppingList.shared_with.and_(User.id == current_user.id))
-            .options(
-                selectinload(ShoppingList.items).selectinload(Item.category),
-                selectinload(ShoppingList.items).selectinload(Item.owner),
-                selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
-                selectinload(ShoppingList.shared_with)
-            )
-        )
-        shopping_list = result.scalars().first()
-    
-    if not shopping_list:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Shopping list not found or you don't have access"
-        )
     
     # Sort items by category before returning
     if shopping_list.items:
@@ -212,7 +215,6 @@ async def read_shopping_list(
 
 @router.put("/{list_id}", response_model=ShoppingListRead)
 async def update_shopping_list(
-    *,
     list_id: int,
     list_in: ShoppingListUpdate,
     session: AsyncSession = Depends(get_session),
@@ -221,20 +223,8 @@ async def update_shopping_list(
     """
     Update a shopping list details.
     """
-    # First, check if the list exists and belongs to the current user
-    result = await session.execute(
-        select(ShoppingList).where(
-            ShoppingList.id == list_id,
-            ShoppingList.owner_id == current_user.id
-        )
-    )
-    shopping_list = result.scalars().first()
-    
-    if not shopping_list:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Shopping list not found or you don't have access"
-        )
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     
     # Update list attributes
     update_data = list_in.dict(exclude_unset=True)
@@ -264,20 +254,18 @@ async def update_shopping_list(
     try:
         list_data = list_read.model_dump(mode='json')
         await websocket_service.notify_list_updated(
-            list_id=list_id,
+            list_id=shopping_list.id,
             list_data=list_data,
             user_id=str(current_user.id)
         )
-    except Exception as e:
-        logger.error(f"Failed to send WebSocket notification for list update: {e}")
-        logger.exception("Full exception details:")
+    except Exception:
+        logger.exception("Failed to send WebSocket list_updated notification")
     
     return list_read
 
 
 @router.delete("/{list_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_shopping_list(
-    *,
     list_id: int,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
@@ -285,40 +273,23 @@ async def delete_shopping_list(
     """
     Delete a shopping list.
     """
-    # First, check if the list exists and belongs to the current user
-    result = await session.execute(
-        select(ShoppingList).where(
-            ShoppingList.id == list_id,
-            ShoppingList.owner_id == current_user.id
-        )
-    )
-    shopping_list = result.scalars().first()
-    
-    if not shopping_list:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Shopping list not found or you don't have access"
-        )
-    
-    # Delete the shopping list
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     await session.delete(shopping_list)
     await session.commit()
-    
-    # Send real-time notification to list members about deletion
+
+    # Notify via WebSocket
     try:
         await websocket_service.notify_list_deleted(
-            list_id=list_id,
+            list_id=shopping_list.id,
             user_id=str(current_user.id)
         )
-    except Exception as e:
-        logger.error(f"Failed to send WebSocket notification for list deletion: {e}")
-    
-    return None
+    except Exception:
+        logger.exception("Failed to send WebSocket list_deleted notification")
 
 
 @router.post("/{list_id}/items", response_model=ItemRead)
 async def create_item_for_list(
-    *,
     list_id: int,
     item_in: ItemCreate,
     session: AsyncSession = Depends(get_session),
@@ -328,23 +299,9 @@ async def create_item_for_list(
     Add an item to a specific shopping list.
     Uses AI to automatically categorize items and standardize names.
     """
-    # Extract all needed scalar values from current_user at the very start
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     user_id = current_user.id
-
-    # Check if the shopping list exists and belongs to the user
-    result = await session.execute(
-        select(ShoppingList).where(
-            ShoppingList.id == list_id,
-            ShoppingList.owner_id == user_id
-        )
-    )
-    shopping_list = result.scalars().first()
-    
-    if not shopping_list:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Shopping list not found or you don't have access"
-        )
     
     # Use AI to suggest category and standardize name
     category = None
@@ -424,7 +381,7 @@ async def create_item_for_list(
         name=item_in.name,
         quantity=item_in.quantity,
         description=item_in.description,
-        shopping_list_id=list_id,
+        shopping_list_id=shopping_list.id,
         owner_id=user_id,
         last_modified_by_id=user_id,
         category_id=category.id if category else None,
@@ -457,7 +414,6 @@ async def create_item_for_list(
 
 @router.get("/{list_id}/items", response_model=List[ItemRead])
 async def read_items_from_list(
-    *,
     list_id: int,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
@@ -465,34 +421,11 @@ async def read_items_from_list(
     """
     Get all items from a specific shopping list.
     """
-    # Check if the shopping list exists and belongs to the user
-    result = await session.execute(
-        select(ShoppingList).where(
-            ShoppingList.id == list_id,
-            ShoppingList.owner_id == current_user.id
-        )
-    )
-    shopping_list = result.scalars().first()
-    
-    if not shopping_list:
-        # Check if it's shared with the user
-        result = await session.execute(
-            select(ShoppingList).where(
-                ShoppingList.id == list_id
-            ).join(
-                ShoppingList.shared_with.and_(User.id == current_user.id)
-            )
-        )
-        shopping_list = result.scalars().first()
-        
-        if not shopping_list:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Shopping list not found or you don't have access"
-            )
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     # Eagerly load category for all items
     result = await session.execute(
-        select(Item).where(Item.shopping_list_id == list_id).options(selectinload(Item.category), selectinload(Item.shopping_list), selectinload(Item.owner))
+        select(Item).where(Item.shopping_list_id == shopping_list.id).options(selectinload(Item.category), selectinload(Item.shopping_list), selectinload(Item.owner))
     )
     items = result.scalars().all()
     return items
@@ -500,7 +433,6 @@ async def read_items_from_list(
 
 @router.post("/{list_id}/share", response_model=ShoppingListRead)
 async def share_shopping_list(
-    *,
     list_id: int,
     share_data: ShareRequest,
     session: AsyncSession = Depends(get_session),
@@ -509,20 +441,12 @@ async def share_shopping_list(
     """
     Share a shopping list with another user by email.
     """
-    # First, check if the list exists and belongs to the current user
-    result = await session.execute(
-        select(ShoppingList).where(
-            ShoppingList.id == list_id,
-            ShoppingList.owner_id == current_user.id
-        )
-    )
-    shopping_list = result.scalars().first()
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     
-    if not shopping_list:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Shopping list not found or you don't have access"
-        )
+    # Only owner can share
+    if shopping_list.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only owner can share the list")
     
     # Find the user to share with
     result = await session.execute(
@@ -531,44 +455,183 @@ async def share_shopping_list(
     user_to_share_with = result.scalars().first()
     
     if not user_to_share_with:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with email {share_data.email} not found"
-        )
+        # User doesn't exist - send invitation email instead of error
+        logger.info(f"Sending invitation email to non-existent user: {share_data.email}")
+        try:
+            # Prepare list data for notifications - manually create serializable data
+            list_data = {
+                "id": shopping_list.id,
+                "name": shopping_list.name,
+                "description": shopping_list.description,
+                "owner_id": str(shopping_list.owner_id),
+                "created_at": shopping_list.created_at.isoformat(),
+                "updated_at": shopping_list.updated_at.isoformat(),
+                "members": []  # Empty for non-existent user
+            }
+            
+            await send_list_invitation_email(
+                to_email=share_data.email,
+                list_data=list_data,
+                inviter_email=current_user.email
+            )
+            logger.info(f"Invitation email sent successfully to {share_data.email}")
+        except Exception:
+            logger.exception(f"Failed to send invitation email to {share_data.email}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send invitation email. Please try again."
+            )
+        
+        # Return the shopping list without changes (user will be added when they register)
+        return await build_shopping_list_response(shopping_list, session, current_user)
     
+    # User exists - proceed with normal sharing
     # Check if already shared
     if user_to_share_with in shopping_list.shared_with:
-        return shopping_list  # Already shared, just return the list
+        return await build_shopping_list_response(shopping_list, session, current_user)  # Already shared, just return the list
     
     # Add the user to shared_with
     shopping_list.shared_with.append(user_to_share_with)
     await session.commit()
     
-    # Populate members
-    shopping_list.members = shopping_list.shared_with + [shopping_list.owner]
+    # Refresh to get updated relationships
+    await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
     
-    # Send real-time notification to list members
+    # Update list data with new member - manually create serializable data
+    list_data = {
+        "id": shopping_list.id,
+        "name": shopping_list.name,
+        "description": shopping_list.description,
+        "owner_id": str(shopping_list.owner_id),
+        "created_at": shopping_list.created_at.isoformat(),
+        "updated_at": shopping_list.updated_at.isoformat(),
+        "members": [{"email": u.email, "id": str(u.id)} for u in shopping_list.shared_with]
+    }
+    
+    # Send notifications: WebSocket and email
+    # WebSocket
     try:
-        from app.schemas.shopping_list import ShoppingListRead
-        list_data = ShoppingListRead.model_validate(shopping_list, from_attributes=True).model_dump(mode='json')
         await websocket_service.notify_list_shared(
             list_id=list_id,
             list_data=list_data,
             new_member_email=share_data.email,
             user_id=str(current_user.id)
         )
-    except Exception as e:
-        logger.error(f"Failed to send WebSocket notification for list sharing: {e}")
-        logger.exception("Full exception details:")
+    except Exception:
+        logger.exception("Failed to send WebSocket list_shared notification")
+    # Email notification for existing user
+    try:
+        await send_list_invitation_email(
+            to_email=share_data.email,
+            list_data=list_data,
+            inviter_email=current_user.email
+        )
+    except Exception:
+        logger.exception("Failed to send list invitation email")
+    
+    return await build_shopping_list_response(shopping_list, session, current_user)
+
+
+@router.delete("/{list_id}/share/{user_email}", response_model=ShoppingListRead)
+async def remove_member_from_list(
+    list_id: int,
+    user_email: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(current_user),
+):
+    """
+    Remove a member from a shared shopping list.
+    Only the owner can remove members.
+    """
+    # Get shopping list with permission check
+    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    
+    # Only owner can remove members
+    if shopping_list.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only owner can remove members")
+    
+    # Find the user to remove
+    result = await session.execute(
+        select(User).where(User.email == user_email)
+    )
+    user_to_remove = result.scalars().first()
+    
+    if not user_to_remove:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with email {user_email} not found"
+        )
+    
+    # Remove the user from shared_with if they're in the list
+    if user_to_remove in shopping_list.shared_with:
+        shopping_list.shared_with.remove(user_to_remove)
+        await session.commit()
+    
+    # Refresh to get updated relationships  
+    await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
+    
+    # Send real-time notification
+    try:
+        from app.schemas.shopping_list import ShoppingListRead
+        list_data = ShoppingListRead.model_validate(shopping_list, from_attributes=True).model_dump(mode='json')
+        await websocket_service.notify_member_removed(
+            list_id=list_id,
+            list_data=list_data,
+            removed_member_email=user_email,
+            user_id=str(current_user.id)
+        )
+    except Exception:
+        logger.exception("Failed to send WebSocket member_removed notification")
     
     return shopping_list
 
-from app.core.fastapi_users import current_user
-from app.models import User, ShoppingList, Item
-from app.schemas.shopping_list import ShoppingListRead, ShoppingListCreate, ShoppingListUpdate
-from app.schemas.user import UserRead
-from app.schemas.item import ItemRead
-from app.api.deps import get_session
+
+async def build_shopping_list_response(
+    shopping_list, 
+    session: AsyncSession, 
+    current_user: User
+) -> ShoppingListRead:
+    """
+    Helper function to safely build a ShoppingListRead response from a SQLAlchemy model.
+    Ensures all relationships are properly loaded and converted to Pydantic models.
+    """
+    # Eagerly load all relationships
+    result = await session.execute(
+        select(ShoppingList)
+        .where(ShoppingList.id == shopping_list.id)
+        .options(
+            selectinload(ShoppingList.items).selectinload(Item.category),
+            selectinload(ShoppingList.items).selectinload(Item.owner),
+            selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
+            selectinload(ShoppingList.shared_with),
+            selectinload(ShoppingList.owner)
+        )
+    )
+    fresh_shopping_list = result.scalars().first()
+    
+    # Convert items to Pydantic models
+    items = []
+    if fresh_shopping_list.items:
+        sorted_items = sort_items_by_category(fresh_shopping_list.items)
+        items = [ItemRead.model_validate(i, from_attributes=True) for i in sorted_items]
+    
+    # Convert members to Pydantic models
+    members = [UserRead.model_validate(u, from_attributes=True) for u in fresh_shopping_list.shared_with]
+    if fresh_shopping_list.owner_id != current_user.id:
+        members.append(UserRead.model_validate(fresh_shopping_list.owner, from_attributes=True))
+    
+    # Build and return Pydantic model
+    return ShoppingListRead(
+        id=fresh_shopping_list.id,
+        name=fresh_shopping_list.name,
+        description=fresh_shopping_list.description,
+        owner_id=fresh_shopping_list.owner_id,
+        created_at=fresh_shopping_list.created_at,
+        updated_at=fresh_shopping_list.updated_at,
+        items=items,
+        members=members
+    )
+
 
 def sort_items_by_category(items: List[Item]) -> List[Item]:
     """

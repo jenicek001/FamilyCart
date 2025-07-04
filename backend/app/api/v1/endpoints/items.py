@@ -15,6 +15,31 @@ from app.services.websocket_service import websocket_service
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+async def get_shopping_list_by_id(
+    list_id: int,
+    session: AsyncSession,
+    current_user: User,
+):
+    """
+    Helper function to retrieve a ShoppingList by ID,
+    ensuring current_user is owner or shared member.
+    """
+    result = await session.execute(
+        select(ShoppingList)
+        .where(ShoppingList.id == list_id)
+        .options(
+            selectinload(ShoppingList.shared_with),
+            selectinload(ShoppingList.items),
+            selectinload(ShoppingList.owner)
+        )
+    )
+    shopping_list = result.scalars().first()
+    if not shopping_list:
+        raise HTTPException(status_code=404, detail="Shopping list not found")
+    if shopping_list.owner_id != current_user.id and current_user not in shopping_list.shared_with:
+        raise HTTPException(status_code=403, detail="Not authorized to access this list")
+    return shopping_list
+
 async def get_or_create_category(name: Optional[str], session: AsyncSession) -> Optional[Category]:
     """Find an existing category or create a new one."""
     if not name:
@@ -41,14 +66,12 @@ async def create_item(
     """
     Create a new item in a shopping list.
     """
-    result = await session.execute(select(ShoppingList).where(ShoppingList.id == item_in.shopping_list_id))
-    shopping_list = result.scalars().first()
-    
-    if not shopping_list:
-        raise HTTPException(status_code=404, detail="Shopping list not found")
-    
-    if shopping_list.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to add items to this list")
+    # Validate access to the shopping list (owner or shared member)
+    shopping_list = await get_shopping_list_by_id(
+        list_id=item_in.shopping_list_id,
+        session=session,
+        current_user=current_user
+    )
 
     category_name = item_in.category_name
     if not category_name:

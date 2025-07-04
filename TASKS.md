@@ -229,17 +229,30 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
 * **Backend - User Management:**
     * [x] Enhance user lookup by email for invitations - Implemented in share endpoint
     * [x] Add user profile endpoints for member display - Already exists
-    * [ ] Implement notification system for list invitations
+    * [x] ✅ **FIXED**: Implement notification system for list invitations - Email invitations now sent to non-existent users instead of showing error
+    * [x] ✅ **FIXED**: Fix backend serialization error when sharing lists - "Unable to serialize unknown type: Item" resolved with proper Pydantic model conversion
+    * [ ] Integrate with real email service (SMTP, SendGrid, etc.) - Currently using placeholder console logging
+    * [ ] Create email templates for invitation emails - Professional HTML email templates
+    * [ ] Add email verification flow for new user registration
+    * [ ] Track invitation status (pending, accepted, expired)
 * **Frontend - Collaboration UI:**
-    * [ ] Create list sharing interface (invite by email)
-    * [ ] Display list members and their roles
+    * [x] ✅ **FIXED**: Create list sharing interface (invite by email) - Share button click handler added, ShareDialog component created
+    * [x] ✅ **FIXED**: Display list members and their roles - ShareDialog shows owner and members with proper roles  
     * [x] Show item attribution (who added/updated each item) - Already implemented
-    * [ ] Add member management interface (remove members, transfer ownership)
-    * [ ] Display pending invitations
+    * [x] ✅ **FIXED**: Add member management interface (remove members, transfer ownership) - ShareDialog includes member removal functionality
+    * [x] ✅ **FIXED**: Enhanced error handling for non-existent users - Now sends invitation emails instead of showing error messages when inviting non-existent users
+    * [x] ✅ **FIXED**: Sharing dialog UI visibility - Fixed transparent dialog and buttons, now only background is transparent while dialog window and buttons are clearly visible with solid backgrounds and good contrast
+    * [x] ✅ **FIXED**: Error toast notification visibility - Fixed gray transparent "User not found" toast messages when inviting non-existent users, now using solid red background with high contrast text
+    * [ ] Display pending invitations - Show list of sent invitations with status
+    * [ ] Invitation management interface - Allow users to resend or cancel pending invitations
+    * [ ] Auto-accept invitations for new users - When user registers with invited email, automatically add them to lists
+    * [x] ✅ **FIXED**: User menu functionality - User menu component created with logout and profile options
 * **Testing:**
     * [ ] Unit tests for sharing permissions
-    * [ ] Integration tests for invitation flow
+    * [ ] Integration tests for invitation flow - Test both existing and non-existent user invitation paths
     * [ ] UI tests for collaboration features
+    * [ ] Email service integration tests - Mock email service for automated testing
+    * [ ] End-to-end invitation workflow tests - From invitation to user registration to list access
 
 ## Sprint 6: Real-time Synchronization ✅ COMPLETED 🎉
 
@@ -263,6 +276,38 @@ Migrate the FamilyCart app UI to use the Stitch/layout.html style for shopping l
 
 ### ⚠️ SPRINT 6 FULLY COMPLETE! ✅
 **All tasks completed successfully. Real-time synchronization is production-ready.**
+
+## Sprint 7: Enhanced Email & Invitation System
+
+### User Stories:
+* As a user, I want to send professional invitation emails to non-existent users so they can join my shopping lists.
+* As a user, I want to see the status of my sent invitations and manage them.
+* As a new user, I want to automatically gain access to lists I was invited to when I register.
+
+### Tasks:
+* **Backend - Email Service Integration:**
+    * [ ] Configure production email service (SendGrid, AWS SES, or SMTP)
+    * [ ] Create email templates for list invitations
+    * [ ] Implement invitation tracking database model
+    * [ ] Add invitation expiration and cleanup logic
+    * [ ] Create email verification for new registrations
+* **Backend - Invitation Management:**
+    * [ ] Endpoint to list pending invitations sent by user
+    * [ ] Endpoint to list pending invitations received by email
+    * [ ] Auto-accept invitations during user registration
+    * [ ] Resend invitation functionality
+    * [ ] Cancel invitation functionality
+* **Frontend - Invitation Management UI:**
+    * [ ] Pending invitations section in ShareDialog
+    * [ ] Invitation status indicators (sent, pending, expired, accepted)
+    * [ ] Resend/cancel invitation buttons
+    * [ ] Email validation improvements in invite form
+* **Testing:**
+    * [ ] Email service integration tests
+    * [ ] Invitation lifecycle tests
+    * [ ] UI tests for invitation management
+
+## Sprint 8: Performance & Optimization ⚡
 
 ### Tasks:
 * **Backend - WebSocket Implementation:**
@@ -979,7 +1024,7 @@ Continue with remaining Sprint 3+ tasks:
 - ✅ **Data preservation**: No loss of existing timestamp data during migration
 - ✅ **Production ready**: Changes tested and verified in development environment
 
-#### **Impact:**
+#### **Impact**:
 - **Backend stability**: No more 500 errors on item state changes
 - **User experience**: Item completion toggles work reliably
 - **Data consistency**: All datetimes properly timezone-aware throughout system
@@ -1307,6 +1352,12 @@ This completes User Story FR008 with exceptional attention to both functionality
 - `docs/ai-provider-benchmark-report.md` - Initial benchmark findings
 - `backend/benchmark_ai_providers.py` - Automated benchmarking framework
 - `backend/focused_benchmark.py` - Targeted performance tests
+
+**Benefits Achieved**:
+- **Data-Driven Decisions**: Objective performance metrics for all models
+- **Optimized Fallback**: Enhanced fallback strategy with best-performing local models
+- **Multilingual Insights**: Clear understanding of Czech language capabilities
+- **Production Readiness**: Clear recommendations for different deployment scenarios
 
 **Timeline**: Benchmarking completed on 2025-07-03
 **Status**: ✅ **COMPLETE** - Data-driven recommendations available for production deployment

@@ -260,6 +260,13 @@ export function RealtimeShoppingList({
     );
   };
 
+  // Handle list updates from the share dialog
+  const handleListUpdate = useCallback((updatedList: ShoppingList) => {
+    if (onListUpdate) {
+      onListUpdate(list.id, updatedList);
+    }
+  }, [list.id, onListUpdate]);
+
   return (
     <div className="relative">
       {/* Connection status indicator */}
@@ -276,6 +283,7 @@ export function RealtimeShoppingList({
         onAddItem={onAddItem}
         onBackToSelector={onBackToSelector}
         onSelectList={onSelectList}
+        onListUpdate={handleListUpdate}
       />
     </div>
   );

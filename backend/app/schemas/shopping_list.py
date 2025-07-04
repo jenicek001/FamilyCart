@@ -1,6 +1,6 @@
 import uuid
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 from app.schemas.user import UserRead
 
@@ -24,7 +24,7 @@ class ShoppingListRead(ShoppingListBase):
     owner_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-    items: list = []  # Default to empty list if no items
+    items: List[Any] = []  # Temporarily use Any to avoid serialization issues
     members: List[UserRead] = []  # List of users who have access to this list
 
     class Config:
