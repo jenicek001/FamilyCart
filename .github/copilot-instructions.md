@@ -2,7 +2,7 @@
 
 ## 🔄 Project Awareness & Context
 - **Always read `PLANNING.md`** at the start of a new conversation to understand the project's architecture, goals, style, and constraints.
-- **Check `TASK.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
+- **Check `TASKS.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `PLANNING.md`.
 
 ## 🧱 Code Structure & Modularity
@@ -11,8 +11,8 @@
 - **Use clear, consistent imports** (prefer relative imports within packages).
 
 ## ✅ Task Completion
-- **Mark completed tasks in `TASK.md`** immediately after finishing them.
-- Add new sub-tasks or TODOs discovered during development to `TASK.md` under a “Discovered During Work” section.
+- **Mark completed tasks in `TASKS.md`** immediately after finishing them.
+- Add new sub-tasks or TODOs discovered during development to `TASKS.md` under a “Discovered During Work” section.
 
 ## 📚 Documentation & Explainability
 - **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.
@@ -24,7 +24,7 @@
 - **When developing new features, adding new modules or libraries or debugging issues** - always use Context7 MCP server to reference up-to-date API documentation and code examples for any libraries or frameworks involved. Add 'use context7' to your prompt or leverage the Context7 MCP server for the most current, version-specific docs.
 - **Never hallucinate libraries or functions** – only use known, verified Python packages.
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
-- **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASK.md`.
+- **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASKS.md`.
 
 ## Backend-specific rules
 

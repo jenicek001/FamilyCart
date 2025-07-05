@@ -56,6 +56,13 @@ export function useWebSocket({
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
   
+  // Connection state management to prevent rapid connects/disconnects
+  const connectionAttemptRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectingRef = useRef(false);
+  const stableConnectionRef = useRef(false);
+  const lastConnectionAttemptRef = useRef<number>(0);
+  const minConnectionInterval = 1000; // Minimum 1 second between connection attempts
+  
   // Use refs to avoid stale closures in callbacks
   const connectRef = useRef<(() => void) | null>(null);
   const latestTokenRef = useRef(token);
@@ -79,10 +86,17 @@ export function useWebSocket({
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
     }
+    if (connectionAttemptRef.current) {
+      clearTimeout(connectionAttemptRef.current);
+      connectionAttemptRef.current = null;
+    }
   }, []);
 
   const disconnect = useCallback(() => {
     clearTimeouts();
+    isConnectingRef.current = false;
+    stableConnectionRef.current = false;
+    
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -107,15 +121,32 @@ export function useWebSocket({
   }, [send]);
 
   const connect = useCallback(() => {
-    if (!token || !listId || wsRef.current?.readyState === WebSocket.OPEN) {
+    const now = Date.now();
+    
+    // Prevent rapid connection attempts
+    if (isConnectingRef.current || 
+        wsRef.current?.readyState === WebSocket.OPEN ||
+        (now - lastConnectionAttemptRef.current) < minConnectionInterval) {
+      console.log('WebSocket connection skipped: Too soon or already connecting/connected');
+      return;
+    }
+    
+    if (!token || !listId) {
       if (!token) {
         console.log('WebSocket connection skipped: No auth token available');
         setError('Authentication required. Please log in.');
         return;
       }
-      return;
+      if (!listId) {
+        console.log('WebSocket connection skipped: No list ID provided');
+        setError('No list selected');
+        return;
+      }
     }
 
+    lastConnectionAttemptRef.current = now;
+    isConnectingRef.current = true;
+    
     console.log(`Attempting WebSocket connection to list ${listId} with token: ${token.substring(0, 20)}...`);
     setConnecting(true);
     setError(null);
@@ -134,8 +165,16 @@ export function useWebSocket({
         setConnecting(false);
         setError(null);
         reconnectAttemptsRef.current = 0;
+        isConnectingRef.current = false;
+        stableConnectionRef.current = true;
         onConnectionChange?.(true);
-        startPingInterval();
+        
+        try {
+          startPingInterval();
+        } catch (pingError) {
+          console.warn('Failed to start ping interval:', pingError);
+          // Don't fail the connection for ping issues
+        }
       };
 
       wsRef.current.onmessage = (event) => {
@@ -145,10 +184,20 @@ export function useWebSocket({
           
           switch (message.type) {
             case 'item_change':
-              onItemChange?.(message);
+              try {
+                onItemChange?.(message);
+              } catch (error) {
+                console.error('Error in onItemChange handler:', error);
+                // Don't propagate handler errors to WebSocket error state
+              }
               break;
             case 'list_change':
-              onListChange?.(message);
+              try {
+                onListChange?.(message);
+              } catch (error) {
+                console.error('Error in onListChange handler:', error);
+                // Don't propagate handler errors to WebSocket error state
+              }
               break;
             case 'pong':
               // Handle pong response (connection keepalive)
@@ -159,8 +208,9 @@ export function useWebSocket({
             default:
               console.log('Unknown WebSocket message type:', message.type);
           }
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
+        } catch (parseError) {
+          console.error('Error parsing WebSocket message:', parseError);
+          // Don't set error state for parse errors
         }
       };
 
@@ -169,6 +219,8 @@ export function useWebSocket({
         setConnected(false);
         setConnecting(false);
         clearTimeouts();
+        isConnectingRef.current = false;
+        stableConnectionRef.current = false;
         onConnectionChange?.(false);
 
         // Handle specific close codes
@@ -202,12 +254,14 @@ export function useWebSocket({
         console.error('WebSocket error:', error);
         setError('WebSocket connection error');
         setConnecting(false);
+        isConnectingRef.current = false;
       };
 
     } catch (err) {
       console.error('Error creating WebSocket connection:', err);
       setError('Failed to create WebSocket connection');
       setConnecting(false);
+      isConnectingRef.current = false;
     }
   }, [token, listId, onItemChange, onListChange, onConnectionChange, autoReconnect, reconnectInterval, startPingInterval]);
 
@@ -229,21 +283,52 @@ export function useWebSocket({
   // Connect when token and listId are available
   useEffect(() => {
     if (token && listId) {
-      console.log('WebSocket useEffect: Attempting connection', { hasToken: !!token, listId });
-      connect();
+      console.log('WebSocket useEffect: Token and listId available', { 
+        hasToken: !!token, 
+        listId,
+        isConnecting: isConnectingRef.current,
+        hasConnection: !!wsRef.current,
+        connectionState: wsRef.current?.readyState
+      });
+      
+      // Don't reconnect if we already have a stable connection with the same parameters
+      if (stableConnectionRef.current && 
+          wsRef.current?.readyState === WebSocket.OPEN &&
+          latestTokenRef.current === token &&
+          latestListIdRef.current === listId) {
+        console.log('WebSocket useEffect: Skipping connection - already stable');
+        return;
+      }
+      
+      // Add a longer delay to ensure authentication state has stabilized
+      const connectTimeout = setTimeout(() => {
+        // Double-check that we still need to connect and params haven't changed
+        if (latestTokenRef.current && latestListIdRef.current) {
+          if (connectRef.current) {
+            connectRef.current();
+          } else {
+            connect();
+          }
+        }
+      }, 500); // Increased delay to 500ms for better stability
+      
+      return () => {
+        clearTimeout(connectTimeout);
+        // Only disconnect if this useEffect is being cleaned up due to token/listId change
+        // Don't disconnect on component unmount - let the cleanup effect handle that
+      };
     } else {
-      console.log('WebSocket useEffect: Skipping connection', { hasToken: !!token, listId });
+      console.log('WebSocket useEffect: Missing token or listId', { hasToken: !!token, listId });
       if (!token) {
         setError('Please log in to enable real-time updates');
       } else if (!listId) {
         setError('No list selected');
       }
-    }
-    
-    return () => {
+      
+      // Disconnect if we don't have the required parameters
       disconnect();
-    };
-  }, [token, listId]); // Removed connect and disconnect from dependencies
+    }
+  }, [token, listId]); // Only depend on token and listId changes
 
   // Cleanup on unmount
   useEffect(() => {

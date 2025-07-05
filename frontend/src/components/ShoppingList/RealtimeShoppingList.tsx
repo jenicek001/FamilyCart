@@ -209,6 +209,13 @@ export function RealtimeShoppingList({
   // Show connection status in toast when there are issues
   useEffect(() => {
     if (error) {
+      // Don't show toast for temporary connection states during login
+      if (error.includes('Please log in to enable real-time updates') ||
+          error.includes('No list selected') ||
+          error.includes('Authentication required')) {
+        return;
+      }
+
       // Show different actions based on error type
       let action = (
         <button
@@ -220,7 +227,7 @@ export function RealtimeShoppingList({
       );
 
       // For authentication errors, suggest refresh instead
-      if (error.includes('Authentication') || error.includes('log in')) {
+      if (error.includes('Authentication failed') || error.includes('log in again')) {
         action = (
           <button
             onClick={() => window.location.reload()}

@@ -179,6 +179,8 @@ async def update_item(
     """
     Update an item.
     """
+    # Capture user ID early to avoid async context issues
+    current_user_id = str(current_user.id)
     # Eagerly load shopping_list relationship including shared_with
     result = await session.execute(
         select(Item)
@@ -255,7 +257,7 @@ async def update_item(
         await websocket_service.notify_item_updated(
             list_id=db_item.shopping_list_id,
             item_data=item_data,
-            user_id=str(current_user.id)
+            user_id=current_user_id
         )
     except Exception as e:
         logger.error(f"Failed to send WebSocket notification for item update: {e}")
@@ -273,6 +275,8 @@ async def delete_item(
     """
     Delete an item.
     """
+    # Capture user ID early to avoid async context issues
+    current_user_id = str(current_user.id)
     # Eagerly load shopping_list relationship including shared_with
     result = await session.execute(
         select(Item)
@@ -304,7 +308,7 @@ async def delete_item(
         await websocket_service.notify_item_deleted(
             list_id=list_id,
             item_id=item_id_for_notification,
-            user_id=str(current_user.id)
+            user_id=current_user_id
         )
     except Exception as e:
         logger.error(f"Failed to send WebSocket notification for item deletion: {e}")

@@ -190,27 +190,10 @@ async def read_shopping_list(
     """
     # Get shopping list with permission check
     shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
-    # Eagerly load related data for the authorized shopping_list
-    result = await session.execute(
-        select(ShoppingList)
-        .where(ShoppingList.id == shopping_list.id)
-        .options(
-            selectinload(ShoppingList.items).selectinload(Item.category),
-            selectinload(ShoppingList.items).selectinload(Item.owner),
-            selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
-            selectinload(ShoppingList.shared_with)
-        )
-    )
-    shopping_list = result.scalars().first()
     
-    # Sort items by category before returning
-    if shopping_list.items:
-        shopping_list.items = sort_items_by_category(shopping_list.items)
-    
-    # Populate members (users with whom the list is shared plus the owner if the viewer is not the owner)
-    shopping_list.members = shopping_list.shared_with + ([shopping_list.owner] if shopping_list.owner_id != current_user.id else [])
-    
-    return shopping_list
+    # Use helper function to build proper Pydantic response
+    # The helper will handle eager loading, sorting, and conversion to Pydantic models
+    return await build_shopping_list_response(shopping_list, session, current_user)
 
 
 @router.put("/{list_id}", response_model=ShoppingListRead)
@@ -223,6 +206,9 @@ async def update_shopping_list(
     """
     Update a shopping list details.
     """
+    # Capture user ID early to avoid async context issues
+    current_user_id = str(current_user.id)
+    
     # Get shopping list with permission check
     shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     
@@ -256,7 +242,7 @@ async def update_shopping_list(
         await websocket_service.notify_list_updated(
             list_id=shopping_list.id,
             list_data=list_data,
-            user_id=str(current_user.id)
+            user_id=current_user_id
         )
     except Exception:
         logger.exception("Failed to send WebSocket list_updated notification")
@@ -273,6 +259,9 @@ async def delete_shopping_list(
     """
     Delete a shopping list.
     """
+    # Capture user ID before any database operations to avoid async context issues
+    user_id = str(current_user.id)
+    
     # Get shopping list with permission check
     shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     await session.delete(shopping_list)
@@ -282,7 +271,7 @@ async def delete_shopping_list(
     try:
         await websocket_service.notify_list_deleted(
             list_id=shopping_list.id,
-            user_id=str(current_user.id)
+            user_id=user_id
         )
     except Exception:
         logger.exception("Failed to send WebSocket list_deleted notification")
@@ -441,6 +430,10 @@ async def share_shopping_list(
     """
     Share a shopping list with another user by email.
     """
+    # Capture user data early to avoid async context issues
+    current_user_id = str(current_user.id)
+    current_user_email = current_user.email
+    
     # Get shopping list with permission check
     shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     
@@ -472,7 +465,7 @@ async def share_shopping_list(
             await send_list_invitation_email(
                 to_email=share_data.email,
                 list_data=list_data,
-                inviter_email=current_user.email
+                inviter_email=current_user_email
             )
             logger.info(f"Invitation email sent successfully to {share_data.email}")
         except Exception:
@@ -515,7 +508,7 @@ async def share_shopping_list(
             list_id=list_id,
             list_data=list_data,
             new_member_email=share_data.email,
-            user_id=str(current_user.id)
+            user_id=current_user_id
         )
     except Exception:
         logger.exception("Failed to send WebSocket list_shared notification")
@@ -524,7 +517,7 @@ async def share_shopping_list(
         await send_list_invitation_email(
             to_email=share_data.email,
             list_data=list_data,
-            inviter_email=current_user.email
+            inviter_email=current_user_email
         )
     except Exception:
         logger.exception("Failed to send list invitation email")
@@ -543,6 +536,9 @@ async def remove_member_from_list(
     Remove a member from a shared shopping list.
     Only the owner can remove members.
     """
+    # Capture user ID early to avoid async context issues
+    current_user_id = str(current_user.id)
+    
     # Get shopping list with permission check
     shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     
@@ -578,7 +574,7 @@ async def remove_member_from_list(
             list_id=list_id,
             list_data=list_data,
             removed_member_email=user_email,
-            user_id=str(current_user.id)
+            user_id=current_user_id
         )
     except Exception:
         logger.exception("Failed to send WebSocket member_removed notification")

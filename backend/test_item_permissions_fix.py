@@ -16,7 +16,7 @@ def test_shared_user_item_permissions():
     print("🔑 Logging in as Berta (shared user)...")
     login_data = {
         "username": "berta.stepanova@gmail.com", 
-        "password": "Password123!"
+        "password": "berta"
     }
     
     login_response = requests.post(
@@ -28,17 +28,7 @@ def test_shared_user_item_permissions():
     print(f"Login status: {login_response.status_code}")
     if login_response.status_code != 200:
         print(f"❌ Login failed: {login_response.text}")
-        # Try with different password
-        login_data["password"] = "TestPassword123!"
-        login_response = requests.post(
-            f"{base_url}/api/v1/auth/jwt/login",
-            data=login_data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"}
-        )
-        print(f"Retry login status: {login_response.status_code}")
-        if login_response.status_code != 200:
-            print(f"❌ Login still failed: {login_response.text}")
-            return
+        return
     
     login_result = login_response.json()
     token = login_result["access_token"]
