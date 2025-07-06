@@ -53,14 +53,104 @@
 
 ## Current Sprint 🔄
 
-## Sprint 7: Enhanced Collaboration & Advanced Organization
+### Sprint 7: Visual Identity & UI Unification 🎨
+
+**Duration**: July 2025  
+**Focus**: Creating a professional, cohesive visual identity and UI consistency before launching professional collaboration features.
+
+### User Stories:
+* As a user, I want the app to have a distinctive, professional logo that represents shared family shopping.
+* As a user, I want consistent UI elements (dialogs, buttons, forms) throughout the app for a polished experience.
+* As a user, I want the app to have a favicon and proper branding in browser tabs.
+* As a user, I want the app to feel cohesive and professional when sharing it with family members.
+
+### Interactive Design Tasks (AI-Guided):
+
+**🎨 Visual Identity Creation:**
+* [ ] **Logo Design & Generation** (Interactive with AI)
+    * [ ] Define brand concepts (family, collaboration, shopping, organization)
+    * [ ] Generate logo concepts using AI tools (Gemini, ChatGPT, DALL-E)
+    * [ ] Create multiple variations (full logo, icon only, monochrome)
+    * [ ] Export in multiple formats (SVG, PNG, ICO for favicon)
+    * [ ] Test logo visibility at different sizes
+
+* [ ] **Color Palette & Theming** (Interactive Design)
+    * [ ] Define primary brand colors (2-3 main colors)
+    * [ ] Create complementary color palette for UI elements
+    * [ ] Ensure accessibility compliance (WCAG contrast ratios)
+    * [ ] Update CSS custom properties for consistent theming
+    * [ ] Test dark/light mode compatibility
+
+* [ ] **Typography & Visual Hierarchy** (Style Guide Creation)
+    * [ ] Select and implement consistent font families
+    * [ ] Define heading hierarchy (H1-H6) with proper sizing
+    * [ ] Standardize body text, captions, and UI text styles
+    * [ ] Create typography CSS classes for consistency
+
+**🔧 UI Component Standardization:**
+* [ ] **Dialog & Modal Consistency**
+    * [ ] Standardize ShareDialog, SettingsDialog styling
+    * [ ] Create reusable Dialog component with consistent styling
+    * [ ] Ensure proper spacing, borders, and animations
+    * [ ] Add consistent close button behavior and styling
+
+* [ ] **Button & Form Element Unification**
+    * [ ] Standardize primary/secondary button styles
+    * [ ] Create consistent form input styling (text inputs, selects)
+    * [ ] Implement consistent hover/focus states
+    * [ ] Add loading states and disabled button styling
+
+* [ ] **Icon & Graphics Consistency**
+    * [ ] Standardize icon library usage (size, color, style)
+    * [ ] Create custom icons for unique FamilyCart actions
+    * [ ] Implement consistent icon sizing throughout the app
+    * [ ] Ensure AI-generated item icons align with overall style
+
+**📱 Branding Implementation:**
+* [ ] **Favicon & Browser Integration**
+    * [ ] Generate favicon from logo (16x16, 32x32, 64x64)
+    * [ ] Add proper meta tags for web app manifest
+    * [ ] Test favicon appearance across browsers
+    * [ ] Add app icon for mobile "add to home screen"
+
+* [ ] **Application Header & Branding**
+    * [ ] Integrate logo into app header/navigation
+    * [ ] Add subtle branding elements throughout the UI
+    * [ ] Ensure brand consistency in email templates (preparation for Sprint 9)
+    * [ ] Create loading screen with brand elements
+
+### 📊 SPRINT 7 PROGRESS: 🔄 0% Complete - Visual Identity & UI Unification
+**STATUS**: Ready to begin interactive design process with AI guidance.
+
+### **Sprint 7 Success Criteria:**
+- [ ] Professional logo created and implemented across the app
+- [ ] Consistent UI styling with unified design system
+- [ ] Proper favicon and browser branding
+- [ ] Color palette and typography guidelines established
+- [ ] All dialogs and forms follow consistent design patterns
+- [ ] App feels cohesive and professional for family sharing
+
+### **Interactive AI Design Process:**
+1. **Concept Development**: AI will propose multiple logo concepts based on FamilyCart's purpose
+2. **Style Exploration**: Interactive selection of colors, fonts, and visual themes
+3. **Asset Generation**: Use AI tools to create professional graphics and icons
+4. **Implementation Guidance**: Step-by-step integration of visual identity into codebase
+5. **Feedback & Refinement**: Iterative improvement based on visual testing
+
+### **Technical Implementation Notes:**
+- Logo files should be optimized SVGs for scalability
+- CSS custom properties for easy theme management
+- Component library approach for UI consistency
+- Performance considerations for graphics and animations
+
+---
+
+## Sprint 9: Enhanced Collaboration
 
 ### User Stories:
 * As a user, I want to send professional invitation emails to non-existent users so they can join my shopping lists.
 * As a user, I want to see the status of my sent invitations and manage them.
 * As a new user, I want to automatically gain access to lists I was invited to when I register.
-* As a user, I want to reorder items within categories so I can organize my shopping.
-* As a user, I want to reorder entire categories so I can arrange the list according to my shopping route.
 * As a user, I want better permission controls for shared lists (owner vs member permissions).
 
 ### Tasks:
@@ -82,16 +172,6 @@
     * [ ] Cancel invitation functionality (`DELETE /invitations/{id}`)
     * [ ] Track invitation status (pending, accepted, expired, cancelled)
 
-* **Backend - Advanced Item Organization:**
-    * [ ] Add ordering fields to Item and Category models (`sort_order` columns)
-    * [ ] Implement endpoints for reordering items within categories
-        * `PUT /shopping-lists/{list_id}/items/reorder` (bulk reorder within categories)
-        * `PUT /items/{item_id}/position` (move single item position)
-    * [ ] Implement endpoints for reordering categories
-        * `PUT /shopping-lists/{list_id}/categories/reorder` (category order)
-    * [ ] Add validation for ordering operations (prevent conflicts)
-    * [ ] Create migration for ordering system
-
 * **Frontend - Enhanced Collaboration UI:**
     * [ ] Pending invitations section in ShareDialog with status indicators
     * [ ] Invitation status indicators (sent, pending, expired, accepted)
@@ -101,86 +181,72 @@
     * [ ] Auto-accept invitations interface for new users
     * [ ] Permission-based UI controls (owner vs member actions)
 
-* **Frontend - Drag & Drop Interface:**
-    * [ ] Install and configure `react-beautiful-dnd` or `@dnd-kit/core` for drag and drop
-    * [ ] Implement drag and drop for reordering items within categories
-        * Visual feedback during drag operations
-        * Drop zones between items within same category
-        * Prevent dragging across categories (separate feature)
-    * [ ] Implement drag and drop for reordering categories
-        * Category header drag handles
-        * Visual feedback for category reordering
-        * Collapsible/expandable category sections
-    * [ ] Add visual feedback during drag operations (ghost items, drop indicators)
-    * [ ] Group items by category in the UI (already implemented)
-    * [ ] Add category headers and collapsible sections
-    * [ ] Persist reorder changes immediately (optimistic updates + API calls)
-
 * **Testing:**
     * [ ] Email service integration tests (mock SMTP, SendGrid)
     * [ ] Invitation lifecycle tests (create, send, accept, expire workflow)
     * [ ] UI tests for invitation management (Playwright tests)
-    * [ ] Unit tests for ordering logic (backend)
-    * [ ] UI tests for drag and drop functionality (Playwright drag tests)
-    * [ ] Integration tests for order persistence
     * [ ] End-to-end invitation workflow tests
 
-### 📊 SPRINT 7 PROGRESS: 🔄 0% Complete - Enhanced Collaboration & Advanced Organization
-**STATUS**: Ready to begin with comprehensive task list combining email invitations, permission system, and drag & drop organization features.
+### 📊 SPRINT 9 PROGRESS: 🔄 0% Complete - Enhanced Collaboration
+**STATUS**: Ready to begin with focused collaboration features - email invitations and permission system.
 
-### **Sprint 7 Success Criteria:**
+### **Sprint 9 Success Criteria:**
 - [ ] Professional invitation emails sent to non-existent users
 - [ ] Users can view and manage pending invitations
 - [ ] New users automatically added to lists they were invited to
-- [ ] Intuitive drag and drop reordering for items and categories
-- [ ] Order changes persist across sessions and sync in real-time
 - [ ] Permission system distinguishes owner vs member capabilities
 - [ ] All collaboration features have proper error handling and feedback
 
 ### **Technical Priorities:**
 1. **Email System** (High Priority): Complete invitation workflow for better collaboration
 2. **Permission System** (High Priority): Proper role-based access control
-3. **Drag & Drop** (Medium Priority): Enhanced user experience for organization
-4. **UI Polish** (Medium Priority): Professional invitation management interface
+3. **UI Polish** (High Priority): Professional invitation management interface
 
 ### **Dependencies & Notes:**
 - Email service configuration needs environment variables and provider selection
-- Drag and drop library selection should prioritize accessibility and mobile support
 - Permission system should be backward compatible with existing shared lists
-- Real-time updates should work with reordering (WebSocket integration)
+- Integration with existing WebSocket system for real-time invitation updates
 
 ## Future Sprints (Planned)
-
-### Sprint 9: OAuth2 Authentication
-* Google OAuth2 integration
-* Apple ID authentication
-* Social login UI improvements
 
 ### Sprint 10: Search & History Features
 * Item search with autocomplete
 * Shopping history tracking
-* Personalized suggestions
+* Personalized suggestions based on purchase patterns
+* Fast as-you-type search (under 200ms response time)
 
-### Sprint 11: Internationalization (I18n)
+### Sprint 11: Advanced Item Organization
+* Drag and drop reordering for items within categories
+* Drag and drop reordering for entire categories
+* Visual feedback during drag operations
+* Collapsible/expandable category sections
+* Real-time sync of reordering changes
+
+### Sprint 12: Internationalization (I18n)
 * Multi-language support
 * Category translation system
 * Locale-specific formatting
 
 ## Future Sprints (Post-MVP)
 
-### Sprint 12: Performance Optimization & Monitoring
+### Sprint 13: OAuth2 Authentication
+* Google OAuth2 integration
+* Apple ID authentication
+* Social login UI improvements
+
+### Sprint 14: Performance Optimization & Monitoring
 * Caching strategy implementation
 * Monitoring and logging setup
 * Database query optimization
 * Frontend performance optimization
 
-### Sprint 13: Security & Compliance
+### Sprint 15: Security & Compliance
 * GDPR compliance features
 * Data export/deletion capabilities
 * Security audit and penetration testing
 * Privacy policy implementation
 
-### Sprint 14: Advanced Features
+### Sprint 16: Advanced Features
 * Push notifications (PWA)
 * Offline support and sync
 * Recipe integration
@@ -203,33 +269,117 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 ## Current Status (July 2025)
 - ✅ **Sprints 1-6**: Core functionality complete and production ready
 - ✅ **Sprint 8**: AI enhancements and multi-provider system complete
-- 🔄 **Sprint 7**: Enhanced collaboration and organization (current focus)
+- 🔄 **Sprint 7**: Visual Identity & UI Unification (current focus - design phase)
+- 📋 **Sprint 9**: Enhanced collaboration (planned - high priority after branding)
+- 📋 **Sprint 11**: Advanced organization (planned - UX improvement)
 
 ## Success Metrics by Sprint
 
-### Sprint 7 Success Criteria:
+### Sprint 7 Success Criteria (Current):
+- [ ] Professional logo created and implemented across the app
+- [ ] Consistent UI styling with unified design system
+- [ ] Proper favicon and browser branding
+- [ ] Color palette and typography guidelines established
+- [ ] All dialogs and forms follow consistent design patterns
+
+### Sprint 9 Success Criteria (Planned):
 - [ ] Professional invitation email system operational
-- [ ] Drag and drop reordering works smoothly on all devices
 - [ ] Permission system distinguishes owner vs member capabilities
-- [ ] Order changes persist correctly across sessions
+- [ ] Users can view and manage pending invitations
 - [ ] All collaboration features have proper error handling
 
 ## Risk Assessment & Mitigation
 
 ### Current Sprint 7 Risks:
+1. **Design Consistency**: Ensure visual identity works across all screen sizes and devices
+2. **Brand Recognition**: Create distinctive logo that represents family collaboration
+3. **Implementation Integration**: Smoothly integrate new branding without breaking existing UI
+
+### Future Sprint 9 Risks:
 1. **Email Service Integration**: Choose reliable provider and implement fallbacks
-2. **Drag & Drop Complexity**: Select accessibility-friendly library with mobile support
-3. **Permission System**: Ensure backward compatibility with existing shared lists
-4. **Real-time Integration**: Coordinate ordering changes with WebSocket updates
+2. **Permission System**: Ensure backward compatibility with existing shared lists
+3. **User Experience**: Professional invitation management interface
 
 ### Mitigation Strategies:
-* Use established email service providers (SendGrid, AWS SES)
-* Comprehensive testing for drag and drop across devices
-* Gradual permission system rollout with existing list support
-* Thorough integration testing for real-time order synchronization
+* AI-guided design process with multiple concept iterations and user feedback
+* Responsive design testing across devices during implementation
+* Gradual rollout of visual changes with fallback to existing styles
+* Comprehensive testing for visual consistency and accessibility compliance
 
 ---
 
 *Updated: July 6, 2025*  
 *Next Review: July 13, 2025*  
-*Current Sprint: Sprint 7 - Enhanced Collaboration & Advanced Organization*
+*Current Sprint: Sprint 7 - Visual Identity & UI Unification*
+
+## Sprint 11: Advanced Item Organization
+
+### User Stories:
+* As a user, I want to reorder items within categories so I can organize my shopping by my store route.
+* As a user, I want to reorder entire categories so I can arrange the list according to my shopping preferences.
+* As a user, I want visual feedback during drag operations so I know where items will be placed.
+* As a user, I want my reordering changes to sync in real-time with other family members.
+
+### Tasks:
+
+* **Backend - Item Organization System:**
+    * [ ] Add ordering fields to Item and Category models (`sort_order` columns)
+    * [ ] Implement endpoints for reordering items within categories
+        * `PUT /shopping-lists/{list_id}/items/reorder` (bulk reorder within categories)
+        * `PUT /items/{item_id}/position` (move single item position)
+    * [ ] Implement endpoints for reordering categories
+        * `PUT /shopping-lists/{list_id}/categories/reorder` (category order)
+    * [ ] Add validation for ordering operations (prevent conflicts)
+    * [ ] Create migration for ordering system
+    * [ ] Integrate reordering with WebSocket system for real-time updates
+
+* **Frontend - Drag & Drop Interface:**
+    * [ ] Install and configure `@dnd-kit/core` or `react-beautiful-dnd` for drag and drop
+    * [ ] Implement drag and drop for reordering items within categories
+        * Visual feedback during drag operations
+        * Drop zones between items within same category
+        * Prevent dragging across categories (separate feature)
+    * [ ] Implement drag and drop for reordering categories
+        * Category header drag handles
+        * Visual feedback for category reordering
+        * Collapsible/expandable category sections
+    * [ ] Add visual feedback during drag operations (ghost items, drop indicators)
+    * [ ] Persist reorder changes immediately (optimistic updates + API calls)
+    * [ ] Mobile-friendly drag and drop with touch support
+
+* **Real-time Integration:**
+    * [ ] WebSocket events for item reordering
+    * [ ] WebSocket events for category reordering
+    * [ ] Conflict resolution for simultaneous reordering by multiple users
+    * [ ] Visual indicators when other users are reordering
+
+* **Testing:**
+    * [ ] Unit tests for ordering logic (backend)
+    * [ ] UI tests for drag and drop functionality (Playwright drag tests)
+    * [ ] Integration tests for order persistence
+    * [ ] Real-time sync tests for reordering
+    * [ ] Mobile drag and drop testing
+    * [ ] Accessibility testing for keyboard navigation
+
+### 📊 SPRINT 11 PROGRESS: 🔄 Not Started - Advanced Item Organization
+**STATUS**: Planned for future implementation after Sprint 7 (visual identity) and Sprint 9 (collaboration) are complete.
+
+### **Sprint 11 Success Criteria:**
+- [ ] Intuitive drag and drop reordering for items within categories
+- [ ] Drag and drop reordering for entire categories
+- [ ] Order changes persist correctly across sessions
+- [ ] Real-time sync of reordering changes with other users
+- [ ] Mobile-friendly drag and drop experience
+- [ ] Accessibility support for keyboard navigation
+
+### **Technical Priorities:**
+1. **Drag & Drop Library** (High Priority): Select accessibility-friendly library with mobile support
+2. **Real-time Integration** (High Priority): Coordinate ordering changes with WebSocket updates
+3. **Mobile Experience** (Medium Priority): Touch-friendly drag and drop
+4. **Accessibility** (Medium Priority): Keyboard navigation for reordering
+
+### **Dependencies & Notes:**
+- Requires completed Sprint 7 (visual identity) and Sprint 9 (collaboration features) as foundation
+- Drag and drop library selection should prioritize accessibility and mobile support
+- Real-time updates should integrate seamlessly with existing WebSocket system
+- Performance testing needed for large lists with many items
