@@ -13,6 +13,7 @@
 ## ✅ Task Completion
 - **Mark completed tasks in `TASKS.md`** immediately after finishing them.
 - Add new sub-tasks or TODOs discovered during development to `TASKS.md` under a “Discovered During Work” section.
+- After finishing a sprint, create a new summary MD file (e.g., `SPRINT_7_SUMMARY.md`) documenting the key outcomes, challenges, fixed bugs, and next steps.
 
 ## 📚 Documentation & Explainability
 - **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.
