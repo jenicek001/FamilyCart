@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createUserBadge } from '@/utils/userColors';
+import { LogoWithText } from '@/components/ui/Logo';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Home, LogOut, Settings, ShoppingCart, UserCircle, Loader2 } from 'lucide-react';
+import { Home, LogOut, Settings, UserCircle, Loader2 } from 'lucide-react';
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
@@ -31,10 +32,7 @@ export default function Header() {
   return (
     <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <ShoppingCart className="h-7 w-7 text-primary" />
-          <h1 className="text-2xl font-headline font-bold text-primary">FamilyCart</h1>
-        </Link>
+        <LogoWithText variant="logo" size="lg" href="/dashboard" />
         
         <nav className="flex items-center gap-4">
           {loading ? (
