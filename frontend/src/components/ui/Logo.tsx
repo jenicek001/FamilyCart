@@ -63,6 +63,7 @@ export function FamilyCartLogo({
         width={48}
         height={48}
         className={cn(config.image, 'object-contain')}
+
         priority
       />
       {showText && (

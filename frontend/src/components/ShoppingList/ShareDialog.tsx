@@ -152,40 +152,64 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-white border border-gray-200 shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-gray-900">
-            <Share className="h-5 w-5" />
+      <DialogContent className="max-w-md shadow-2xl rounded-xl border-0" style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        backdropFilter: 'blur(10px)'
+      }}>
+        <DialogHeader className="pb-4" style={{ borderBottomColor: '#f1f5f9' }}>
+          <DialogTitle className="flex items-center gap-3 text-xl" style={{ color: '#0f172a' }}>
+            <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
+              <Share className="h-5 w-5" style={{ color: '#f59e0b' }} />
+            </div>
             Share "{list.name}"
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 py-4">
           {/* Current Members */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium mb-3 text-gray-900">Members ({(list.members?.length || 0) + 1})</h4>
-            <div className="space-y-2">
+          <div className="p-4 rounded-xl border" style={{ 
+            backgroundColor: '#fef7ed', 
+            borderColor: '#fed7aa' 
+          }}>
+            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#0f172a' }}>
+              <Crown className="h-4 w-4" style={{ color: '#f59e0b' }} />
+              Family Members ({(list.members?.length || 0) + 1})
+            </h4>
+            <div className="space-y-3">
               {/* Owner */}
-              <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="flex items-center justify-between p-3 rounded-lg shadow-sm border" style={{
+                backgroundColor: '#ffffff',
+                borderColor: '#e2e8f0'
+              }}>
                 <div className="flex items-center gap-3">
                   {isOwner && user ? (
                     <UserBadge user={user} size="sm" showName />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-xs text-gray-700">?</span>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)'
+                      }}>
+                        <span className="text-sm font-medium" style={{ color: '#f59e0b' }}>?</span>
                       </div>
-                      <span className="text-sm text-gray-900">Owner</span>
+                      <div>
+                        <span className="text-sm font-medium" style={{ color: '#0f172a' }}>Owner</span>
+                      </div>
                     </div>
                   )}
-                  <Crown className="h-4 w-4 text-yellow-500" />
+                  <Crown className="h-4 w-4" style={{ color: '#f59e0b' }} />
                 </div>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Owner</span>
+                <span className="text-xs font-medium px-2 py-1 rounded-full" style={{
+                  color: '#92400e',
+                  backgroundColor: '#fef3c7'
+                }}>Owner</span>
               </div>
               
               {/* Members */}
               {list.members?.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div key={member.id} className="flex items-center justify-between p-3 rounded-lg shadow-sm border" style={{
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e2e8f0'
+                }}>
                   <UserBadge user={member} size="sm" showName />
                   {isOwner && member.id !== user?.id && (
                     <Button
@@ -193,9 +217,18 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
                       size="sm"
                       onClick={() => handleRemoveMember(member.id)}
                       disabled={isRemoving === member.id}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 bg-white border border-red-200"
+                      className="transition-colors hover:bg-red-50"
+                      style={{ color: '#dc2626' }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#b91c1c'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#dc2626'}
                     >
-                      <UserMinus className="h-4 w-4" />
+                      {isRemoving === member.id ? (
+                        <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{
+                          borderColor: '#dc2626'
+                        }} />
+                      ) : (
+                        <UserMinus className="h-4 w-4" />
+                      )}
                     </Button>
                   )}
                 </div>
@@ -204,11 +237,15 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
           </div>
 
           {/* Invite by Email */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <Label htmlFor="email" className="text-sm font-medium text-gray-900">
-              Invite by email
+          <div className="p-4 rounded-xl border" style={{
+            backgroundColor: '#dbeafe',
+            borderColor: '#93c5fd'
+          }}>
+            <Label htmlFor="email" className="text-sm font-semibold flex items-center gap-2 mb-3" style={{ color: '#0f172a' }}>
+              <Mail className="h-4 w-4" style={{ color: '#3b82f6' }} />
+              Invite Family Member
             </Label>
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2">
               <Input
                 id="email"
                 type="email"
@@ -220,56 +257,127 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
                     handleInviteByEmail();
                   }
                 }}
-                className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                className="transition-all duration-200"
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e2e8f0',
+                  color: '#0f172a'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e2e8f0';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               <Button 
                 onClick={handleInviteByEmail} 
                 disabled={isInviting || !email.trim()}
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-sm"
+                className="transition-all duration-200 shadow-sm border-0"
+                style={{
+                  backgroundColor: '#3b82f6',
+                  color: '#ffffff'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isInviting && email.trim()) {
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isInviting && email.trim()) {
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
+                  }
+                }}
               >
-                <Mail className="h-4 w-4 mr-1" />
-                {isInviting ? 'Sending...' : 'Invite'}
+                {isInviting ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-1" />
+                    Invite
+                  </>
+                )}
               </Button>
             </div>
-            <p className="text-xs text-gray-600 mt-2 bg-blue-50 p-2 rounded border-l-2 border-blue-300">
-              Note: The person must already have a FamilyCart account to be invited.
+            <p className="text-xs mt-2 p-2 rounded border-l-2" style={{
+              color: '#1e3a8a',
+              backgroundColor: 'rgba(147, 197, 253, 0.5)',
+              borderLeftColor: '#3b82f6'
+            }}>
+              📧 The person must already have a FamilyCart account to be invited.
             </p>
           </div>
 
           {/* Share Link */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <Label className="text-sm font-medium text-gray-900">Share link</Label>
-            <div className="flex gap-2 mt-2">
+          <div className="p-4 rounded-xl border" style={{
+            backgroundColor: '#f0fdf4',
+            borderColor: '#bbf7d0'
+          }}>
+            <Label className="text-sm font-semibold flex items-center gap-2 mb-3" style={{ color: '#0f172a' }}>
+              <Share className="h-4 w-4" style={{ color: '#22c55e' }} />
+              Quick Share Link
+            </Label>
+            <div className="flex gap-2">
               <Input
                 value={shareUrl}
                 readOnly
-                className="text-sm bg-white border-gray-300 text-gray-900"
+                className="text-sm"
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e2e8f0',
+                  color: '#64748b'
+                }}
               />
               <Button 
                 onClick={handleCopyShareUrl}
                 variant="outline"
                 size="sm"
-                className="bg-white border-gray-300 hover:bg-gray-50 text-gray-700"
+                className="transition-colors"
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e2e8f0',
+                  color: '#374151'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
               >
                 {shareUrlCopied ? (
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-4 w-4" style={{ color: '#22c55e' }} />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
               </Button>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
+            <p className="text-xs mt-2 flex items-center gap-1" style={{ color: '#166534' }}>
+              <span className="w-1 h-1 rounded-full" style={{ backgroundColor: '#64748b' }}></span>
               Anyone with this link can view the list
             </p>
           </div>
         </div>
 
-        <DialogFooter className="pt-4 border-t border-gray-200">
+        <DialogFooter className="pt-4" style={{ borderTopColor: '#f1f5f9' }}>
           <Button 
             variant="outline" 
             onClick={onClose}
-            className="bg-white border-gray-300 hover:bg-gray-50 text-gray-700 shadow-sm"
+            className="transition-colors px-6"
+            style={{
+              backgroundColor: '#ffffff',
+              borderColor: '#e2e8f0',
+              color: '#374151'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ffffff';
+            }}
           >
             Done
           </Button>

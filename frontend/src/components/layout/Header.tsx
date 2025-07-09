@@ -32,7 +32,7 @@ export default function Header() {
   return (
     <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <LogoWithText variant="logo" size="lg" href="/dashboard" />
+        <LogoWithText variant="cart-family" size="lg" href="/dashboard" />
         
         <nav className="flex items-center gap-4">
           {loading ? (

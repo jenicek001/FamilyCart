@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, User, Eye, EyeOff } from 'lucide-react';
+import { Mail, User, Eye, EyeOff, ShoppingCart, Users } from 'lucide-react';
+import { LogoWithText } from '@/components/ui/Logo';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -84,17 +85,36 @@ export default function SignupPage() {
   };
 
   return (
-    <Card className="w-full max-w-md shadow-xl">
-      <CardHeader className="text-center">
-        <CardTitle className="font-headline text-3xl">Create Account</CardTitle>
-        <CardDescription>Join FamilyCart and simplify your shopping.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSignup} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-             <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{
+      background: 'linear-gradient(135deg, #fef7ed 0%, #dbeafe 50%, #f0fdf4 100%)'
+    }}>
+      <Card className="w-full max-w-md shadow-2xl border-0" style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)'
+      }}>
+        {/* Header with Logo */}
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-4">
+            <LogoWithText variant="cart-family" size="lg" />
+          </div>
+          <CardTitle className="font-headline text-3xl" style={{ color: '#0f172a' }}>
+            Join FamilyCart
+          </CardTitle>
+          <CardDescription style={{ color: '#64748b' }}>
+            Start organizing your family shopping together
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="px-6">
+          <form onSubmit={handleSignup} className="space-y-5">
+            {/* Full Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="fullName" className="font-medium" style={{ color: '#374151' }}>
+                Full Name
+              </Label>
+              <div className="relative group">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors" 
+                     style={{ color: '#9ca3af' }} />
                 <Input
                   id="fullName"
                   type="text"
@@ -102,29 +122,63 @@ export default function SignupPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="pl-10"
+                  className="pl-10 h-11 transition-all duration-200"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#ffffff'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#f59e0b';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="nickname">Nickname *</Label>
-             <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            
+            {/* Nickname Field */}
+            <div className="space-y-2">
+              <Label htmlFor="nickname" className="font-medium" style={{ color: '#374151' }}>
+                Nickname
+              </Label>
+              <div className="relative group">
+                <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors" 
+                      style={{ color: '#9ca3af' }} />
                 <Input
                   id="nickname"
                   type="text"
-                  placeholder="How would you like to be called?"
+                  placeholder="How should family call you?"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   required
-                  className="pl-10"
+                  className="pl-10 h-11 transition-all duration-200"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#ffffff'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#f59e0b';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-             <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="font-medium" style={{ color: '#374151' }}>
+                Email
+              </Label>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors" 
+                     style={{ color: '#9ca3af' }} />
                 <Input
                   id="email"
                   type="email"
@@ -132,13 +186,29 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="pl-10"
+                  className="pl-10 h-11 transition-all duration-200"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#ffffff'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#f59e0b';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
+            
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="font-medium" style={{ color: '#374151' }}>
+                Password
+              </Label>
+              <div className="relative group">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -146,23 +216,39 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="pr-10"
+                  className="pr-10 h-11 transition-all duration-200"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#ffffff'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#f59e0b';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
                 <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-gray-100"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
                 </Button>
+              </div>
             </div>
-          </div>
-           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-             <div className="relative">
+            
+            {/* Confirm Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="font-medium" style={{ color: '#374151' }}>
+                Confirm Password
+              </Label>
+              <div className="relative group">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
@@ -170,33 +256,81 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="pr-10"
+                  className="pr-10 h-11 transition-all duration-200"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#ffffff'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#f59e0b';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
                 <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-gray-100"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   <span className="sr-only">{showConfirmPassword ? "Hide confirm password" : "Show confirm password"}</span>
                 </Button>
+              </div>
             </div>
-          </div>
-          <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
-            {isLoading ? 'Creating Account...' : 'Sign Up'}
-          </Button>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-center">
-        <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <a href="/login" className="font-medium text-primary hover:underline">
-            Login
-          </a>
-        </p>
-      </CardFooter>
-    </Card>
+            
+            {/* Sign Up Button */}
+            <Button 
+              type="submit" 
+              className="w-full h-11 font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
+              disabled={isLoading}
+              style={{
+                backgroundColor: '#f59e0b',
+                color: '#ffffff',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#d97706';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#f59e0b';
+                }
+              }}
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Creating Account...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Create Account
+                </div>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        
+        <CardFooter className="flex justify-center px-6 pb-6">
+          <p className="text-sm" style={{ color: '#64748b' }}>
+            Already have an account?{' '}
+            <a href="/login" className="font-medium underline transition-colors" 
+               style={{ color: '#f59e0b' }}
+               onMouseEnter={(e) => e.currentTarget.style.color = '#d97706'}
+               onMouseLeave={(e) => e.currentTarget.style.color = '#f59e0b'}>
+              Sign in here
+            </a>
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

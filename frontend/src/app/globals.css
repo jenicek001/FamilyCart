@@ -52,30 +52,78 @@
   :root {
     --radius: 0.75rem;
     
-    /* Light theme variables for shadcn/ui */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* FamilyCart Family Warmth Color Palette - Generated 2025-07-09 */
+    /* Primary Brand Colors (Warm Orange) */
+    --fc-primary-50: rgb(255, 238, 187);
+    --fc-primary-100: rgb(255, 218, 167);
+    --fc-primary-500: #f59e0b;
+    --fc-primary-700: rgb(195, 108, 0);
+    --fc-primary-900: rgb(145, 58, 0);
+    
+    /* Secondary Colors (Trusted Blue) */
+    --fc-secondary-50: rgb(219, 234, 254);
+    --fc-secondary-100: rgb(199, 214, 234);
+    --fc-secondary-500: #3b82f6;
+    --fc-secondary-700: rgb(9, 80, 196);
+    --fc-secondary-900: rgb(0, 30, 146);
+    
+    /* Accent Colors (Fresh Green) */
+    --fc-accent-50: rgb(134, 239, 172);
+    --fc-accent-100: rgb(114, 219, 152);
+    --fc-accent-500: #22c55e;
+    --fc-accent-700: rgb(0, 147, 44);
+    --fc-accent-900: rgb(0, 97, 0);
+    
+    /* Semantic Colors (enhanced for family context) */
+    --fc-success: #22c55e;
+    --fc-warning: #f59e0b;
+    --fc-danger: #ef4444;
+    --fc-info: #3b82f6;
+    
+    /* Family-focused category colors */
+    --fc-category-produce: #22c55e;
+    --fc-category-dairy: #3b82f6;
+    --fc-category-meat: #ef4444;
+    --fc-category-pantry: #f59e0b;
+    --fc-category-frozen: #06b6d4;
+    --fc-category-bakery: #8b5cf6;
+    --fc-category-household: #6b7280;
+    --fc-category-personal: #ec4899;
+    --fc-category-beverages: #10b981;
+    --fc-category-snacks: #f97316;
+    
+    /* UI Colors */
+    --fc-background: #f8fafc;
+    --fc-card-bg: #ffffff;
+    --fc-text-primary: #0f172a;
+    --fc-text-secondary: #64748b;
+    --fc-border: #e2e8f0;
+    --fc-border-hover: #cbd5e1;
+    
+    /* Light theme variables for shadcn/ui (updated for Family Warmth) */
+    --background: 248 250 252; /* slate-50 */
+    --foreground: 15 23 42; /* slate-900 */
+    --card: 255 255 255; /* white */
+    --card-foreground: 15 23 42; /* slate-900 */
+    --popover: 255 255 255; /* white */
+    --popover-foreground: 15 23 42; /* slate-900 */
+    --primary: 245 158 11; /* warm orange #f59e0b */
+    --primary-foreground: 255 255 255; /* white */
+    --secondary: 59 130 246; /* blue #3b82f6 */
+    --secondary-foreground: 255 255 255; /* white */
+    --muted: 248 250 252; /* slate-50 */
+    --muted-foreground: 100 116 139; /* slate-500 */
+    --accent: 34 197 94; /* green #22c55e */
+    --accent-foreground: 255 255 255; /* white */
+    --destructive: 239 68 68; /* red-500 */
+    --destructive-foreground: 255 255 255; /* white */
+    --border: 226 232 240; /* slate-200 */
+    --input: 226 232 240; /* slate-200 */
+    --ring: 245 158 11; /* warm orange primary */
+    --chart-1: 245 158 11; /* warm orange */
+    --chart-2: 34 197 94; /* green */
+    --chart-3: 59 130 246; /* blue */
+    --chart-4: 168 85 247; /* purple */
+    --chart-5: 236 72 153; /* pink */
   }
 }
