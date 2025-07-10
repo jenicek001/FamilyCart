@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # AI APIs
     OPENAI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
-    GEMINI_MODEL_NAME: str = "gemini-1.5-flash"  # Optimized for speed: 10x faster than 2.5-flash
+    GEMINI_MODEL_NAME: str = "gemini-2.5-flash-lite-preview-06-17"  # Cost-efficient model with low latency, supports text/images/video/audio
     
     # AI Provider Configuration
     AI_PROVIDER: str = "gemini"  # Options: "gemini", "ollama"

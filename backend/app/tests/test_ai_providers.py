@@ -1,7 +1,21 @@
 """
 Unit tests for AI Provider Factory and Providers
 
-Tests the AI provider pattern implementation including factory,
+Tests the AI provider pattern         mock_settings.AI_PROVIDER = "gemini"
+        mock_settings.GOOGLE_API_KEY = "test-key"
+        mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
+        
+        with patch('app.services.ai_factory.GeminiProvider') as mock_gemini:
+            mock_instance = Mock()
+            mock_instance.provider_name = "gemini"
+            mock_instance.model_name = "gemini-2.5-flash-lite-preview-06-17"
+            mock_gemini.return_value = mock_instance
+            
+            info = AIProviderFactory.get_provider_info()
+            
+            assert info == {
+                "provider": "gemini",
+                "model_name": "gemini-2.5-flash-lite-preview-06-17",including factory,
 provider selection, and basic functionality of both Gemini and Ollama providers.
 """
 
@@ -25,7 +39,7 @@ class TestAIProviderFactory:
         """Test that factory returns Gemini provider when configured."""
         mock_settings.AI_PROVIDER = "gemini"
         mock_settings.GOOGLE_API_KEY = "test-key"
-        mock_settings.GEMINI_MODEL_NAME = "gemini-1.5-flash"
+        mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
         
         with patch('app.services.ai_factory.GeminiProvider') as mock_gemini:
             mock_instance = Mock()
@@ -67,7 +81,7 @@ class TestAIProviderFactory:
         """Test that factory returns the same instance on multiple calls."""
         mock_settings.AI_PROVIDER = "gemini"
         mock_settings.GOOGLE_API_KEY = "test-key"
-        mock_settings.GEMINI_MODEL_NAME = "gemini-1.5-flash"
+        mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
         
         with patch('app.services.ai_factory.GeminiProvider') as mock_gemini:
             mock_instance = Mock()
@@ -119,7 +133,7 @@ class TestAIProviderFactory:
         with patch('app.core.config.settings') as mock_settings:
             mock_settings.AI_PROVIDER = "gemini"
             mock_settings.GOOGLE_API_KEY = "test-key"
-            mock_settings.GEMINI_MODEL_NAME = "gemini-1.5-flash"
+            mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
             
             with patch('app.services.ai_factory.GeminiProvider') as mock_gemini:
                 mock_instance = Mock()
@@ -149,7 +163,7 @@ class TestAIProviderIntegration:
     def test_gemini_provider_initialization(self, mock_genai, mock_settings):
         """Test Gemini provider initializes correctly."""
         mock_settings.GOOGLE_API_KEY = "test-key"
-        mock_settings.GEMINI_MODEL_NAME = "gemini-1.5-flash"
+        mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
         
         mock_model = Mock()
         mock_genai.GenerativeModel.return_value = mock_model
@@ -157,9 +171,9 @@ class TestAIProviderIntegration:
         provider = GeminiProvider()
         
         assert provider.provider_name == "gemini"
-        assert provider.model_name == "gemini-1.5-flash"
+        assert provider.model_name == "gemini-2.5-flash-lite-preview-06-17"
         mock_genai.configure.assert_called_once_with(api_key="test-key")
-        mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-flash")
+        mock_genai.GenerativeModel.assert_called_once_with("gemini-2.5-flash-lite-preview-06-17")
 
     @patch('app.core.config.settings')
     def test_gemini_provider_missing_api_key(self, mock_settings):
@@ -193,7 +207,7 @@ class TestAIProviderIntegration:
     async def test_gemini_generate_text(self, mock_cache, mock_genai, mock_settings):
         """Test Gemini provider text generation."""
         mock_settings.GOOGLE_API_KEY = "test-key"
-        mock_settings.GEMINI_MODEL_NAME = "gemini-1.5-flash"
+        mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
         
         # Setup mocks
         mock_model = AsyncMock()

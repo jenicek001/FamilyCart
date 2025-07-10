@@ -258,27 +258,24 @@ class GeminiProvider(AIProvider):
 
         try:
             response = await self.model.generate_content_async(prompt)
-            data = json.loads(response.text)
-            suggested_icon = data.get("icon_name", "shopping_cart").strip().replace(".", "")
+            # First try to parse as JSON (legacy behavior)
+            try:
+                data = json.loads(response.text)
+                suggested_icon = data.get("icon_name", "shopping_cart").strip().replace(".", "")
+                logger.info(f"Parsed JSON icon response: {suggested_icon}")
+            except (json.JSONDecodeError, KeyError):
+                # Expected behavior: parse as plain text response
+                suggested_icon = response.text.strip().replace(".", "")
+                logger.info(f"Parsed plain text icon response: {suggested_icon}")
+            
             if suggested_icon in icon_list:
                 await cache_service.set(cache_key, suggested_icon, expire=3600 * 24 * 180) # Cache for 6 months
                 return suggested_icon
             else:
                 # Fallback to a generic icon if the suggested one is not in the list
-                logger.warning(f"Suggested icon ''{suggested_icon}'' not in the predefined list. Falling back to default.")
+                logger.warning(f"Suggested icon '{suggested_icon}' not in the predefined list. Falling back to default.")
                 await cache_service.set(cache_key, "shopping_cart", expire=3600 * 24 * 180) # Cache for 6 months
                 return "shopping_cart"
-        except (json.JSONDecodeError, AttributeError, KeyError) as e:
-            logger.error(f"Error parsing icon suggestion from Gemini: {e}")
-            # Fallback to raw text if JSON parsing fails
-            try:
-                suggested_icon = response.text.strip().replace(".", "")
-                if suggested_icon in icon_list:
-                    await cache_service.set(cache_key, suggested_icon, expire=3600 * 24 * 180)
-                    return suggested_icon
-            except Exception as inner_e:
-                logger.error(f"Error processing raw text for icon suggestion: {inner_e}")
-            return "shopping_cart"
         except Exception as e:
             logger.error(f"Error suggesting icon with Gemini: {e}")
             # Re-raise rate limit and quota errors so fallback service can handle them

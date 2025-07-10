@@ -417,3 +417,27 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 - Drag and drop library selection should prioritize accessibility and mobile support
 - Real-time updates should integrate seamlessly with existing WebSocket system
 - Performance testing needed for large lists with many items
+
+## Discovered During Work
+
+### 2025-01-10: Gemini Model Update & Backend Fixes ✅ COMPLETED
+* [x] **Gemini Model Update to Latest Version**
+    * [x] Updated backend to use `gemini-2.5-flash-lite-preview-06-17` (latest model)
+    * [x] Updated all configuration files, environment variables, and test mocks
+    * [x] Verified configuration loading and model initialization
+    * [x] Created comprehensive update report documentation
+    * [x] Ensured all test and documentation uses `poetry run` instead of direct commands
+
+* [x] **Fixed Backend Icon Suggestion Parsing Error**
+    * [x] Diagnosed "Expecting value: line 1 column 1 (char 0)" JSON parsing error
+    * [x] Updated Gemini provider to handle both JSON and plain text responses
+    * [x] Verified fix works correctly for both icon and category suggestions  
+    * [x] Created comprehensive test script to validate the fix
+    * [x] Confirmed backend no longer fails when Gemini returns plain text responses
+
+**Technical Details:**
+- Updated `config.py` and `.env` to use new Gemini model name
+- Modified `test_ai_providers.py` to use correct model in all test assertions
+- Enhanced `gemini_provider.py` parsing logic with proper fallback handling
+- All test execution instructions now correctly use `poetry run pytest`
+- Created verification test script: `test_icon_suggestion_fix.py`

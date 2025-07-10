@@ -286,7 +286,7 @@ The API will be available at `http://localhost:8000`
 ### Running tests
 
 ```bash
-pytest
+poetry run pytest
 ```
 
 ### Code formatting
