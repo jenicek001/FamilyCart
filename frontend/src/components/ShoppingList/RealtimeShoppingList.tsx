@@ -250,21 +250,49 @@ export function RealtimeShoppingList({
     }
   }, [error, toast, reconnect]);
 
-  // Connection status indicator
+  // Connection status indicator - Family Warmth themed
   const ConnectionIndicator = () => {
     const statusConfig = {
-      connecting: { icon: '⏳', color: 'text-yellow-500', text: 'Connecting...' },
-      connected: { icon: '🟢', color: 'text-green-500', text: 'Live updates enabled' },
-      disconnected: { icon: '⚫', color: 'text-gray-400', text: 'Offline' },
-      error: { icon: '🔴', color: 'text-red-500', text: 'Connection error' },
+      connecting: { 
+        icon: 'sync', 
+        bgColor: 'bg-amber-100', 
+        iconColor: 'text-amber-600',
+        borderColor: 'border-amber-200',
+        text: 'Connecting...' 
+      },
+      connected: { 
+        icon: 'wifi', 
+        bgColor: 'bg-green-100', 
+        iconColor: 'text-green-600',
+        borderColor: 'border-green-200',
+        text: 'Live updates' 
+      },
+      disconnected: { 
+        icon: 'wifi_off', 
+        bgColor: 'bg-gray-100', 
+        iconColor: 'text-gray-500',
+        borderColor: 'border-gray-200',
+        text: 'Offline' 
+      },
+      error: { 
+        icon: 'signal_wifi_connected_no_internet_4', 
+        bgColor: 'bg-red-100', 
+        iconColor: 'text-red-600',
+        borderColor: 'border-red-200',
+        text: 'Connection error' 
+      },
     };
 
     const config = statusConfig[connectionStatus];
 
     return (
-      <div className={`flex items-center gap-1 text-xs ${config.color}`} title={config.text}>
-        <span>{config.icon}</span>
-        <span className="hidden sm:inline">{config.text}</span>
+      <div className={`flex items-center gap-2 px-3 py-2 rounded-full border ${config.bgColor} ${config.borderColor} transition-all duration-200`} title={config.text}>
+        <span className={`material-icons text-sm ${config.iconColor} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}>
+          {config.icon}
+        </span>
+        <span className={`text-xs font-medium ${config.iconColor} hidden sm:inline`}>
+          {config.text}
+        </span>
       </div>
     );
   };
@@ -277,13 +305,8 @@ export function RealtimeShoppingList({
   }, [list.id, onListUpdate]);
 
   return (
-    <div className="relative">
-      {/* Connection status indicator */}
-      <div className="absolute top-2 right-2 z-30">
-        <ConnectionIndicator />
-      </div>
-      
-      {/* Shopping list view */}
+    <div className="relative">      
+      {/* Shopping list view with connection status passed as prop */}
       <ShoppingListView
         list={list}
         allLists={allLists}
@@ -294,6 +317,7 @@ export function RealtimeShoppingList({
         onSelectList={onSelectList}
         onListUpdate={handleListUpdate}
         onCreateList={onCreateList}
+        connectionIndicator={<ConnectionIndicator />}
       />
     </div>
   );

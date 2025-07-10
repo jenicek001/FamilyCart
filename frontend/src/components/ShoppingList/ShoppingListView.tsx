@@ -22,6 +22,7 @@ interface ShoppingListViewProps {
   onSelectList?: (list: ShoppingList) => void;
   onListUpdate?: (updatedList: ShoppingList) => void;
   onCreateList?: () => void;
+  connectionIndicator?: React.ReactNode;
 }
 
 export function ShoppingListView({ 
@@ -33,7 +34,8 @@ export function ShoppingListView({
   onBackToSelector,
   onSelectList,
   onListUpdate,
-  onCreateList
+  onCreateList,
+  connectionIndicator
 }: ShoppingListViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -148,6 +150,13 @@ export function ShoppingListView({
             />
           </div>
           <div className="flex items-center gap-2">
+            {/* Connection status indicator */}
+            {connectionIndicator && (
+              <div>
+                {connectionIndicator}
+              </div>
+            )}
+            
             {/* Rename button */}
             <button 
               onClick={() => setIsRenameDialogOpen(true)}
