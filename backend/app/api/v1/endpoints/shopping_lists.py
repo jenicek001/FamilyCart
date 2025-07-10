@@ -224,7 +224,13 @@ async def update_shopping_list(
     result = await session.execute(
         select(ShoppingList)
         .where(ShoppingList.id == shopping_list.id)
-        .options(selectinload(ShoppingList.items), selectinload(ShoppingList.shared_with), selectinload(ShoppingList.owner))
+        .options(
+            selectinload(ShoppingList.items).selectinload(Item.category),
+            selectinload(ShoppingList.items).selectinload(Item.owner),
+            selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
+            selectinload(ShoppingList.shared_with),
+            selectinload(ShoppingList.owner)
+        )
     )
     shopping_list = result.scalars().first()
 
@@ -234,7 +240,10 @@ async def update_shopping_list(
     if shopping_list.owner_id != current_user.id:
         members.append(UserRead.model_validate(shopping_list.owner, from_attributes=True))
     
-    list_read = ShoppingListRead.model_validate(shopping_list, from_attributes=True, context={"items": items, "members": members})
+    # Create the response object and explicitly set items and members
+    list_read = ShoppingListRead.model_validate(shopping_list, from_attributes=True)
+    list_read.items = items
+    list_read.members = members
     
     # Send real-time notification to list members
     try:

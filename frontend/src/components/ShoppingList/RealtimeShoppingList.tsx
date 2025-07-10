@@ -24,6 +24,7 @@ interface RealtimeShoppingListProps {
   onItemUpdate?: (listId: number, item: Item) => void;
   onItemDelete?: (listId: number, itemId: number) => void;
   onItemCreate?: (listId: number, item: Item) => void;
+  onCreateList?: () => void;
 }
 
 export function RealtimeShoppingList({
@@ -38,6 +39,7 @@ export function RealtimeShoppingList({
   onItemUpdate,
   onItemDelete,
   onItemCreate,
+  onCreateList,
 }: RealtimeShoppingListProps) {
   const { toast } = useToast();
   const { user, token } = useAuth();
@@ -291,6 +293,7 @@ export function RealtimeShoppingList({
         onBackToSelector={onBackToSelector}
         onSelectList={onSelectList}
         onListUpdate={handleListUpdate}
+        onCreateList={onCreateList}
       />
     </div>
   );

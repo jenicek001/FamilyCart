@@ -7,9 +7,10 @@ interface HeaderListSelectorProps {
   currentList: ShoppingList;
   allLists: ShoppingList[];
   onListSelect: (list: ShoppingList) => void;
+  onCreateList?: () => void;
 }
 
-export function HeaderListSelector({ currentList, allLists, onListSelect }: HeaderListSelectorProps) {
+export function HeaderListSelector({ currentList, allLists, onListSelect, onCreateList }: HeaderListSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const getListIcon = (list: ShoppingList) => {
@@ -131,6 +132,31 @@ export function HeaderListSelector({ currentList, allLists, onListSelect }: Head
                   </span>
                 </button>
               ))}
+
+              {/* Create New List Button */}
+              {onCreateList && (
+                <>
+                  <div className="border-t border-[#F3ECE7] my-2" />
+                  <button
+                    onClick={() => {
+                      onCreateList();
+                      setIsOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-3 hover:bg-[#FCFAF8] rounded-lg transition-colors duration-200 text-left group"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-[#ED782A] flex items-center justify-center">
+                      <span className="material-icons text-white text-sm">add</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-[#ED782A]">Create New List</div>
+                      <div className="text-sm text-[#8B7355]">Start a fresh shopping list</div>
+                    </div>
+                    <span className="material-icons text-[#ED782A] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      arrow_forward
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </>

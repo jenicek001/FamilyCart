@@ -1,8 +1,11 @@
 import uuid
 from pydantic import BaseModel
-from typing import Optional, List, Any
+from typing import Optional, List, Any, TYPE_CHECKING
 from datetime import datetime
 from app.schemas.user import UserRead
+
+if TYPE_CHECKING:
+    from app.schemas.item import ItemRead
 
 class ShoppingListBase(BaseModel):
     name: str
@@ -24,7 +27,7 @@ class ShoppingListRead(ShoppingListBase):
     owner_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-    items: List[Any] = []  # Temporarily use Any to avoid serialization issues
+    items: List["ItemRead"] = []  # List of items in this shopping list
     members: List[UserRead] = []  # List of users who have access to this list
 
     class Config:

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import { Edit3 } from 'lucide-react';
 import { ShoppingList, Item, ItemCreate } from '../../types';
 import { ShoppingListItem } from './ShoppingListItem';
 import { SmartSearchBar } from './SmartSearchBar';
@@ -8,6 +9,7 @@ import { HeaderListSelector } from './HeaderListSelector';
 import { getCategoryIcon, getCategoryColorClass } from '../../utils/categories';
 import { useToast } from '../../hooks/use-toast';
 import { ShareDialog } from './ShareDialog';
+import { RenameListDialog } from './RenameListDialog';
 import { UserMenu } from './UserMenu';
 
 interface ShoppingListViewProps {
@@ -19,6 +21,7 @@ interface ShoppingListViewProps {
   onBackToSelector?: () => void;
   onSelectList?: (list: ShoppingList) => void;
   onListUpdate?: (updatedList: ShoppingList) => void;
+  onCreateList?: () => void;
 }
 
 export function ShoppingListView({ 
@@ -29,11 +32,13 @@ export function ShoppingListView({
   onAddItem,
   onBackToSelector,
   onSelectList,
-  onListUpdate
+  onListUpdate,
+  onCreateList
 }: ShoppingListViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { toast } = useToast();
 
@@ -139,9 +144,18 @@ export function ShoppingListView({
               currentList={list}
               allLists={allLists}
               onListSelect={onSelectList || (() => {})}
+              onCreateList={onCreateList}
             />
           </div>
           <div className="flex items-center gap-2">
+            {/* Rename button */}
+            <button 
+              onClick={() => setIsRenameDialogOpen(true)}
+              className="flex items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+              aria-label="Rename list"
+            >
+              <Edit3 className="h-5 w-5" />
+            </button>
             {/* Share button */}
             <button 
               onClick={() => setIsShareDialogOpen(true)}
@@ -284,6 +298,14 @@ export function ShoppingListView({
       <ShareDialog
         isOpen={isShareDialogOpen}
         onClose={() => setIsShareDialogOpen(false)}
+        list={list}
+        onListUpdate={onListUpdate}
+      />
+
+      {/* Rename Dialog */}
+      <RenameListDialog
+        isOpen={isRenameDialogOpen}
+        onClose={() => setIsRenameDialogOpen(false)}
         list={list}
         onListUpdate={onListUpdate}
       />

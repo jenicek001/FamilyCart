@@ -7,6 +7,7 @@ import type { ShoppingList, Item, ItemCreate } from '@/types';
 import { ShoppingListSelector } from '@/components/ShoppingList/ShoppingListSelector';
 import { RealtimeShoppingList } from '@/components/ShoppingList/RealtimeShoppingList';
 import { EmptyState } from '@/components/ShoppingList/EmptyState';
+import { CreateListDialog } from '@/components/ShoppingList/CreateListDialog';
 import { useToast } from '@/hooks/use-toast';
 import { setLastActiveListId, getLastActiveListId } from '@/utils/localStorage';
 
@@ -15,7 +16,6 @@ export default function EnhancedDashboard() {
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [selectedList, setSelectedList] = useState<ShoppingList | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [newListName, setNewListName] = useState('');
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
 
   const { toast } = useToast();
@@ -56,17 +56,17 @@ export default function EnhancedDashboard() {
     }
   }, [token, toast, selectedList]);
 
-  const handleCreateList = async () => {
-    if (!newListName.trim()) return;
-    
+  const handleCreateList = async (name: string, description?: string) => {
     try {
-      const { data } = await apiClient.post<ShoppingList>('/api/v1/shopping-lists/', {
-        name: newListName.trim()
-      });
+      const payload: { name: string; description?: string } = { name };
+      if (description) {
+        payload.description = description;
+      }
+      
+      const { data } = await apiClient.post<ShoppingList>('/api/v1/shopping-lists/', payload);
       
       setLists(prev => [data, ...prev]);
       setSelectedList(data);
-      setNewListName('');
       setIsCreateListDialogOpen(false);
       
       toast({
@@ -80,6 +80,7 @@ export default function EnhancedDashboard() {
         description: "Could not create shopping list.",
         variant: "destructive"
       });
+      throw error; // Re-throw so the dialog can handle the error
     }
   };
 
@@ -241,6 +242,7 @@ export default function EnhancedDashboard() {
           onAddItem={handleAddItem}
           onBackToSelector={handleBackToSelector}
           onSelectList={handleSelectList}
+          onCreateList={() => setIsCreateListDialogOpen(true)}
           onListUpdate={(listId, updatedData) => {
             // Update the list in both lists array and selectedList
             setLists(prev => prev.map(list => 
@@ -313,40 +315,11 @@ export default function EnhancedDashboard() {
       )}
 
       {/* Create List Dialog */}
-      {isCreateListDialogOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-strong max-w-md w-full mx-4 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Create New Shopping List</h3>
-            <input
-              type="text"
-              value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
-              placeholder="Enter list name..."
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors mb-4"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleCreateList();
-                if (e.key === 'Escape') setIsCreateListDialogOpen(false);
-              }}
-            />
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setIsCreateListDialogOpen(false)}
-                className="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateList}
-                disabled={!newListName.trim()}
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Create List
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateListDialog
+        isOpen={isCreateListDialogOpen}
+        onClose={() => setIsCreateListDialogOpen(false)}
+        onCreateList={handleCreateList}
+      />
     </>
   );
 }
