@@ -5,12 +5,13 @@
 
 "use client";
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { ShoppingList, Item } from '../../types';
 import { ShoppingListView } from './ShoppingListView';
 import { useWebSocket, WebSocketMessage } from '../../hooks/use-websocket';
 import { useToast } from '../../hooks/use-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { useShoppingListContextSafe } from '../../contexts/ShoppingListContext';
 
 interface RealtimeShoppingListProps {
   list: ShoppingList;
@@ -43,7 +44,42 @@ export function RealtimeShoppingList({
 }: RealtimeShoppingListProps) {
   const { toast } = useToast();
   const { user, token } = useAuth();
+  const shoppingListContext = useShoppingListContextSafe();
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+
+  // Handle list updates from the share dialog
+  const handleListUpdate = useCallback((updatedList: ShoppingList) => {
+    if (onListUpdate) {
+      onListUpdate(list.id, updatedList);
+    }
+  }, [list.id, onListUpdate]);
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const shoppingListHandlers = useMemo(() => ({
+    onListSelect: onSelectList,
+    onCreateList,
+    onListUpdate: handleListUpdate,
+    connectionStatus,
+    onBackToSelector,
+  }), [onSelectList, onCreateList, handleListUpdate, connectionStatus, onBackToSelector]);
+
+  // Update shopping list context when component mounts or list changes
+  useEffect(() => {
+    if (shoppingListContext) {
+      shoppingListContext.setCurrentList(list);
+      shoppingListContext.setAllLists(allLists);
+      shoppingListContext.setShoppingListHandlers(shoppingListHandlers);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (shoppingListContext) {
+        shoppingListContext.setCurrentList(null);
+        shoppingListContext.setAllLists([]);
+        shoppingListContext.setShoppingListHandlers({});
+      }
+    };
+  }, [list, allLists, shoppingListContext, shoppingListHandlers]);
 
   // Debug logging
   useEffect(() => {
@@ -250,74 +286,14 @@ export function RealtimeShoppingList({
     }
   }, [error, toast, reconnect]);
 
-  // Connection status indicator - Family Warmth themed
-  const ConnectionIndicator = () => {
-    const statusConfig = {
-      connecting: { 
-        icon: 'sync', 
-        bgColor: 'bg-amber-100', 
-        iconColor: 'text-amber-600',
-        borderColor: 'border-amber-200',
-        text: 'Connecting...' 
-      },
-      connected: { 
-        icon: 'wifi', 
-        bgColor: 'bg-green-100', 
-        iconColor: 'text-green-600',
-        borderColor: 'border-green-200',
-        text: 'Live updates' 
-      },
-      disconnected: { 
-        icon: 'wifi_off', 
-        bgColor: 'bg-gray-100', 
-        iconColor: 'text-gray-500',
-        borderColor: 'border-gray-200',
-        text: 'Offline' 
-      },
-      error: { 
-        icon: 'signal_wifi_connected_no_internet_4', 
-        bgColor: 'bg-red-100', 
-        iconColor: 'text-red-600',
-        borderColor: 'border-red-200',
-        text: 'Connection error' 
-      },
-    };
-
-    const config = statusConfig[connectionStatus];
-
-    return (
-      <div className={`flex items-center gap-2 px-2 py-2 rounded-full border ${config.bgColor} ${config.borderColor} transition-all duration-200 h-10`} title={config.text}>
-        <span className={`material-icons text-lg ${config.iconColor} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}>
-          {config.icon}
-        </span>
-        <span className={`text-xs font-medium ${config.iconColor} hidden sm:inline`}>
-          {config.text}
-        </span>
-      </div>
-    );
-  };
-
-  // Handle list updates from the share dialog
-  const handleListUpdate = useCallback((updatedList: ShoppingList) => {
-    if (onListUpdate) {
-      onListUpdate(list.id, updatedList);
-    }
-  }, [list.id, onListUpdate]);
-
   return (
     <div className="relative">      
-      {/* Shopping list view with connection status passed as prop */}
+      {/* Shopping list view - controls now moved to header */}
       <ShoppingListView
         list={list}
-        allLists={allLists}
         onUpdateItem={onUpdateItem}
         onDeleteItem={onDeleteItem}
         onAddItem={onAddItem}
-        onBackToSelector={onBackToSelector}
-        onSelectList={onSelectList}
-        onListUpdate={handleListUpdate}
-        onCreateList={onCreateList}
-        connectionIndicator={<ConnectionIndicator />}
       />
     </div>
   );
