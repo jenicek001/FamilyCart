@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { ShoppingCart, Users, Zap, Shield, ArrowRight, Star } from 'lucide-react';
-import { LoginDialog } from '@/components/auth/LoginDialog';
-import { RegisterDialog } from '@/components/auth/RegisterDialog';
-import { useAuth } from '@/contexts/AuthContext';
+import { LoginDialog } from '../../components/auth/LoginDialog';
+import { RegisterDialog } from '../../components/auth/RegisterDialog';
+import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
