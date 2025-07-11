@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     // No need to manually delete headers - apiClient will handle this
-    router.push('/login');
+    router.push('/');
   };
 
   return (
