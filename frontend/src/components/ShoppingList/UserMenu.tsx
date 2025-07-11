@@ -64,7 +64,7 @@ export function UserMenu({ isOpen, onClose, onToggle }: UserMenuProps) {
         aria-label="User menu"
         aria-expanded={isOpen}
       >
-        <span className="material-icons text-2xl">person</span>
+        <span className="material-icons text-lg">person</span>
       </button>
 
       {/* Dropdown Menu */}

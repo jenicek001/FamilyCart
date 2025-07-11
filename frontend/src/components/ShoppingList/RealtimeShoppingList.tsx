@@ -286,8 +286,8 @@ export function RealtimeShoppingList({
     const config = statusConfig[connectionStatus];
 
     return (
-      <div className={`flex items-center gap-2 px-3 py-2 rounded-full border ${config.bgColor} ${config.borderColor} transition-all duration-200`} title={config.text}>
-        <span className={`material-icons text-sm ${config.iconColor} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}>
+      <div className={`flex items-center gap-2 px-2 py-2 rounded-full border ${config.bgColor} ${config.borderColor} transition-all duration-200 h-10`} title={config.text}>
+        <span className={`material-icons text-lg ${config.iconColor} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}>
           {config.icon}
         </span>
         <span className={`text-xs font-medium ${config.iconColor} hidden sm:inline`}>
