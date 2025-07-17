@@ -152,12 +152,12 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md shadow-2xl rounded-xl border-0" style={{
+      <DialogContent className="max-w-md mx-4 sm:mx-0 p-4 sm:p-6 shadow-2xl rounded-xl border-0" style={{
         backgroundColor: 'rgba(255, 255, 255, 0.98)',
         backdropFilter: 'blur(10px)'
       }}>
-        <DialogHeader className="pb-4" style={{ borderBottomColor: '#f1f5f9' }}>
-          <DialogTitle className="flex items-center gap-3 text-xl" style={{ color: '#0f172a' }}>
+        <DialogHeader className="pb-2 sm:pb-4" style={{ borderBottomColor: '#f1f5f9' }}>
+          <DialogTitle className="flex items-center gap-3 text-lg sm:text-xl" style={{ color: '#0f172a' }}>
             <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
               <Share className="h-5 w-5" style={{ color: '#f59e0b' }} />
             </div>
@@ -362,11 +362,11 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
           </div>
         </div>
 
-        <DialogFooter className="pt-4" style={{ borderTopColor: '#f1f5f9' }}>
+        <DialogFooter className="pt-2 sm:pt-4" style={{ borderTopColor: '#f1f5f9' }}>
           <Button 
             variant="outline" 
             onClick={onClose}
-            className="transition-colors px-6"
+            className="w-full sm:w-auto transition-colors px-6"
             style={{
               backgroundColor: '#ffffff',
               borderColor: '#e2e8f0',

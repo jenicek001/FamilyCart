@@ -98,36 +98,38 @@ export default function Header() {
 
   return (
     <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="container mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <LogoWithText variant="cart-family" size="lg" href="/dashboard" />
           
           {/* Shopping List Controls - when viewing a list */}
           {currentList && (
-            <div className="flex items-center gap-3 ml-4">
+            <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 min-w-0 flex-1">
               {/* Back button for mobile */}
               {onBackToSelector && (
                 <button
                   onClick={onBackToSelector}
-                  className="flex items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 lg:hidden"
+                  className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 lg:hidden flex-shrink-0"
                   aria-label="Back to list selection"
                 >
-                  <span className="material-icons text-lg">arrow_back</span>
+                  <span className="material-icons text-base sm:text-lg">arrow_back</span>
                 </button>
               )}
               
               {/* List Selector */}
-              <HeaderListSelector
-                currentList={currentList}
-                allLists={allLists}
-                onListSelect={onListSelect || (() => {})}
-                onCreateList={onCreateList}
-              />
+              <div className="min-w-0 flex-1">
+                <HeaderListSelector
+                  currentList={currentList}
+                  allLists={allLists}
+                  onListSelect={onListSelect || (() => {})}
+                  onCreateList={onCreateList}
+                />
+              </div>
             </div>
           )}
         </div>
         
-        <nav className="flex items-center gap-3">
+        <nav className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
           {/* Shopping List Action Controls - when viewing a list */}
           {currentList && (
             <>
@@ -141,34 +143,34 @@ export default function Header() {
               {/* Rename button */}
               <button 
                 onClick={() => setIsRenameDialogOpen(true)}
-                className="flex items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+                className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
                 aria-label="Rename list"
               >
-                <Edit3 className="h-5 w-5" />
+                <Edit3 className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
               
               {/* Share button */}
               <button 
                 onClick={() => setIsShareDialogOpen(true)}
-                className="flex items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+                className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
                 aria-label="Share list"
               >
-                <span className="material-icons text-lg">share</span>
+                <span className="material-icons text-base sm:text-lg">share</span>
               </button>
             </>
           )}
           
           {/* User Menu */}
           {loading ? (
-             <Loader2 className="h-6 w-6 animate-spin text-primary"/>
+             <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-primary"/>
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-9 w-9">
+                <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full">
+                  <Avatar className="h-7 w-7 sm:h-9 sm:w-9">
                     {/* Using a service like DiceBear for avatars based on user info */}
                     <AvatarImage src={userBadge?.avatarUrl} alt={userBadge?.displayName || "User"} />
-                    <AvatarFallback className={userBadge ? `${userBadge.color.bg} ${userBadge.color.text} border ${userBadge.color.border} font-medium` : ''}>
+                    <AvatarFallback className={userBadge ? `${userBadge.color.bg} ${userBadge.color.text} border ${userBadge.color.border} font-medium text-xs sm:text-sm` : ''}>
                       {userBadge?.initials || 'FC'}
                     </AvatarFallback>
                   </Avatar>
@@ -180,7 +182,7 @@ export default function Header() {
                     <p className="text-sm font-medium leading-none">
                       {userBadge?.displayName || 'User'}
                     </p>
-                    <p className="text-xs leading-none text-muted-foreground">
+                    <p className="text-xs leading-none text-muted-foreground truncate">
                       {user.email}
                     </p>
                   </div>
@@ -202,7 +204,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
               <Link href="/login">Login</Link>
             </Button>
           )}

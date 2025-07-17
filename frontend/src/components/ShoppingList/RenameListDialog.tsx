@@ -123,11 +123,11 @@ export function RenameListDialog({ isOpen, onClose, list, onListUpdate }: Rename
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md" style={{ backgroundColor: '#ffffff' }}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-xl" style={{ color: '#0f172a' }}>
+      <DialogContent className="max-w-md mx-4 sm:mx-0 p-4 sm:p-6" style={{ backgroundColor: '#ffffff' }}>
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="flex items-center gap-3 text-lg sm:text-xl" style={{ color: '#0f172a' }}>
             <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
-              <Edit3 className="h-5 w-5" style={{ color: '#f59e0b' }} />
+              <Edit3 className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: '#f59e0b' }} />
             </div>
             Rename List
           </DialogTitle>
@@ -173,12 +173,12 @@ export function RenameListDialog({ isOpen, onClose, list, onListUpdate }: Rename
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 pt-2 sm:pt-4 flex-col sm:flex-row">
           <Button 
             variant="outline" 
             onClick={onClose}
             disabled={isLoading}
-            className="transition-colors"
+            className="w-full sm:w-auto transition-colors"
             style={{
               backgroundColor: '#ffffff',
               borderColor: '#e2e8f0',
@@ -196,7 +196,7 @@ export function RenameListDialog({ isOpen, onClose, list, onListUpdate }: Rename
           <Button 
             onClick={handleSave}
             disabled={!canSave || isLoading}
-            className="transition-colors px-6"
+            className="w-full sm:w-auto transition-colors px-6"
             style={{
               backgroundColor: canSave && !isLoading ? '#f59e0b' : '#94a3b8',
               borderColor: 'transparent',

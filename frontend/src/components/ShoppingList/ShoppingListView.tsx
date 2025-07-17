@@ -104,23 +104,23 @@ export function ShoppingListView({
     <div className="relative flex size-full min-h-screen flex-col bg-[#FCFAF8]">
       <div className="layout-container flex h-full grow flex-col">
         {/* Main content */}
-        <main className="px-4 sm:px-6 lg:px-8 flex flex-1 justify-center py-5">
+        <main className="px-2 sm:px-4 lg:px-8 flex flex-1 justify-center py-3 sm:py-5">
           <div className="layout-content-container flex flex-col w-full max-w-2xl flex-1">
             {/* List header with progress info */}
-            <div className="flex items-center justify-between px-2 pb-4 pt-2">
-              <div>
-                <h2 className="text-[#1B130D] text-2xl font-bold leading-tight tracking-[-0.015em]">Shopping List</h2>
-                <p className="text-sm text-gray-600 mt-1">
+            <div className="flex items-center justify-between px-1 sm:px-2 pb-3 sm:pb-4 pt-1 sm:pt-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-[#1B130D] text-lg sm:text-2xl font-bold leading-tight tracking-[-0.015em]">Shopping List</h2>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
                   {Object.values(pendingItemsByCategory).flat().length} items remaining
                   {list.members && list.members.length > 1 && (
-                    <span className="ml-2">• {list.members.length} members</span>
+                    <span className="ml-2 hidden sm:inline">• {list.members.length} members</span>
                   )}
                 </p>
               </div>
             </div>
 
             {/* Search/Add bar */}
-            <div className="mb-4 px-2">
+            <div className="mb-3 sm:mb-4 px-1 sm:px-2">
               <SmartSearchBar
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -134,24 +134,24 @@ export function ShoppingListView({
 
             {/* Pending Items List - Grouped by Category */}
             {Object.keys(pendingItemsByCategory).length > 0 && (
-              <div className="space-y-6 mb-6">
+              <div className="space-y-4 sm:space-y-6 mb-4 sm:mb-6">
                 {allCategories.filter(categoryName => pendingItemsByCategory[categoryName]?.length > 0).map((categoryName) => (
-                  <div key={categoryName} className="space-y-3">
+                  <div key={categoryName} className="space-y-2 sm:space-y-3">
                     {/* Category Header */}
-                    <div className="flex items-center gap-3 px-2 py-2 bg-white rounded-lg border border-[#F3ECE7]">
-                      <div className={`flex items-center justify-center rounded-lg shrink-0 size-8 ${getCategoryColorClass(categoryName)}`}>
-                        <span className="material-icons text-lg">{getCategoryIcon(categoryName)}</span>
+                    <div className="flex items-center gap-2 sm:gap-3 px-2 py-2 bg-white rounded-lg border border-[#F3ECE7]">
+                      <div className={`flex items-center justify-center rounded-lg shrink-0 size-6 sm:size-8 ${getCategoryColorClass(categoryName)}`}>
+                        <span className="material-icons text-base sm:text-lg">{getCategoryIcon(categoryName)}</span>
                       </div>
-                      <div>
-                        <h3 className="text-[#1B130D] font-semibold text-lg">{categoryName}</h3>
-                        <p className="text-sm text-gray-600">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-[#1B130D] font-semibold text-base sm:text-lg truncate">{categoryName}</h3>
+                        <p className="text-xs sm:text-sm text-gray-600">
                           {pendingItemsByCategory[categoryName].length} item{pendingItemsByCategory[categoryName].length !== 1 ? 's' : ''}
                         </p>
                       </div>
                     </div>
                     
                     {/* Items in this category */}
-                    <div className="space-y-2 pl-4">
+                    <div className="space-y-2 pl-2 sm:pl-4">
                       {pendingItemsByCategory[categoryName].map((item: Item) => (
                         <ShoppingListItem
                           key={item.id}
@@ -169,23 +169,23 @@ export function ShoppingListView({
 
             {/* Completed Items - Grouped by Category */}
             {Object.keys(completedItemsByCategory).length > 0 && (
-              <div className="mt-8 pt-6 border-t border-[#F3ECE7]">
-                <h3 className="text-[#1B130D] text-xl font-semibold leading-tight tracking-[-0.01em] px-2 pb-3">
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-[#F3ECE7]">
+                <h3 className="text-[#1B130D] text-lg sm:text-xl font-semibold leading-tight tracking-[-0.01em] px-1 sm:px-2 pb-2 sm:pb-3">
                   Checked Items ({Object.values(completedItemsByCategory).flat().length})
                 </h3>
-                <div className="space-y-4 opacity-60">
+                <div className="space-y-3 sm:space-y-4 opacity-60">
                   {allCategories.filter(categoryName => completedItemsByCategory[categoryName]?.length > 0).map((categoryName) => (
                     <div key={`completed-${categoryName}`} className="space-y-2">
                       {/* Category Header for completed items */}
-                      <div className="flex items-center gap-3 px-2 py-1">
-                        <div className={`flex items-center justify-center rounded-lg shrink-0 size-6 ${getCategoryColorClass(categoryName)} opacity-50`}>
-                          <span className="material-icons text-sm">{getCategoryIcon(categoryName)}</span>
+                      <div className="flex items-center gap-2 sm:gap-3 px-1 sm:px-2 py-1">
+                        <div className={`flex items-center justify-center rounded-lg shrink-0 size-5 sm:size-6 ${getCategoryColorClass(categoryName)} opacity-50`}>
+                          <span className="material-icons text-xs sm:text-sm">{getCategoryIcon(categoryName)}</span>
                         </div>
-                        <h4 className="text-sm font-medium text-gray-500">{categoryName}</h4>
+                        <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">{categoryName}</h4>
                       </div>
                       
                       {/* Completed items in this category */}
-                      <div className="space-y-2 pl-4">
+                      <div className="space-y-2 pl-2 sm:pl-4">
                         {completedItemsByCategory[categoryName].map((item: Item) => (
                           <ShoppingListItem
                             key={item.id}
@@ -205,14 +205,14 @@ export function ShoppingListView({
 
             {/* Empty State */}
             {Object.keys(pendingItemsByCategory).length === 0 && Object.keys(completedItemsByCategory).length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-                  <span className="material-icons text-4xl text-slate-400">shopping_cart</span>
+              <div className="text-center py-8 sm:py-12">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                  <span className="material-icons text-2xl sm:text-4xl text-slate-400">shopping_cart</span>
                 </div>
-                <h3 className="text-xl font-semibold text-slate-600 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-600 mb-2">
                   {searchQuery || selectedCategory !== 'all' ? 'No items found' : 'Your list is empty'}
                 </h3>
-                <p className="text-slate-500 mb-6">
+                <p className="text-sm sm:text-base text-slate-500 mb-4 sm:mb-6 px-4">
                   {searchQuery || selectedCategory !== 'all' 
                     ? 'Try adjusting your search or filter'
                     : 'Use the search bar above to add items to your shopping list'

@@ -59,35 +59,35 @@ export function ConfirmationDialog({
       />
       
       {/* Dialog */}
-      <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6 border border-[#F3ECE7]">
+      <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-2 sm:mx-4 p-4 sm:p-6 border border-[#F3ECE7]">
         {/* Icon and Title */}
         <div className="flex items-center gap-3 mb-4">
-          <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 ${styles.iconColor}`}>
-            <span className="material-icons text-2xl">{styles.icon}</span>
+          <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 ${styles.iconColor}`}>
+            <span className="material-icons text-xl sm:text-2xl">{styles.icon}</span>
           </div>
-          <h3 className="text-lg font-semibold text-[#1B130D]">
+          <h3 className="text-base sm:text-lg font-semibold text-[#1B130D]">
             {title}
           </h3>
         </div>
         
         {/* Message */}
-        <div className="mb-6">
-          <p className="text-[#8B7355] leading-relaxed">
+        <div className="mb-4 sm:mb-6">
+          <p className="text-sm sm:text-base text-[#8B7355] leading-relaxed">
             {message}
           </p>
         </div>
         
         {/* Actions */}
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-[#8B7355] hover:text-[#1B130D] font-medium rounded-lg hover:bg-[#F3ECE7] transition-colors duration-200"
+            className="w-full sm:w-auto px-4 py-2 text-[#8B7355] hover:text-[#1B130D] font-medium rounded-lg hover:bg-[#F3ECE7] transition-colors duration-200"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 font-medium rounded-lg transition-colors duration-200 ${styles.confirmButton}`}
+            className={`w-full sm:w-auto px-4 py-2 font-medium rounded-lg transition-colors duration-200 ${styles.confirmButton}`}
           >
             {confirmLabel}
           </button>

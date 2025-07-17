@@ -66,9 +66,9 @@ export function CreateListDialog({ isOpen, onClose, onCreateList }: CreateListDi
       />
       
       {/* Dialog */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div 
-          className="bg-white rounded-xl shadow-strong max-w-md w-full mx-4 transform transition-all duration-200 scale-100"
+          className="bg-white rounded-xl shadow-strong max-w-md w-full max-h-[calc(100vh-1rem)] overflow-y-auto transform transition-all duration-200 scale-100"
           style={{
             background: 'linear-gradient(135deg, #fcfaf8 0%, #f9f5f0 100%)',
             border: '1px solid #f3ece7'
@@ -76,15 +76,15 @@ export function CreateListDialog({ isOpen, onClose, onCreateList }: CreateListDi
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 pb-4">
+          <div className="flex items-center justify-between p-4 sm:p-6 pb-2 sm:pb-4">
             <div className="flex items-center gap-3">
               <div 
                 className="p-2 rounded-lg"
                 style={{ backgroundColor: 'rgba(237, 120, 42, 0.1)' }}
               >
-                <PlusCircle className="h-5 w-5" style={{ color: '#ed782a' }} />
+                <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: '#ed782a' }} />
               </div>
-              <h3 className="text-xl font-semibold" style={{ color: '#1b130d' }}>
+              <h3 className="text-lg sm:text-xl font-semibold" style={{ color: '#1b130d' }}>
                 Create New List
               </h3>
             </div>
@@ -98,7 +98,7 @@ export function CreateListDialog({ isOpen, onClose, onCreateList }: CreateListDi
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="px-6 pb-6">
+          <form onSubmit={handleSubmit} className="px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="space-y-4">
               {/* List Name */}
               <div>
@@ -192,19 +192,19 @@ export function CreateListDialog({ isOpen, onClose, onCreateList }: CreateListDi
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-6">
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6">
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={isCreating}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white/50 rounded-lg transition-colors font-medium disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white/50 rounded-lg transition-colors font-medium disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={!name.trim() || isCreating}
-                className="inline-flex items-center px-6 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 style={{
                   backgroundColor: '#ed782a',
                   color: 'white'

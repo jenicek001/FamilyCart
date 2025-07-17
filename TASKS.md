@@ -1,13 +1,5 @@
 # TASKS.md
-## Purpose of this file: Tracks current tasks, backlog, a**🎨 Visual Identity Creation:**
-* [x] **Logo Design & Generation** (Interactive with AI)
-    * [x] Define brand concepts (family, collaboration, shopping, organization)
-    * [x] Generate logo concepts using AI tools (Gemini, ChatGPT, DALL-E)
-    * [x] Create multiple variations (full logo, icon only, monochrome)
-    * [x] User selected cart-family variant as primary logo
-    * [x] Implemented smart size-based variant selection for readability
-    * [ ] Export optimized favicon formats (16x16, 32x32 with thicker lines)
-    * [x] Test logo visibility at different sizestasks.
+## Purpose of this file:
 * Tracks current tasks, backlog, and sub-tasks.
 * Includes: Bullet list of active work, milestones, and anything discovered mid-process.
 * Prompt to AI: "Update TASK.md to mark XYZ as done and add ABC as a new task."
@@ -557,3 +549,14 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 - CSS classes follow established patterns with bg-*, text-*, border-* utilities
 - Responsive design with `hidden sm:inline` for text labels on mobile
 - Maintains all existing WebSocket connection management and error handling
+
+**🎨 Visual Identity Creation:**
+* [x] **Logo Design & Generation** (Interactive with AI)
+    * [x] Define brand concepts (family, collaboration, shopping, organization)
+    * [x] Generate logo concepts using AI tools (Gemini, ChatGPT, DALL-E)
+    * [x] Create multiple variations (full logo, icon only, monochrome)
+    * [x] User selected cart-family variant as primary logo
+    * [x] Implemented smart size-based variant selection for readability
+    * [ ] Export optimized favicon formats (16x16, 32x32 with thicker lines)
+    * [x] Test logo visibility at different sizestasks.
+

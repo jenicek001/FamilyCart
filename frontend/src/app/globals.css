@@ -46,6 +46,86 @@
   .input-primary {
     @apply w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white;
   }
+
+  /* Mobile-specific fixes */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Ensure proper touch targets on mobile */
+  @media (max-width: 640px) {
+    .mobile-touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Prevent text overflow on mobile */
+    .mobile-text-ellipsis {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    /* Ensure checkboxes are visible on mobile */
+    input[type="checkbox"] {
+      min-width: 20px;
+      min-height: 20px;
+      flex-shrink: 0;
+    }
+    
+    /* Ensure user info is visible on mobile */
+    .mobile-user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      overflow: hidden;
+      line-height: 1.3;
+    }
+    
+    /* Ensure user info text is readable on mobile */
+    .mobile-user-info span {
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Make user color dots more visible on mobile */
+    .mobile-user-dots {
+      min-width: 16px;
+      min-height: 16px;
+      border-width: 2px;
+    }
+    
+    /* Mobile dialog fixes */
+    .mobile-dialog-content {
+      max-width: calc(100vw - 2rem);
+      max-height: calc(100vh - 2rem);
+      margin: 1rem;
+      padding: 1rem;
+    }
+    
+    .mobile-dialog-header {
+      padding: 1rem 1rem 0.5rem 1rem;
+    }
+    
+    .mobile-dialog-footer {
+      padding: 0.5rem 1rem 1rem 1rem;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .mobile-dialog-footer button {
+      width: 100%;
+    }
+    
+    /* Override shadcn dialog content for better mobile experience */
+    [data-radix-dialog-content] {
+      max-width: calc(100vw - 1rem);
+      margin: 0.5rem;
+    }
+  }
 }
 
 @layer base {

@@ -54,31 +54,31 @@ export function HeaderListSelector({ currentList, allLists, onListSelect, onCrea
       {/* Current List Button with integrated selector */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 group hover:bg-[#F3ECE7]/50 rounded-lg px-2 py-1 transition-all duration-200"
+        className="flex items-center gap-2 sm:gap-3 group hover:bg-[#F3ECE7]/50 rounded-lg px-1 sm:px-2 py-1 transition-all duration-200 max-w-full overflow-hidden"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className="text-2xl">{getListIcon(currentList)}</span>
-        <div className="text-left">
-          <div className="flex items-center gap-2">
-            <h1 className="text-[#1B130D] text-xl font-bold leading-tight tracking-[-0.015em]">
+        <span className="text-xl sm:text-2xl flex-shrink-0">{getListIcon(currentList)}</span>
+        <div className="text-left min-w-0 flex-1">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <h1 className="text-[#1B130D] text-lg sm:text-xl font-bold leading-tight tracking-[-0.015em] truncate">
               {currentList.name}
             </h1>
-            <span className="material-icons text-[#8B7355] text-lg group-hover:text-[#ED782A] transition-colors duration-200">
+            <span className="material-icons text-[#8B7355] text-base sm:text-lg group-hover:text-[#ED782A] transition-colors duration-200 flex-shrink-0">
               {isOpen ? 'expand_less' : 'expand_more'}
             </span>
           </div>
-          <div className="text-sm text-[#8B7355] leading-tight flex items-center gap-2">
-            <span>{getPendingItemsCount(currentList)} items</span>
-            <span>•</span>
-            <div className="flex items-center gap-1">
-              <div className="w-12 h-1.5 bg-[#F3ECE7] rounded-full overflow-hidden">
+          <div className="text-xs sm:text-sm text-[#8B7355] leading-tight flex items-center gap-1 sm:gap-2">
+            <span className="whitespace-nowrap">{getPendingItemsCount(currentList)} items</span>
+            <span className="hidden sm:inline">•</span>
+            <div className="flex items-center gap-1 min-w-0">
+              <div className="w-8 sm:w-12 h-1 sm:h-1.5 bg-[#F3ECE7] rounded-full overflow-hidden flex-shrink-0">
                 <div 
                   className="h-full bg-[#ED782A] rounded-full transition-all duration-300"
                   style={{ width: `${getProgressPercentage(currentList)}%` }}
                 />
               </div>
-              <span className="text-xs">{getProgressPercentage(currentList)}%</span>
+              <span className="text-xs whitespace-nowrap">{getProgressPercentage(currentList)}%</span>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function HeaderListSelector({ currentList, allLists, onListSelect, onCrea
           />
           
           {/* Menu */}
-          <div className="absolute top-full left-0 mt-2 bg-white border border-[#F3ECE7] rounded-lg shadow-lg z-20 min-w-80 max-h-80 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#F3ECE7] rounded-lg shadow-lg z-20 min-w-80 sm:min-w-80 max-h-80 overflow-y-auto">
             <div className="p-2">
               <div className="text-xs font-medium text-[#8B7355] px-3 py-2 uppercase tracking-wide">
                 Switch to
@@ -107,27 +107,27 @@ export function HeaderListSelector({ currentList, allLists, onListSelect, onCrea
                     onListSelect(list);
                     setIsOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-3 hover:bg-[#FCFAF8] rounded-lg transition-colors duration-200 text-left group"
+                  className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-3 hover:bg-[#FCFAF8] rounded-lg transition-colors duration-200 text-left group"
                   role="option"
                 >
-                  <span className="text-lg">{getListIcon(list)}</span>
-                  <div className="flex-1">
-                    <div className="font-medium text-[#1B130D]">{list.name}</div>
-                    <div className="text-sm text-[#8B7355] flex items-center gap-2">
-                      <span>{getPendingItemsCount(list)} items</span>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <div className="w-12 h-1.5 bg-[#F3ECE7] rounded-full overflow-hidden">
+                  <span className="text-base sm:text-lg flex-shrink-0">{getListIcon(list)}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-[#1B130D] truncate">{list.name}</div>
+                    <div className="text-sm text-[#8B7355] flex items-center gap-1 sm:gap-2">
+                      <span className="whitespace-nowrap">{getPendingItemsCount(list)} items</span>
+                      <span className="hidden sm:inline">•</span>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <div className="w-8 sm:w-12 h-1 sm:h-1.5 bg-[#F3ECE7] rounded-full overflow-hidden flex-shrink-0">
                           <div 
                             className="h-full bg-[#ED782A] rounded-full transition-all duration-300"
                             style={{ width: `${getProgressPercentage(list)}%` }}
                           />
                         </div>
-                        <span className="text-xs">{getProgressPercentage(list)}%</span>
+                        <span className="text-xs whitespace-nowrap">{getProgressPercentage(list)}%</span>
                       </div>
                     </div>
                   </div>
-                  <span className="material-icons text-[#8B7355] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <span className="material-icons text-[#8B7355] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0 text-base sm:text-lg">
                     arrow_forward
                   </span>
                 </button>
@@ -142,16 +142,16 @@ export function HeaderListSelector({ currentList, allLists, onListSelect, onCrea
                       onCreateList();
                       setIsOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-3 hover:bg-[#FCFAF8] rounded-lg transition-colors duration-200 text-left group"
+                    className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-3 hover:bg-[#FCFAF8] rounded-lg transition-colors duration-200 text-left group"
                   >
-                    <div className="w-5 h-5 rounded-full bg-[#ED782A] flex items-center justify-center">
-                      <span className="material-icons text-white text-sm">add</span>
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#ED782A] flex items-center justify-center flex-shrink-0">
+                      <span className="material-icons text-white text-xs sm:text-sm">add</span>
                     </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-[#ED782A]">Create New List</div>
-                      <div className="text-sm text-[#8B7355]">Start a fresh shopping list</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-[#ED782A] text-sm sm:text-base">Create New List</div>
+                      <div className="text-xs sm:text-sm text-[#8B7355] truncate">Start a fresh shopping list</div>
                     </div>
-                    <span className="material-icons text-[#ED782A] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <span className="material-icons text-[#ED782A] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0 text-base sm:text-lg">
                       arrow_forward
                     </span>
                   </button>
