@@ -28,7 +28,7 @@ class UserBasic(BaseModel):
 class ItemBase(BaseModel):
     name: str
     quantity: Optional[str] = None
-    description: Optional[str] = None
+    comment: Optional[str] = None
     standardized_name: Optional[str] = None
     translations: Optional[dict[str, str]] = None
     
@@ -46,6 +46,11 @@ class ItemBase(BaseModel):
 class ItemCreate(ItemBase):
     category_name: Optional[str] = None # The backend will handle resolving this to a category_id
     icon_name: Optional[str] = None
+    
+    # New structured quantity fields
+    quantity_value: Optional[float] = None
+    quantity_unit_id: Optional[str] = None
+    quantity_display_text: Optional[str] = None
 
 # Properties to receive on item creation via standalone endpoint (requires shopping_list_id)
 class ItemCreateStandalone(ItemCreate):
@@ -55,12 +60,17 @@ class ItemCreateStandalone(ItemCreate):
 class ItemUpdate(BaseModel):
     name: Optional[str] = None
     quantity: Optional[str] = None
-    description: Optional[str] = None
+    comment: Optional[str] = None
     is_completed: Optional[bool] = None
     category_id: Optional[int] = None
     icon_name: Optional[str] = None
     standardized_name: Optional[str] = None
     translations: Optional[dict[str, str]] = None
+    
+    # New structured quantity fields
+    quantity_value: Optional[float] = None
+    quantity_unit_id: Optional[str] = None
+    quantity_display_text: Optional[str] = None
     
     @field_validator('quantity', mode='before')
     @classmethod
@@ -87,6 +97,11 @@ class ItemRead(ItemBase):
     icon_name: Optional[str] = None
     standardized_name: Optional[str] = None
     translations: Optional[dict[str, str]] = None
+    
+    # New structured quantity fields
+    quantity_value: Optional[float] = None
+    quantity_unit_id: Optional[str] = None
+    quantity_display_text: Optional[str] = None
 
     class Config:
         from_attributes = True

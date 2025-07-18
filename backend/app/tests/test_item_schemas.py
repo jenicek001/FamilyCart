@@ -40,7 +40,7 @@ def test_item_read_schema_includes_is_completed():
         "id": 1,
         "name": "Test Item",
         "quantity": "1",
-        "description": "Test description",
+        "comment": "Test comment",
         "shopping_list_id": 1,
         "owner_id": str(uuid4()),
         "last_modified_by_id": str(uuid4()),
@@ -93,12 +93,12 @@ def test_multiple_field_update_with_completion():
     item_update = ItemUpdate(
         name="Updated Name",
         quantity="2",
-        description="Updated description",
+        comment="Updated comment",
         is_completed=True
     )
     
     update_dict = item_update.dict(exclude_unset=True)
-    expected_fields = {"name", "quantity", "description", "is_completed"}
+    expected_fields = {"name", "quantity", "comment", "is_completed"}
     assert set(update_dict.keys()) == expected_fields
     assert update_dict["is_completed"] is True
     assert update_dict["name"] == "Updated Name"

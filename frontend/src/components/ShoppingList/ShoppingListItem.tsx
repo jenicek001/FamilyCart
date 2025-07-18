@@ -6,6 +6,8 @@ import { getCategoryColor, getCategoryIcon, getCategoryColorClass } from '../../
 import { formatSmartTime } from '../../utils/dateUtils';
 import { UserColorDot } from '../ui/UserBadge';
 import { ConfirmationDialog } from '../ui/ConfirmationDialog';
+import { QuantityInput } from '../QuantityInput';
+import { getItemQuantityDisplay, getItemQuantityForEdit, parseUserQuantityInput } from '../../utils/quantity';
 
 interface ShoppingListItemProps {
   item: Item;
@@ -24,7 +26,8 @@ export function ShoppingListItem({
 }: ShoppingListItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
-  const [editQuantity, setEditQuantity] = useState(item.quantity || 1);
+  const [editQuantity, setEditQuantity] = useState(getItemQuantityForEdit(item));
+  const [editComment, setEditComment] = useState(item.comment || '');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const categoryColor = getCategoryColor(item.category?.name);
@@ -33,17 +36,35 @@ export function ShoppingListItem({
 
   const handleSaveEdit = async () => {
     if (editName.trim()) {
-      await onUpdate({
+      // Parse the quantity input
+      const quantityInput = parseUserQuantityInput(editQuantity, item.category?.name);
+      
+      const updates: Partial<Item> = {
         name: editName.trim(),
-        quantity: editQuantity,
-      });
+        comment: editComment.trim() || null,
+      };
+      
+      if (quantityInput) {
+        // Update with structured quantity
+        updates.quantity_value = typeof quantityInput.value === 'string' ? parseFloat(quantityInput.value) : quantityInput.value;
+        updates.quantity_unit_id = quantityInput.unitId;
+        updates.quantity_display_text = quantityInput.displayText || null;
+        // Also update legacy quantity for backward compatibility
+        updates.quantity = editQuantity;
+      } else {
+        // Fallback to legacy quantity
+        updates.quantity = editQuantity;
+      }
+      
+      await onUpdate(updates);
       setIsEditing(false);
     }
   };
 
   const handleCancelEdit = () => {
     setEditName(item.name);
-    setEditQuantity(item.quantity || 1);
+    setEditQuantity(getItemQuantityForEdit(item));
+    setEditComment(item.comment || '');
     setIsEditing(false);
   };
 
@@ -97,13 +118,24 @@ export function ShoppingListItem({
               />
               <div className="flex items-center space-x-2">
                 <label className="text-xs sm:text-sm text-slate-600 font-medium">Qty:</label>
-                <input
-                  type="number"
+                <QuantityInput
                   value={editQuantity}
-                  onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                  onChange={setEditQuantity}
+                  categoryName={item.category?.name}
                   onKeyDown={handleKeyPress}
-                  min="1"
-                  className="w-16 sm:w-20 px-1 sm:px-2 py-1 text-sm sm:text-base border border-slate-300 rounded focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] transition-colors"
+                  className="w-32 sm:w-40"
+                  placeholder="1 piece"
+                />
+              </div>
+              <div>
+                <label className="text-xs sm:text-sm text-slate-600 font-medium block mb-1">Comment:</label>
+                <textarea
+                  value={editComment}
+                  onChange={(e) => setEditComment(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  className="w-full px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] transition-colors resize-none"
+                  placeholder="Add a comment..."
+                  rows={2}
                 />
               </div>
               <div className="flex space-x-2">
@@ -125,12 +157,21 @@ export function ShoppingListItem({
             <>
               <p className={`text-[#1B130D] text-sm sm:text-base font-medium leading-normal truncate ${isCompleted ? 'line-through' : ''}`}>
                 {item.name}
-                {item.quantity && item.quantity > 1 && (
-                  <span className="ml-2 text-xs sm:text-sm text-gray-600">({item.quantity})</span>
-                )}
               </p>
               <p className={`text-xs sm:text-sm font-normal leading-normal truncate ${isCompleted ? 'line-through' : ''}`} style={{ color: categoryColor }}>
                 {item.category?.name || 'Other'}
+                {/* Quantity display */}
+                {getItemQuantityDisplay(item) !== '1' && (
+                  <span className="ml-2 text-xs sm:text-sm text-gray-600">
+                    ({getItemQuantityDisplay(item)})
+                  </span>
+                )}
+                {/* Comment */}
+                {item.comment && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    💬 {item.comment}
+                  </span>
+                )}
               </p>
             </>
           )}

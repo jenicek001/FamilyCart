@@ -11,10 +11,21 @@ import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { icons } from 'lucide-react';
+import { QuantityInput } from '../QuantityInput';
+import { parseUserQuantityInput } from '../../utils/quantity';
 
 interface AddItemFormProps {
   listId: number;
-  onAddItem: (listId: number, item: { name: string; quantity?: string; description?: string; category_name?: string; icon_name?: string }) => void;
+  onAddItem: (listId: number, item: { 
+    name: string; 
+    quantity?: string; 
+    comment?: string; 
+    category_name?: string; 
+    icon_name?: string;
+    quantity_value?: number;
+    quantity_unit_id?: string;
+    quantity_display_text?: string;
+  }) => void;
 }
 
 // Helper to render a Lucide icon dynamically by name
@@ -37,7 +48,7 @@ const DynamicIcon = ({ name, ...props }: { name: string | null | undefined } & R
 export default function AddItemForm({ listId, onAddItem }: AddItemFormProps) {
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('1');
-  const [description, setDescription] = useState('');
+  const [comment, setComment] = useState('');
   const [category, setCategory] = useState('');
   const [iconName, setIconName] = useState('');
   const [isCategorizing, setIsCategorizing] = useState(false);
@@ -96,18 +107,30 @@ export default function AddItemForm({ listId, onAddItem }: AddItemFormProps) {
       return;
     }
     
-    onAddItem(listId, {
+    // Parse the quantity input
+    const quantityInput = parseUserQuantityInput(quantity, category);
+    
+    const itemData = {
       name: itemName,
       quantity: quantity,
-      description: description,
+      comment: comment,
       category_name: category,
       icon_name: iconName,
-    });
+    };
+    
+    // Add structured quantity fields if parsing was successful
+    if (quantityInput) {
+      (itemData as any).quantity_value = typeof quantityInput.value === 'string' ? parseFloat(quantityInput.value) : quantityInput.value;
+      (itemData as any).quantity_unit_id = quantityInput.unitId;
+      (itemData as any).quantity_display_text = quantityInput.displayText || undefined;
+    }
+
+    onAddItem(listId, itemData);
 
     // Reset form
     setItemName('');
     setQuantity('1');
-    setDescription('');
+    setComment('');
     setCategory('');
     setIconName('');
   };
@@ -128,11 +151,12 @@ export default function AddItemForm({ listId, onAddItem }: AddItemFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor={`quantity-${listId}`}>Quantity</Label>
-          <Input 
-            id={`quantity-${listId}`}
-            placeholder="e.g., 1 gallon" 
+          <QuantityInput 
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={setQuantity}
+            categoryName={category}
+            placeholder="e.g., 2 kg, 1 pack, 500 ml"
+            className="w-full"
           />
         </div>
         <div className="space-y-2">
@@ -153,12 +177,12 @@ export default function AddItemForm({ listId, onAddItem }: AddItemFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`description-${listId}`}>Description (Optional)</Label>
+        <Label htmlFor={`comment-${listId}`}>Comment (Optional)</Label>
         <Textarea 
-          id={`description-${listId}`}
+          id={`comment-${listId}`}
           placeholder="Any specific details..." 
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
         />
       </div>
 

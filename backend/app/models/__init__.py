@@ -5,10 +5,12 @@ from .user import User
 from .category import Category
 from .shopping_list import ShoppingList
 from .item import Item
+from .unit import Unit
 
 __all__ = [
     "User",
     "Category",
     "ShoppingList",
     "Item",
+    "Unit",
 ]

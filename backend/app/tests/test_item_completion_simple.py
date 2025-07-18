@@ -35,7 +35,7 @@ async def test_update_item_completion_status_simple(client: AsyncClient, test_db
     item = Item(
         name="Test Item",
         quantity="1",
-        description="Test item for completion",
+        comment="Test item for completion",
         shopping_list_id=shopping_list_id,
         owner_id=test_user["id"],
         last_modified_by_id=test_user["id"],
@@ -86,7 +86,7 @@ async def test_update_item_completion_back_to_false_simple(client: AsyncClient, 
     item = Item(
         name="Test Item",
         quantity="1",
-        description="Test item for completion",
+        comment="Test item for completion",
         shopping_list_id=shopping_list_id,
         owner_id=test_user["id"],
         last_modified_by_id=test_user["id"],

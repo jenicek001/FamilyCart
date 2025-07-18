@@ -94,12 +94,16 @@ async def create_item(
         standardized_name=standardized_name,
         translations=translations,
         quantity=item_in.quantity,
-        description=item_in.description,
+        comment=item_in.comment,
         shopping_list_id=item_in.shopping_list_id,
         owner_id=current_user.id,
         last_modified_by_id=current_user.id,
         category_id=category.id if category else None,
         icon_name=icon_name,
+        # New structured quantity fields
+        quantity_value=item_in.quantity_value,
+        quantity_unit_id=item_in.quantity_unit_id,
+        quantity_display_text=item_in.quantity_display_text,
     )
     session.add(db_item)
     await session.commit()

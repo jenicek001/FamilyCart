@@ -378,14 +378,18 @@ async def create_item_for_list(
     db_item = Item(
         name=item_in.name,
         quantity=item_in.quantity,
-        description=item_in.description,
+        comment=item_in.comment,
         shopping_list_id=shopping_list.id,
         owner_id=user_id,
         last_modified_by_id=user_id,
         category_id=category.id if category else None,
         icon_name=icon_name or (item_in.icon_name if hasattr(item_in, 'icon_name') else None),
         standardized_name=standardized_name,
-        translations=translations
+        translations=translations,
+        # New structured quantity fields
+        quantity_value=item_in.quantity_value,
+        quantity_unit_id=item_in.quantity_unit_id,
+        quantity_display_text=item_in.quantity_display_text,
     )
     
     session.add(db_item)

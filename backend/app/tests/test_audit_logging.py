@@ -34,7 +34,7 @@ async def test_audit_logging_for_item_completion(client: AsyncClient, test_db: A
     item = Item(
         name="Test Item for Audit",
         quantity="1",
-        description="Test item for audit logging",
+        comment="Test item for audit logging",
         shopping_list_id=shopping_list_id,
         owner_id=test_user["id"],
         last_modified_by_id=test_user["id"],
@@ -109,7 +109,7 @@ async def test_no_audit_log_when_completion_status_unchanged(client: AsyncClient
     item = Item(
         name="Test Item No Audit",
         quantity="1",
-        description="Test item for no audit logging",
+        comment="Test item for no audit logging",
         shopping_list_id=shopping_list_id,
         owner_id=test_user["id"],
         last_modified_by_id=test_user["id"],
@@ -157,7 +157,7 @@ async def test_no_audit_log_when_setting_same_completion_status(client: AsyncCli
     item = Item(
         name="Test Item Same Status",
         quantity="1",
-        description="Test item for same status",
+        comment="Test item for same status",
         shopping_list_id=shopping_list_id,
         owner_id=test_user["id"],
         last_modified_by_id=test_user["id"],

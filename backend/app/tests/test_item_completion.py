@@ -45,7 +45,7 @@ async def test_item(test_db: AsyncSession, test_user: dict, test_shopping_list: 
     item = Item(
         name="Test Item",
         quantity="1",
-        description="Test item for completion",
+        comment="Test item for completion",
         shopping_list_id=test_shopping_list.id,
         owner_id=test_user["id"],
         last_modified_by_id=test_user["id"],
@@ -206,7 +206,7 @@ async def test_update_item_completion_preserves_other_fields(client: AsyncClient
     # Get original item data
     original_name = test_item.name
     original_quantity = test_item.quantity
-    original_description = test_item.description
+    original_comment = test_item.comment
     
     response = await client.put(
         f"/api/v1/items/{test_item.id}",
@@ -220,5 +220,5 @@ async def test_update_item_completion_preserves_other_fields(client: AsyncClient
     # Check that other fields are preserved
     assert response_data["name"] == original_name
     assert response_data["quantity"] == original_quantity
-    assert response_data["description"] == original_description
+    assert response_data["comment"] == original_comment
     assert response_data["is_completed"] is True

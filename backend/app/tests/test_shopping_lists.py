@@ -32,7 +32,7 @@ async def test_shopping_list(test_db: AsyncSession, test_user: dict):
     item1 = Item(
         name="Item 1",
         quantity="1",
-        description="First test item",
+        comment="First test item",
         shopping_list_id=shopping_list.id,
         owner_id=test_user["id"],
         category_id=category.id
@@ -41,7 +41,7 @@ async def test_shopping_list(test_db: AsyncSession, test_user: dict):
     item2 = Item(
         name="Item 2",
         quantity="2",
-        description="Second test item",
+        comment="Second test item",
         shopping_list_id=shopping_list.id,
         owner_id=test_user["id"],
         category_id=category.id
@@ -146,7 +146,7 @@ async def test_add_item_to_shopping_list(client: AsyncClient, token_header, test
         json={
             "name": "New Test Item",
             "quantity": "3",
-            "description": "A new item for testing",
+            "comment": "A new item for testing",
             "category_name": "Test Category"
         }
     )
@@ -155,7 +155,7 @@ async def test_add_item_to_shopping_list(client: AsyncClient, token_header, test
     data = response.json()
     assert data["name"] == "New Test Item"
     assert data["quantity"] == "3"
-    assert data["description"] == "A new item for testing"
+    assert data["comment"] == "A new item for testing"
     assert "category" in data
     assert data["category"]["name"] == "Test Category"
 

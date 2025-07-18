@@ -29,9 +29,16 @@ export interface ShoppingListItem {
   updated_at: string; // ISO 8601 date string
   category_id?: number | null;
   category?: Category | null;
-  quantity?: number | null;
-  description?: string | null;
-  notes?: string | null;
+  
+  // Legacy quantity field (for backward compatibility)
+  quantity?: string | null;
+  
+  // New structured quantity fields
+  quantity_value?: number | null;
+  quantity_unit_id?: string | null;
+  quantity_display_text?: string | null;
+  
+  comment?: string | null;
   icon_name?: string | null;
 }
 
@@ -42,9 +49,14 @@ export type Item = ShoppingListItem;
 export interface ItemCreate {
   name: string;
   quantity?: string | null;
-  description?: string | null;
+  comment?: string | null;
   category_name?: string | null;
   icon_name?: string | null;
+  
+  // New structured quantity fields
+  quantity_value?: number | null;
+  quantity_unit_id?: string | null;
+  quantity_display_text?: string | null;
 }
 
 export interface ShoppingList {
@@ -57,3 +69,6 @@ export interface ShoppingList {
   items: ShoppingListItem[];
   members: User[];
 }
+
+// Re-export quantity types
+export * from './quantity';

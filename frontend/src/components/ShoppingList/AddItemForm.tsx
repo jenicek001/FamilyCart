@@ -11,7 +11,7 @@ export function AddItemForm({ onSubmit, onCancel }: AddItemFormProps) {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState('');
-  const [notes, setNotes] = useState('');
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allCategories = getAllCategories();
@@ -27,7 +27,7 @@ export function AddItemForm({ onSubmit, onCancel }: AddItemFormProps) {
         name: name.trim(),
         quantity: String(quantity || 1),
         category_name: finalCategory,
-        description: notes.trim() || null,
+        comment: comment.trim() || null,
         icon_name: null
       });
       
@@ -35,7 +35,7 @@ export function AddItemForm({ onSubmit, onCancel }: AddItemFormProps) {
       setName('');
       setQuantity(1);
       setCategory('');
-      setNotes('');
+      setComment('');
     } catch (error) {
       console.error('Failed to add item:', error);
     } finally {
@@ -119,15 +119,15 @@ export function AddItemForm({ onSubmit, onCancel }: AddItemFormProps) {
           </div>
         </div>
 
-        {/* Notes */}
+        {/* Comment */}
         <div>
-          <label htmlFor="item-notes" className="block text-sm font-medium text-slate-700 mb-2">
-            Notes (Optional)
+          <label htmlFor="item-comment" className="block text-sm font-medium text-slate-700 mb-2">
+            Comment (Optional)
           </label>
           <textarea
-            id="item-notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            id="item-comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Add any additional notes..."
             rows={2}

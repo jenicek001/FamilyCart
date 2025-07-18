@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface ShoppingListCardProps {
   list: ShoppingList;
   currentUser: User | null;
-  onAddItem: (listId: number, item: { name: string; quantity?: string; description?: string; category_name?: string }) => void;
+  onAddItem: (listId: number, item: { name: string; quantity?: string; comment?: string; category_name?: string }) => void;
   onToggleItem: (listId: number, itemId: number) => void;
   onDeleteItem: (listId: number, itemId: number) => void;
   onEditList: (list: ShoppingList) => void;
