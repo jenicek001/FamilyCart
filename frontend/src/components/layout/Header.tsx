@@ -97,7 +97,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-border shadow-sm sticky top-0 z-50">
+    <header className="bg-white/80 backdrop-blur-md border-b border-border shadow-sm sticky-header w-full">
       {/* 2-line mobile layout: top line (logo + actions), bottom line (list selector) */}
       {currentList ? (
         <div className="container mx-auto px-2 sm:px-4">

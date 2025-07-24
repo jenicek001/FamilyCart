@@ -467,6 +467,24 @@ For detailed documentation of major bug fixes and debugging sessions, see:
     * [x] Modern glass morphism effect: semi-transparent white with backdrop blur
     * [x] Content scrolling behind header gets blurred, ensuring clear text readability
     * [x] Maintains professional appearance while solving desktop scrolling readability issues
+    * [x] **FIXED: Mobile header sticky positioning** - Resolved mobile scrolling visibility issues
+        * [x] Removed conflicting `min-h-screen` layout from ShoppingListView component
+        * [x] Updated app layout to use consistent background color (`bg-[#FCFAF8]`)
+        * [x] Fixed scroll container hierarchy to ensure header stays visible during list scrolling
+        * [x] Mobile header now remains sticky and visible during content scrolling on all devices
+        * [x] Maintained blurred transparent effect for both mobile and desktop versions
+    * [x] **FIXED: Mobile header hiding issue (2025-01-21)** - Resolved Safari-specific sticky positioning problems
+        * [x] Added mobile-specific CSS using `position: fixed` for devices under 640px width
+        * [x] Implemented hardware acceleration with `transform: translate3d(0, 0, 0)`
+        * [x] Added proper content padding (`padding-top: 4rem`) to account for fixed header
+        * [x] Enhanced with webkit fallbacks for cross-browser mobile compatibility
+    * [x] **FIXED: Desktop header scrolling issue (2025-01-21)** - Unified fixed positioning for all devices
+        * [x] Updated CSS to use `position: fixed` for all screen sizes (both mobile and desktop)
+        * [x] Removed media query restrictions to ensure consistent behavior across devices
+        * [x] Applied hardware acceleration and proper positioning for all viewports
+        * [x] **CRITICAL FIX: Moved sticky-header CSS outside mobile-only media query**
+        * [x] Removed conflicting Tailwind classes (`sticky top-0 z-50`) from Header component
+        * [x] Header now stays fixed and visible during scrolling on both mobile and desktop
 
 * [x] **Right-Side Icon Standardization**: Unified all header action button and icon sizes
     * [x] **Edit button**: Updated from h-7 w-7 sm:h-8 sm:w-8 to h-8 w-8 sm:h-10 sm:w-10 

@@ -9,9 +9,9 @@ export default function AppLayout({
 }) {
   return (
     <ShoppingListProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-[#FCFAF8] overflow-x-hidden">
         <Header />
-        <main className="flex-grow container mx-auto px-4 py-8">
+        <main className="flex-grow py-3 sm:py-5 relative">
           {children}
         </main>
         <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border">

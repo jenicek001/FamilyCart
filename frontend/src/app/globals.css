@@ -128,6 +128,30 @@
   }
 }
 
+/* Fixed header for all screen sizes - ensures header stays visible during scrolling */
+.sticky-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Ensure body and html don't interfere with positioning */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Add top padding to main content to account for fixed header on all devices */
+main {
+  padding-top: 4rem;
+}
+
 @layer base {
   :root {
     --radius: 0.75rem;
