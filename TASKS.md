@@ -448,6 +448,91 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 **Technical Details:**
 - Updated `config.py` and `.env` to use new Gemini model name
 - Modified `test_ai_providers.py` to use correct model in all test assertions
+
+### 2025-01-24: Header Visual Consistency Improvements ✅ COMPLETED
+* [x] **Logo Size Enhancement**: Increased logo size for better visibility across layouts
+    * [x] Shopping list view: Upgraded from `size="sm"` to `size="2xl"` (h-6 w-6 → h-10 w-10 sm:h-14 sm:w-14)
+    * [x] Dashboard view: Upgraded from `size="lg"` to `size="2xl"` (h-10 w-10 → h-10 w-10 sm:h-14 sm:w-14)  
+    * [x] **FIXED: Logo size consistency** - Both views now use same `2xl` size to prevent loading state changes
+    * [x] Added responsive sizing to prevent mobile layout issues during page loading
+    * [x] Mobile: Logo is 40px (larger than 32px action buttons) for better visual hierarchy
+    * [x] Desktop: Logo is 56px (larger than 40px action buttons) for prominent brand presence
+    * [x] Added new `2xl` size option to Logo component with responsive scaling
+    * [x] Logo now consistently exceeds action button sizes for better visual hierarchy
+    * [x] Improved logo prominence and brand recognition across all viewport sizes
+
+* [x] **Header Background Enhancement**: Improved readability with modern glass morphism effect
+    * [x] **FIXED: Header transparency readability issue** - Added blurred transparent background
+    * [x] Updated from solid `bg-card` to `bg-white/80 backdrop-blur-md` for better readability
+    * [x] Modern glass morphism effect: semi-transparent white with backdrop blur
+    * [x] Content scrolling behind header gets blurred, ensuring clear text readability
+    * [x] Maintains professional appearance while solving desktop scrolling readability issues
+
+* [x] **Right-Side Icon Standardization**: Unified all header action button and icon sizes
+    * [x] **Edit button**: Updated from h-7 w-7 sm:h-8 sm:w-8 to h-8 w-8 sm:h-10 sm:w-10 
+        * [x] Icon size: h-3 w-3 sm:h-4 sm:w-4 → h-4 w-4 sm:h-5 sm:w-5 (Edit3 lucide icon)
+    * [x] **Share button**: Updated from h-7 w-7 sm:h-8 sm:w-8 to h-8 w-8 sm:h-10 sm:w-10
+        * [x] Icon size: text-sm sm:text-base → text-base sm:text-xl (material-icons)
+    * [x] **User avatar**: Updated from h-7 w-7 sm:h-9 sm:w-9 to h-8 w-8 sm:h-10 sm:w-10
+        * [x] Button container remains h-8 w-8 sm:h-10 sm:w-10 for consistent touch targets
+    * [x] **Connection status**: Updated from h-10 to h-8 sm:h-10 and text-lg → text-base sm:text-xl
+        * [x] Maintained mobile (icon only) vs desktop (icon + "Live updates" text) behavior
+    * [x] **Loading spinner**: Updated from h-5 w-5 sm:h-6 sm:w-6 to h-4 w-4 sm:h-5 sm:w-5
+
+**Technical Implementation:**
+- Consistent button sizing: All action buttons now use h-8 w-8 sm:h-10 sm:w-10 for uniform touch targets
+- Standardized icon scaling: Mobile (h-4 w-4, text-base) → Desktop (h-5 w-5, text-xl) across all icons
+- Maintained responsive text behavior: Connection status shows "Live updates" text on desktop only
+- Improved visual hierarchy: Larger logo increases brand presence without affecting functionality
+- Cross-platform consistency: All icon sizes work well on both mobile and desktop layouts
+
+### 2025-01-24: Mobile Header Layout Optimization ✅ COMPLETED
+* [x] **Mobile 2-Line Header Layout**: Redesigned mobile header to solve visibility and readability issues
+    * [x] Analyzed cramped single-line mobile header causing poor list selector visibility 
+    * [x] Implemented responsive 2-line mobile layout: logo + actions on first line, list selector on second line
+    * [x] Created dedicated mobile second line with proper spacing and visual separation
+    * [x] Enhanced HeaderListSelector for improved mobile progress bar visibility (8px width, 1.5px height)
+    * [x] Optimized mobile typography and spacing: gap-2 instead of gap-1 for better touch targets
+    * [x] Maintained desktop single-line header layout unchanged for larger screens
+    * [x] Added proper border separator between header lines on mobile for visual clarity
+    * [x] Tested across multiple mobile viewports (375x667, 414x812) and desktop (1920x1080)
+    * [x] Validated all functionality: dropdown interaction, connection status display, back button positioning
+    * [x] **FINAL FIX: Removed back arrow and fixed desktop layout width issues**
+        * [x] Completely removed back arrow button from both mobile and desktop layouts as requested
+        * [x] Fixed desktop header layout where list selector was taking too much width
+        * [x] Added proper width constraints to desktop list selector (max-w-sm lg:max-w-md)
+        * [x] Restored visibility of all right-side action buttons (edit, share, user) on desktop
+        * [x] Maintained 2-line mobile layout with proper selector width and no back arrow
+        * [x] Tested final implementation across both mobile (375px) and desktop (1920px) viewports
+
+**Technical Implementation:**
+- Mobile-first responsive design: `sm:hidden` classes hide mobile-specific second line on desktop
+- Conditional layout structure: Single-line for dashboard view, 2-line for list view on mobile
+- Enhanced progress indicators: Larger, more readable progress bars on mobile with better percentage display
+- Proper z-index and backdrop handling for dropdown functionality across all viewport sizes
+- Maintained backward compatibility with existing desktop layout and functionality
+- Clean header organization: Logo + actions (line 1), navigation + selector + status (line 2)
+- **Desktop width constraints**: List selector properly constrained with `max-w-sm lg:max-w-md` classes
+- **Complete back arrow removal**: Eliminated confusing navigation element from both responsive layouts
+
+### 2025-01-24: Mobile Shopping List Selector Visibility Issue ✅ COMPLETED
+* [x] **Mobile Layout Problem**: Shopping list selector is not properly visible on mobile phones
+    * [x] Analyzed HeaderListSelector component responsive design issues
+    * [x] Identified problems: hidden selector for single lists, dropdown width issues, header space competition
+    * [x] Create improved mobile-first HeaderListSelector with better responsive design
+    * [x] Implement mobile-specific dropdown positioning and sizing
+    * [x] Test on multiple mobile viewport sizes and orientations
+    * [x] Update layout to prioritize selector visibility on small screens
+    * [x] Ensure selector works well with touch interactions
+
+**Technical Implementation:**
+- Always show selector on mobile even with single list for better UX and "Create New List" access
+- Improved responsive typography: `text-sm sm:text-lg` for mobile-first scaling
+- Better dropdown positioning: `w-screen max-w-sm sm:max-w-md` for mobile width
+- Responsive progress bars: `w-6 sm:w-8 h-1 sm:h-1.5` for proper mobile scaling
+- Touch-friendly spacing: `gap-1 sm:gap-2` with proper touch targets
+- Mobile-specific max height: `max-h-[70vh] sm:max-h-80` to prevent overflow
+- Conditional section headers: Show "Options" instead of "Switch to" for single list scenarios
 - Enhanced `gemini_provider.py` parsing logic with proper fallback handling
 - All test execution instructions now correctly use `poetry run pytest`
 - Created verification test script: `test_icon_suggestion_fix.py`

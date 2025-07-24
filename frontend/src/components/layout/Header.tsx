@@ -85,8 +85,8 @@ export default function Header() {
     const config = statusConfig[connectionStatus];
 
     return (
-      <div className={`flex items-center gap-2 px-2 py-2 rounded-full border ${config.bgColor} ${config.borderColor} transition-all duration-200 h-10`} title={config.text}>
-        <span className={`material-icons text-lg ${config.iconColor} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}>
+      <div className={`flex items-center gap-2 px-2 py-2 rounded-full border ${config.bgColor} ${config.borderColor} transition-all duration-200 h-8 sm:h-10`} title={config.text}>
+        <span className={`material-icons text-base sm:text-xl ${config.iconColor} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}>
           {config.icon}
         </span>
         <span className={`text-xs font-medium ${config.iconColor} hidden sm:inline`}>
@@ -97,50 +97,45 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-          <LogoWithText variant="cart-family" size="lg" href="/dashboard" />
-          
-          {/* Shopping List Controls - when viewing a list */}
-          {currentList && (
-            <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 min-w-0 flex-1">
-              {/* Back button for mobile */}
-              {onBackToSelector && (
-                <button
-                  onClick={onBackToSelector}
-                  className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 lg:hidden flex-shrink-0"
-                  aria-label="Back to list selection"
-                >
-                  <span className="material-icons text-base sm:text-lg">arrow_back</span>
-                </button>
-              )}
-              
-              {/* List Selector */}
-              <div className="min-w-0 flex-1">
-                <HeaderListSelector
-                  currentList={currentList}
-                  allLists={allLists}
-                  onListSelect={onListSelect || (() => {})}
-                  onCreateList={onCreateList}
+    <header className="bg-white/80 backdrop-blur-md border-b border-border shadow-sm sticky top-0 z-50">
+      {/* 2-line mobile layout: top line (logo + actions), bottom line (list selector) */}
+      {currentList ? (
+        <div className="container mx-auto px-2 sm:px-4">
+          {/* First Line: Logo + Actions (mobile) / Full Header (desktop) */}
+          <div className="h-12 sm:h-16 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <LogoWithText 
+                  variant="cart-family" 
+                  size="2xl" 
+                  href="/dashboard" 
                 />
               </div>
+              
+              {/* Desktop List Controls - hidden on mobile */}
+              <div className="hidden sm:flex items-center gap-2 min-w-0 flex-1">
+                {/* Desktop List Selector with constrained width */}
+                <div className="min-w-0 flex-1 max-w-sm lg:max-w-md">
+                  <HeaderListSelector
+                    currentList={currentList}
+                    allLists={allLists}
+                    onListSelect={onListSelect || (() => {})}
+                    onCreateList={onCreateList}
+                  />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-        
-        <nav className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
-          {/* Shopping List Action Controls - when viewing a list */}
-          {currentList && (
-            <>
-              {/* Connection status indicator */}
+            
+            <nav className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              {/* Connection status indicator - desktop only */}
               {connectionStatus && (
-                <div className="flex items-center">
+                <div className="hidden sm:flex items-center">
                   <ConnectionIndicator />
                 </div>
               )}
               
-              {/* Rename button */}
+              {/* Action buttons */}
               <button 
                 onClick={() => setIsRenameDialogOpen(true)}
                 className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
@@ -149,67 +144,149 @@ export default function Header() {
                 <Edit3 className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
               
-              {/* Share button */}
               <button 
                 onClick={() => setIsShareDialogOpen(true)}
-                className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+                className="flex items-center justify-center overflow-hidden rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-[#ED782A] text-white hover:bg-[#D66A25] transition-colors duration-200"
                 aria-label="Share list"
               >
-                <span className="material-icons text-base sm:text-lg">share</span>
+                <span className="material-icons text-base sm:text-xl">share</span>
               </button>
-            </>
-          )}
-          
-          {/* User Menu */}
-          {loading ? (
-             <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-primary"/>
-          ) : user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full">
-                  <Avatar className="h-7 w-7 sm:h-9 sm:w-9">
-                    {/* Using a service like DiceBear for avatars based on user info */}
-                    <AvatarImage src={userBadge?.avatarUrl} alt={userBadge?.displayName || "User"} />
-                    <AvatarFallback className={userBadge ? `${userBadge.color.bg} ${userBadge.color.text} border ${userBadge.color.border} font-medium text-xs sm:text-sm` : ''}>
-                      {userBadge?.initials || 'FC'}
-                    </AvatarFallback>
-                  </Avatar>
+              
+              {/* User Menu */}
+              {loading ? (
+                 <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin text-primary"/>
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full">
+                      <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                        <AvatarImage src={userBadge?.avatarUrl} alt={userBadge?.displayName || "User"} />
+                        <AvatarFallback className={userBadge ? `${userBadge.color.bg} ${userBadge.color.text} border ${userBadge.color.border} font-medium text-xs sm:text-sm` : ''}>
+                          {userBadge?.initials || 'FC'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {userBadge?.displayName || 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                      <Home className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
+                  <Link href="/login">Login</Link>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {userBadge?.displayName || 'User'}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground truncate">
-                      {user.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                  <Home className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
-                  <UserCircle className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
-              <Link href="/login">Login</Link>
-            </Button>
-          )}
-        </nav>
-      </div>
+              )}
+            </nav>
+          </div>
+          
+          {/* Second Line: Mobile List Selector + Connection Status */}
+          <div className="sm:hidden pb-2 border-t border-border/30">
+            <div className="flex items-center gap-2 pt-2">
+              {/* Mobile List Selector - full width */}
+              <div className="min-w-0 flex-1">
+                <HeaderListSelector
+                  currentList={currentList}
+                  allLists={allLists}
+                  onListSelect={onListSelect || (() => {})}
+                  onCreateList={onCreateList}
+                />
+              </div>
+              
+              {/* Mobile Connection Status */}
+              {connectionStatus && (
+                <div className="flex-shrink-0">
+                  <ConnectionIndicator />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Dashboard view - single line layout
+        <div className="container mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+            <div className="flex-shrink-0">
+              <LogoWithText 
+                variant="cart-family" 
+                size="2xl" 
+                href="/dashboard" 
+              />
+            </div>
+          </div>
+          
+          <nav className="flex items-center gap-1 flex-shrink-0">
+            {loading ? (
+               <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin text-primary"/>
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full">
+                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                      <AvatarImage src={userBadge?.avatarUrl} alt={userBadge?.displayName || "User"} />
+                      <AvatarFallback className={userBadge ? `${userBadge.color.bg} ${userBadge.color.text} border ${userBadge.color.border} font-medium text-xs sm:text-sm` : ''}>
+                        {userBadge?.initials || 'FC'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {userBadge?.displayName || 'User'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                    <Home className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/profile')}>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
+          </nav>
+        </div>
+      )}
       
       {/* Dialogs */}
       {currentList && (

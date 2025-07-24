@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface LogoProps {
   variant?: 'cart-family' | 'connected-containers' | 'list' | 'logo' | 'tech-cart';
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   showText?: boolean;
   className?: string;
   href?: string;
@@ -19,19 +19,24 @@ const sizeConfig = {
     gap: 'gap-1.5'
   },
   md: {
-    image: 'h-8 w-8',
-    text: 'text-xl font-headline font-bold',
+    image: 'h-8 w-8 sm:h-9 sm:w-9',
+    text: 'text-xl sm:text-2xl font-headline font-bold',
     gap: 'gap-2'
   },
   lg: {
-    image: 'h-10 w-10',
-    text: 'text-2xl font-headline font-bold',
+    image: 'h-8 w-8 sm:h-10 sm:w-10',
+    text: 'text-xl sm:text-2xl font-headline font-bold',
     gap: 'gap-2'
   },
   xl: {
-    image: 'h-12 w-12',
-    text: 'text-3xl font-headline font-bold',
-    gap: 'gap-3'
+    image: 'h-10 w-10 sm:h-12 sm:w-12',
+    text: 'text-2xl sm:text-3xl font-headline font-bold',
+    gap: 'gap-2 sm:gap-3'
+  },
+  '2xl': {
+    image: 'h-10 w-10 sm:h-14 sm:w-14',
+    text: 'text-2xl sm:text-4xl font-headline font-bold',
+    gap: 'gap-2 sm:gap-4'
   }
 };
 
