@@ -90,50 +90,50 @@ export function ShoppingListItem({
   };
 
   return (
-    <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
+    <div className="bg-white p-3 rounded-xl shadow-sm border border-[#F3ECE7] hover:shadow-md transition-shadow group">
       {/* Main content row */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-start gap-1 sm:gap-3">
         {/* Drag Handle - Hidden on mobile */}
         <button className="hidden sm:block p-1.5 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-100 transition-opacity duration-200">
           <span className="material-icons text-2xl sm:text-3xl">drag_indicator</span>
         </button>
         
         {/* Category Icon */}
-        <div className={`flex items-center justify-center rounded-lg shrink-0 size-8 sm:size-12 ${categoryColorClass}`}>
-          <span className="material-icons text-lg sm:text-2xl">{categoryIcon}</span>
+        <div className={`flex items-center justify-center rounded-lg shrink-0 size-10 sm:size-12 ${categoryColorClass}`}>
+          <span className="material-icons text-xl sm:text-2xl">{categoryIcon}</span>
         </div>
         
-        {/* Content */}
-        <div className="flex-grow min-w-0 pr-2">
+        {/* Content - Takes all available space */}
+        <div className="flex-1 min-w-0 overflow-hidden">
           {isEditing ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <input
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="w-full px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] transition-colors"
+                className="w-full px-3 py-2 text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] transition-colors"
                 placeholder="Item name"
                 autoFocus
               />
               <div className="flex items-center space-x-2">
-                <label className="text-xs sm:text-sm text-slate-600 font-medium">Qty:</label>
+                <label className="text-sm text-slate-600 font-medium whitespace-nowrap">Qty:</label>
                 <QuantityInput
                   value={editQuantity}
                   onChange={setEditQuantity}
                   categoryName={item.category?.name}
                   onKeyDown={handleKeyPress}
-                  className="w-32 sm:w-40"
+                  className="flex-1 min-w-0"
                   placeholder="1 piece"
                 />
               </div>
               <div>
-                <label className="text-xs sm:text-sm text-slate-600 font-medium block mb-1">Comment:</label>
+                <label className="text-sm text-slate-600 font-medium block mb-1">Comment:</label>
                 <textarea
                   value={editComment}
                   onChange={(e) => setEditComment(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="w-full px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] transition-colors resize-none"
+                  className="w-full px-3 py-2 text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED782A]/50 focus:border-[#ED782A] transition-colors resize-none"
                   placeholder="Add a comment..."
                   rows={2}
                 />
@@ -141,76 +141,108 @@ export function ShoppingListItem({
               <div className="flex space-x-2">
                 <button
                   onClick={handleSaveEdit}
-                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#ED782A] text-white rounded hover:bg-[#D66A25] transition-colors"
+                  className="px-4 py-2 text-sm bg-[#ED782A] text-white rounded-lg hover:bg-[#D66A25] transition-colors font-medium"
                 >
                   Save
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                 >
                   Cancel
                 </button>
               </div>
             </div>
           ) : (
-            <>
-              <p className={`text-[#1B130D] text-sm sm:text-base font-medium leading-normal truncate ${isCompleted ? 'line-through' : ''}`}>
-                {item.name}
-              </p>
-              <p className={`text-xs sm:text-sm font-normal leading-normal truncate ${isCompleted ? 'line-through' : ''}`} style={{ color: categoryColor }}>
-                {item.category?.name || 'Other'}
+            <div>
+              {/* Item name - Full width, wraps naturally */}
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className={`text-[#1B130D] text-base font-medium leading-tight flex-1 min-w-0 ${isCompleted ? 'line-through' : ''}`}>
+                  {item.name}
+                </h3>
+              </div>
+              
+              {/* Category and metadata row */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                <span className={`font-medium ${isCompleted ? 'line-through' : ''}`} style={{ color: categoryColor }}>
+                  {item.category?.name || 'Other'}
+                </span>
+                
                 {/* Quantity display */}
                 {getItemQuantityDisplay(item) !== '1' && (
-                  <span className="ml-2 text-xs sm:text-sm text-gray-600">
+                  <span className="text-gray-600 font-medium">
                     ({getItemQuantityDisplay(item)})
                   </span>
                 )}
+                
                 {/* Comment */}
                 {item.comment && (
-                  <span className="ml-2 text-xs text-gray-500">
-                    💬 {item.comment}
+                  <span className="text-gray-500 flex items-center gap-1">
+                    <span>💬</span>
+                    <span className="break-words">{item.comment}</span>
                   </span>
                 )}
-              </p>
-            </>
+              </div>
+            </div>
           )}
         </div>
         
-        {/* Actions */}
-        {!isEditing && (
-          <div className="flex items-center space-x-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="p-1.5 text-gray-500 hover:text-gray-700 transition-colors touch-manipulation"
-              title="Edit item"
-            >
-              <span className="material-icons text-base sm:text-sm">edit</span>
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              className="p-1.5 text-red-500 hover:text-red-700 transition-colors touch-manipulation"
-              title="Delete item"
-            >
-              <span className="material-icons text-base sm:text-sm">delete</span>
-            </button>
+        {/* Action buttons + Checkbox - Right side - Only on desktop hover or always on mobile */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Action buttons */}
+          {!isEditing && (
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-all touch-manipulation opacity-100 sm:opacity-0 group-hover:opacity-100"
+                title="Edit item"
+              >
+                <span className="material-icons text-xl">edit</span>
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-all touch-manipulation opacity-100 sm:opacity-0 group-hover:opacity-100"
+                title="Delete item"
+              >
+                <span className="material-icons text-xl">delete</span>
+              </button>
+            </>
+          )}
+          
+          {/* Checkbox - Same size and alignment as action buttons */}
+          <div className="p-2 flex items-center justify-center">
+            <input
+              type="checkbox"
+              checked={isCompleted}
+              onChange={onToggleComplete}
+              className="h-5 w-5 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer touch-manipulation"
+            />
           </div>
-        )}
-        
-        {/* Checkbox */}
-        <div className="shrink-0">
-          <input
-            type="checkbox"
-            checked={isCompleted}
-            onChange={onToggleComplete}
-            className="h-5 w-5 sm:h-6 sm:w-6 rounded border-[#E7D9CF] border-2 bg-transparent text-[#ED782A] checked:bg-[#ED782A] checked:border-[#ED782A] focus:ring-2 focus:ring-[#ED782A]/50 focus:ring-offset-0 focus:border-[#ED782A] focus:outline-none cursor-pointer touch-manipulation"
-          />
         </div>
       </div>
 
-      {/* User info row - Full width on mobile, hidden during editing */}
+      {/* Mobile user info - Full width usage outside content constraints */}
       {!isEditing && (
-        <div className="flex items-center gap-1 sm:gap-2 text-xs text-gray-500 mt-2 sm:mt-1 pl-10 sm:pl-16">
+        <div className="sm:hidden mt-1 text-xs text-gray-400 pl-11">
+          {/* Added by info - no date, full width */}
+          <div className="flex items-center gap-1">
+            {item.owner && <UserColorDot user={item.owner} size="sm" />}
+            <span>Added by {item.owner?.nickname || item.owner?.email || 'Unknown'}</span>
+          </div>
+          
+          {/* Updated info - with date, full width, single line */}
+          {item.last_modified_by && (
+            <div className="flex items-center gap-1">
+              <UserColorDot user={item.last_modified_by} size="sm" />
+              <span>Updated {formatSmartTime(item.updated_at)} by {item.last_modified_by.nickname || item.last_modified_by.email || 'Unknown'}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Desktop user info row - Hidden on mobile, hidden during editing */}
+      {!isEditing && (
+        <div className="hidden sm:flex items-center gap-1 sm:gap-2 text-xs text-gray-500 mt-2 sm:mt-1 pl-10 sm:pl-16">
           {item.owner && <UserColorDot user={item.owner} size="md" />}
           <span className="shrink-0">
             Added by: {item.owner?.nickname || item.owner?.email || 'Unknown'}
