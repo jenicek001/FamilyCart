@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { ShoppingList, Item } from '../../types';
 import { ShoppingListView } from './ShoppingListView';
 import { useWebSocket, WebSocketMessage } from '../../hooks/use-websocket';
@@ -46,6 +46,9 @@ export function RealtimeShoppingList({
   const { user, token } = useAuth();
   const shoppingListContext = useShoppingListContextSafe();
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  
+  // Ref to track the delayed toast timeout
+  const connectionErrorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle list updates from the share dialog
   const handleListUpdate = useCallback((updatedList: ShoppingList) => {
@@ -244,8 +247,14 @@ export function RealtimeShoppingList({
     }
   }, [connected, connecting, error]);
 
-  // Show connection status in toast when there are issues
+  // Show connection status in toast when there are issues (with delay)
   useEffect(() => {
+    // Clear any existing timeout
+    if (connectionErrorTimeoutRef.current) {
+      clearTimeout(connectionErrorTimeoutRef.current);
+      connectionErrorTimeoutRef.current = null;
+    }
+
     if (error) {
       // Don't show toast for temporary connection states during login
       if (error.includes('Please log in to enable real-time updates') ||
@@ -254,36 +263,47 @@ export function RealtimeShoppingList({
         return;
       }
 
-      // Show different actions based on error type
-      let action = (
-        <button
-          onClick={reconnect}
-          className="px-3 py-1 text-sm bg-white text-red-600 rounded border hover:bg-gray-50"
-        >
-          Retry
-        </button>
-      );
-
-      // For authentication errors, suggest refresh instead
-      if (error.includes('Authentication failed') || error.includes('log in again')) {
-        action = (
+      // Set a timeout to show the toast only if the error persists for more than 10 seconds
+      connectionErrorTimeoutRef.current = setTimeout(() => {
+        // Show different actions based on error type
+        let action = (
           <button
-            onClick={() => window.location.reload()}
+            onClick={reconnect}
             className="px-3 py-1 text-sm bg-white text-red-600 rounded border hover:bg-gray-50"
           >
-            Refresh Page
+            Retry
           </button>
         );
-      }
 
-      toast({
-        title: "Connection issue",
-        description: error,
-        variant: "destructive",
-        duration: 8000,
-        action: action,
-      });
+        // For authentication errors, suggest refresh instead
+        if (error.includes('Authentication failed') || error.includes('log in again')) {
+          action = (
+            <button
+              onClick={() => window.location.reload()}
+              className="px-3 py-1 text-sm bg-white text-red-600 rounded border hover:bg-gray-50"
+            >
+              Refresh Page
+            </button>
+          );
+        }
+
+        toast({
+          title: "Connection issue",
+          description: error,
+          variant: "destructive",
+          duration: 8000,
+          action: action,
+        });
+      }, 10000); // 10 second delay before showing the toast
     }
+
+    // Cleanup function to clear timeout when component unmounts or error changes
+    return () => {
+      if (connectionErrorTimeoutRef.current) {
+        clearTimeout(connectionErrorTimeoutRef.current);
+        connectionErrorTimeoutRef.current = null;
+      }
+    };
   }, [error, toast, reconnect]);
 
   return (

@@ -430,6 +430,24 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 
 ## Discovered During Work
 
+### 2025-07-24: Mobile Connection Issue Toast Delay ✅ COMPLETED
+* [x] **Fixed Mobile Screen Lock WebSocket Connection Issue**
+    * [x] **Problem Analysis**: Mobile WebSocket connections close ~10s after screen lock
+    * [x] **Issue**: Backend reconnects immediately upon screen unlock, but frontend shows "Connection issue" toast for 3-5s
+    * [x] **Root Cause**: Connection error toast shown immediately when WebSocket errors occur
+    * [x] **Solution**: Added 10-second delay before showing connection issue toast
+    * [x] **Implementation**: Added timeout mechanism to prevent showing temporary connection errors
+    * [x] **Behavior**: Toast only appears if connection problem persists for more than 10 seconds
+    * [x] **Benefits**: Eliminates false positive "Connection issue" toasts during normal mobile screen lock/unlock cycles
+    * [x] **Files Modified**: `RealtimeShoppingList.tsx` - updated connection error useEffect with timeout
+
+**Technical Details:**
+- Added `connectionErrorTimeoutRef` to track delayed toast display
+- Modified connection error useEffect to use 10-second timeout before showing toast
+- Added proper cleanup to clear timeout when error resolves or component unmounts
+- Maintains existing error handling for authentication and critical connection issues
+- Toast still appears immediately for non-temporary errors (auth failures, etc.)
+
 ### 2025-01-10: Gemini Model Update & Backend Fixes ✅ COMPLETED
 * [x] **Gemini Model Update to Latest Version**
     * [x] Updated backend to use `gemini-2.5-flash-lite-preview-06-17` (latest model)
