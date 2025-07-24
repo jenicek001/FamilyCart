@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Rename Dialog Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Family Warmth colors */
+        :root {
+            --primary-orange: #ed782a;
+            --primary-text: #1b130d;
+            --border-color: #f3ece7;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="text-center mb-4">
+        <h1 class="text-lg font-bold mb-2">Mobile Rename Dialog Size Test</h1>
+        <p class="text-sm">Screen width: <span id="screen-width"></span>px</p>
+        <button onclick="openDialog()" class="bg-blue-500 text-white px-4 py-2 rounded">Open Rename Dialog</button>
+    </div>
+
+    <!-- Background overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden"></div>
+
+    <!-- Dialog - Current Implementation -->
+    <div id="dialog" class="fixed inset-0 z-50 flex items-center justify-center p-2 hidden">
+        <div class="max-w-sm sm:max-w-md mx-2 sm:mx-4 p-3 sm:p-4 md:p-6 bg-white rounded-lg shadow-lg w-full">
+            <!-- Header -->
+            <div class="pb-2 sm:pb-4">
+                <div class="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl" style="color: #0f172a;">
+                    <div class="p-1.5 sm:p-2 rounded-lg" style="background-color: rgba(245, 158, 11, 0.1);">
+                        <div class="h-4 w-4 sm:h-5 sm:w-5 bg-orange-400 rounded"></div>
+                    </div>
+                    <span class="text-sm sm:text-base md:text-lg">Rename List</span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="space-y-3 sm:space-y-4 py-2 sm:py-4">
+                <!-- List Name Field -->
+                <div class="space-y-1.5 sm:space-y-2">
+                    <label class="block text-xs sm:text-sm font-medium" style="color: #374151;">
+                        List Name *
+                    </label>
+                    <input
+                        type="text"
+                        value="My Shopping List"
+                        class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                        style="border-color: #e2e8f0; background-color: #ffffff;"
+                    />
+                </div>
+
+                <!-- Current Stats - Hidden on small mobile -->
+                <div class="hidden sm:block p-2 sm:p-3 rounded-lg" style="background-color: #f8fafc; border-color: #e2e8f0;">
+                    <div class="flex items-center justify-between text-xs sm:text-sm" style="color: #64748b;">
+                        <span>Current list</span>
+                        <span>5 items</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs sm:text-sm mt-0.5 sm:mt-1" style="color: #64748b;">
+                        <span>Members</span>
+                        <span>2 members</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="gap-2 pt-2 sm:pt-4 flex flex-col sm:flex-row">
+                <button 
+                    onclick="closeDialog()"
+                    class="w-full sm:w-auto text-sm sm:text-base px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 order-2 sm:order-1"
+                >
+                    Cancel
+                </button>
+                <button 
+                    class="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 order-1 sm:order-2"
+                >
+                    Rename List
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateScreenWidth() {
+            document.getElementById('screen-width').textContent = window.innerWidth;
+        }
+
+        function openDialog() {
+            document.getElementById('overlay').classList.remove('hidden');
+            document.getElementById('dialog').classList.remove('hidden');
+        }
+
+        function closeDialog() {
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('dialog').classList.add('hidden');
+        }
+
+        // Update screen width on load and resize
+        updateScreenWidth();
+        window.addEventListener('resize', updateScreenWidth);
+
+        // Close dialog when clicking overlay
+        document.getElementById('overlay').addEventListener('click', closeDialog);
+    </script>
+</body>
+</html>
