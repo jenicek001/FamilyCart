@@ -152,7 +152,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-4 sm:mx-0 p-4 sm:p-6 shadow-2xl rounded-xl border-0" style={{
+      <DialogContent className="max-w-md w-[95vw] sm:w-full mx-auto p-4 sm:p-6 shadow-2xl rounded-xl border-0" style={{
         backgroundColor: 'rgba(255, 255, 255, 0.98)',
         backdropFilter: 'blur(10px)'
       }}>
@@ -165,9 +165,9 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-1">
           {/* Current Members */}
-          <div className="p-4 rounded-xl border" style={{ 
+          <div className="p-3 sm:p-4 rounded-xl border" style={{ 
             backgroundColor: '#fef7ed', 
             borderColor: '#fed7aa' 
           }}>
@@ -175,13 +175,13 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
               <Crown className="h-4 w-4" style={{ color: '#f59e0b' }} />
               Family Members ({(list.members?.length || 0) + 1})
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Owner */}
-              <div className="flex items-center justify-between p-3 rounded-lg shadow-sm border" style={{
+              <div className="flex items-center justify-between p-2 sm:p-3 rounded-lg shadow-sm border" style={{
                 backgroundColor: '#ffffff',
                 borderColor: '#e2e8f0'
               }}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {isOwner && user ? (
                     <UserBadge user={user} size="sm" showName />
                   ) : (
@@ -206,7 +206,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
               
               {/* Members */}
               {list.members?.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-3 rounded-lg shadow-sm border" style={{
+                <div key={member.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg shadow-sm border" style={{
                   backgroundColor: '#ffffff',
                   borderColor: '#e2e8f0'
                 }}>
@@ -217,7 +217,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
                       size="sm"
                       onClick={() => handleRemoveMember(member.id)}
                       disabled={isRemoving === member.id}
-                      className="transition-colors hover:bg-red-50"
+                      className="transition-colors hover:bg-red-50 p-2"
                       style={{ color: '#dc2626' }}
                       onMouseEnter={(e) => e.currentTarget.style.color = '#b91c1c'}
                       onMouseLeave={(e) => e.currentTarget.style.color = '#dc2626'}
@@ -237,7 +237,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
           </div>
 
           {/* Invite by Email */}
-          <div className="p-4 rounded-xl border" style={{
+          <div className="p-3 sm:p-4 rounded-xl border" style={{
             backgroundColor: '#dbeafe',
             borderColor: '#93c5fd'
           }}>
@@ -245,7 +245,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
               <Mail className="h-4 w-4" style={{ color: '#3b82f6' }} />
               Invite Family Member
             </Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="email"
                 type="email"
@@ -257,7 +257,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
                     handleInviteByEmail();
                   }
                 }}
-                className="transition-all duration-200"
+                className="transition-all duration-200 flex-grow"
                 style={{
                   backgroundColor: '#ffffff',
                   borderColor: '#e2e8f0',
@@ -276,7 +276,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
                 onClick={handleInviteByEmail} 
                 disabled={isInviting || !email.trim()}
                 size="sm"
-                className="transition-all duration-200 shadow-sm border-0"
+                className="transition-all duration-200 shadow-sm border-0 w-full sm:w-auto"
                 style={{
                   backgroundColor: '#3b82f6',
                   color: '#ffffff'
@@ -312,7 +312,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
           </div>
 
           {/* Share Link */}
-          <div className="p-4 rounded-xl border" style={{
+          <div className="p-3 sm:p-4 rounded-xl border" style={{
             backgroundColor: '#f0fdf4',
             borderColor: '#bbf7d0'
           }}>
@@ -320,11 +320,11 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
               <Share className="h-4 w-4" style={{ color: '#22c55e' }} />
               Quick Share Link
             </Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 value={shareUrl}
                 readOnly
-                className="text-sm"
+                className="text-sm flex-grow"
                 style={{
                   backgroundColor: '#ffffff',
                   borderColor: '#e2e8f0',
@@ -335,7 +335,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
                 onClick={handleCopyShareUrl}
                 variant="outline"
                 size="sm"
-                className="transition-colors"
+                className="transition-colors w-full sm:w-auto"
                 style={{
                   backgroundColor: '#ffffff',
                   borderColor: '#e2e8f0',

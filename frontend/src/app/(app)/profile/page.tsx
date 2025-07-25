@@ -135,113 +135,134 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold font-headline">Your Profile</h1>
-        <p className="text-muted-foreground">Manage your account details and view your lists.</p>
-      </header>
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto">
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: '#1E293B' }}>Your Profile</h1>
+          <p className="mt-2 text-base sm:text-lg" style={{ color: '#475569' }}>
+            Manage your personal information and shopping lists.
+          </p>
+        </header>
 
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {/* Profile Details Card */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Account Details</CardTitle>
-            <CardDescription>Update your name and email address.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user.full_name || user.email}`}/>
-                  <AvatarFallback>{(user.full_name || user.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left Column: Profile Form */}
+          <div className="lg:col-span-2">
+            <Card className="border-border/50 shadow-lg rounded-xl">
+              <CardHeader className="bg-gray-50/80 rounded-t-xl p-4 sm:p-6 border-b border-border/50">
+                <CardTitle className="flex items-center gap-2 text-lg" style={{ color: '#1E293B' }}>
+                  <UserCircle className="h-6 w-6 text-amber-600" />
+                  Account Details
+                </CardTitle>
+                <CardDescription className="text-sm" style={{ color: '#475569' }}>Update your name and email address.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6">
+                <form onSubmit={handleProfileUpdate} className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user.full_name || user.email}`}/>
+                      <AvatarFallback>{(user.full_name || user.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-xl font-semibold" style={{ color: '#1E293B' }}>{user.nickname || user.full_name || 'New User'}</h2>
+                      <p className="text-sm" style={{ color: '#64748B' }}>{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nickname" className="flex items-center text-sm font-medium" style={{ color: '#334155' }}><User className="inline-block mr-2 h-4 w-4 text-amber-600"/>Nickname *</Label>
+                    <Input 
+                      id="nickname" 
+                      value={newNickname} 
+                      onChange={(e) => setNewNickname(e.target.value)} 
+                      placeholder="Your nickname"
+                      required
+                      className="bg-white/80"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName" className="flex items-center text-sm font-medium" style={{ color: '#334155' }}><UserCircle className="inline-block mr-2 h-4 w-4 text-amber-600"/>Full Name</Label>
+                    <Input 
+                      id="fullName" 
+                      value={newFullName} 
+                      onChange={(e) => setNewFullName(e.target.value)} 
+                      placeholder="Your full name"
+                      className="bg-white/80"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center text-sm font-medium" style={{ color: '#334155' }}><Mail className="inline-block mr-2 h-4 w-4 text-amber-600"/>Email Address</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={newEmail} 
+                      onChange={(e) => setNewEmail(e.target.value)} 
+                      placeholder="your@email.com"
+                      className="bg-white/80"
+                    />
+                  </div>
+                  <Button type="submit" disabled={isUpdating} className="w-full bg-amber-500 hover:bg-amber-600 text-white shadow-md">
+                    {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} 
+                    Save Changes
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column: Lists & Actions */}
+          <div className="space-y-6 lg:space-y-8">
+            <Card className="border-border/50 shadow-lg rounded-xl">
+              <CardHeader className="bg-gray-50/80 rounded-t-xl p-4 sm:p-6 border-b border-border/50">
+                <CardTitle className="text-lg" style={{ color: '#1E293B' }}>My Shopping Lists</CardTitle>
+                <CardDescription className="text-sm" style={{ color: '#475569' }}>An overview of lists you own and are a member of.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 p-4 sm:p-6">
                 <div>
-                  <h2 className="text-xl font-semibold">{user.nickname || user.full_name || 'New User'}</h2>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <h3 className="font-semibold mb-2 text-sm" style={{ color: '#334155' }}>Owned by You ({ownedLists.length})</h3>
+                  {ownedLists.length > 0 ? (
+                    <ul className="space-y-2">
+                      {ownedLists.map(list => <li key={list.id} className="p-2 rounded-lg bg-amber-50/80 text-sm" style={{ color: '#451A03', borderColor: '#FDBA74' }}>{list.name}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">You haven't created any lists yet.</p>
+                  )}
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nickname"><User className="inline-block mr-2 h-4 w-4"/>Nickname *</Label>
-                <Input 
-                  id="nickname" 
-                  value={newNickname} 
-                  onChange={(e) => setNewNickname(e.target.value)} 
-                  placeholder="Your nickname"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fullName"><UserCircle className="inline-block mr-2 h-4 w-4"/>Full Name</Label>
-                <Input 
-                  id="fullName" 
-                  value={newFullName} 
-                  onChange={(e) => setNewFullName(e.target.value)} 
-                  placeholder="Your full name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email"><Mail className="inline-block mr-2 h-4 w-4"/>Email Address</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={newEmail} 
-                  onChange={(e) => setNewEmail(e.target.value)} 
-                  placeholder="your@email.com"
-                />
-              </div>
-              <Button type="submit" disabled={isUpdating} className="w-full">
-                {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} 
-                Save Changes
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <div>
+                  <h3 className="font-semibold mb-2 text-sm" style={{ color: '#334155' }}>Shared with You ({sharedLists.length})</h3>
+                  {sharedLists.length > 0 ? (
+                    <ul className="space-y-2">
+                      {sharedLists.map(list => <li key={list.id} className="p-2 rounded-lg bg-blue-50/80 text-sm" style={{ color: '#1E40AF', borderColor: '#93C5FD' }}>{list.name}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No lists have been shared with you.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Lists Overview Card */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>My Shopping Lists</CardTitle>
-            <CardDescription>An overview of lists you own and are a member of.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">Owned by You ({ownedLists.length})</h3>
-              {ownedLists.length > 0 ? (
-                <ul className="space-y-2">
-                  {ownedLists.map(list => <li key={list.id} className="p-2 rounded-md bg-muted/50 text-sm">{list.name}</li>)}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">You haven't created any lists yet.</p>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Shared with You ({sharedLists.length})</h3>
-              {sharedLists.length > 0 ? (
-                <ul className="space-y-2">
-                  {sharedLists.map(list => <li key={list.id} className="p-2 rounded-md bg-muted/50 text-sm">{list.name}</li>)}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No lists have been shared with you.</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Account Actions Card */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Account Actions</CardTitle>
-            <CardDescription>Manage your account session and data.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col sm:flex-row gap-4">
-            <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto">
-              <LogOut className="mr-2 h-4 w-4" /> Sign Out
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteAccount} className="w-full sm:w-auto">
-              <Trash2 className="mr-2 h-4 w-4" /> Delete Account
-            </Button>
-          </CardContent>
-        </Card>
+            <Card className="border-border/50 shadow-lg rounded-xl">
+              <CardHeader className="bg-gray-50/80 rounded-t-xl p-4 sm:p-6 border-b border-border/50">
+                <CardTitle className="text-lg" style={{ color: '#1E293B' }}>Account Actions</CardTitle>
+                <CardDescription className="text-sm" style={{ color: '#475569' }}>Manage your account session and data.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-4 p-4 sm:p-6">
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout} 
+                  className="flex-grow border-amber-500/80 text-amber-700 hover:bg-amber-50/80 hover:text-amber-800 transition-colors duration-200"
+                >
+                  <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDeleteAccount} 
+                  className="flex-grow bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors duration-200"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Account
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

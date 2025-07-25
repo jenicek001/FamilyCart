@@ -97,7 +97,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-border shadow-sm sticky-header w-full">
+    <header className="bg-white/80 backdrop-blur-md border-b border-border shadow-sm fixed top-0 left-0 right-0 z-50">
       {/* 2-line mobile layout: top line (logo + actions), bottom line (list selector) */}
       {currentList ? (
         <div className="container mx-auto px-2 sm:px-4">
@@ -167,30 +167,43 @@ export default function Header() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
+                  <DropdownMenuContent 
+                    className="w-56 bg-white/95 backdrop-blur-lg border-border/50 shadow-xl rounded-xl" 
+                    align="end" 
+                    forceMount
+                  >
+                    <DropdownMenuLabel className="font-normal p-3">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
+                        <p className="text-sm font-medium leading-none text-gray-800">
                           {userBadge?.displayName || 'User'}
                         </p>
-                        <p className="text-xs leading-none text-muted-foreground truncate">
+                        <p className="text-xs leading-none text-gray-500 truncate">
                           {user.email}
                         </p>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                      <Home className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
+                    <DropdownMenuSeparator className="bg-border/50" />
+                    <DropdownMenuItem 
+                      onClick={() => router.push('/dashboard')}
+                      className="cursor-pointer hover:bg-gray-100/80 focus:bg-gray-100/80 p-3"
+                    >
+                      <Home className="mr-2 h-4 w-4 text-gray-600" />
+                      <span className="text-gray-700">Dashboard</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/profile')}>
-                      <UserCircle className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                    <DropdownMenuItem 
+                      onClick={() => router.push('/profile')}
+                      className="cursor-pointer hover:bg-gray-100/80 focus:bg-gray-100/80 p-3"
+                    >
+                      <UserCircle className="mr-2 h-4 w-4 text-gray-600" />
+                      <span className="text-gray-700">Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                    <DropdownMenuSeparator className="bg-border/50"/>
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="cursor-pointer hover:bg-red-50/80 focus:bg-red-50/80 p-3"
+                    >
+                      <LogOut className="mr-2 h-4 w-4 text-red-500" />
+                      <span className="text-red-500">Log out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -252,30 +265,43 @@ export default function Header() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
+                <DropdownMenuContent 
+                  className="w-56 bg-white/95 backdrop-blur-lg border-border/50 shadow-xl rounded-xl" 
+                  align="end" 
+                  forceMount
+                >
+                  <DropdownMenuLabel className="font-normal p-3">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
+                      <p className="text-sm font-medium leading-none text-gray-800">
                         {userBadge?.displayName || 'User'}
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground truncate">
+                      <p className="text-xs leading-none text-gray-500 truncate">
                         {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                    <Home className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
+                  <DropdownMenuSeparator className="bg-border/50" />
+                  <DropdownMenuItem 
+                    onClick={() => router.push('/dashboard')}
+                    className="cursor-pointer hover:bg-gray-100/80 focus:bg-gray-100/80 p-3"
+                  >
+                    <Home className="mr-2 h-4 w-4 text-gray-600" />
+                    <span className="text-gray-700">Dashboard</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/profile')}>
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                  <DropdownMenuItem 
+                    onClick={() => router.push('/profile')}
+                    className="cursor-pointer hover:bg-gray-100/80 focus:bg-gray-100/80 p-3"
+                  >
+                    <UserCircle className="mr-2 h-4 w-4 text-gray-600" />
+                    <span className="text-gray-700">Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                  <DropdownMenuSeparator className="bg-border/50"/>
+                  <DropdownMenuItem 
+                    onClick={handleLogout}
+                    className="cursor-pointer hover:bg-red-50/80 focus:bg-red-50/80 p-3"
+                  >
+                    <LogOut className="mr-2 h-4 w-4 text-red-500" />
+                    <span className="text-red-500">Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

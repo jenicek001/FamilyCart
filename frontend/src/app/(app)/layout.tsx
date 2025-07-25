@@ -11,7 +11,7 @@ export default function AppLayout({
     <ShoppingListProvider>
       <div className="flex flex-col min-h-screen bg-[#FCFAF8] overflow-x-hidden">
         <Header />
-        <main className="flex-grow py-3 sm:py-5 relative">
+        <main className="flex-grow pt-28 sm:pt-20 pb-5 relative">
           {children}
         </main>
         <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border">
