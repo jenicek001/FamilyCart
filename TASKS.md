@@ -758,3 +758,6 @@ For detailed documentation of major bug fixes and debugging sessions, see:
     * [ ] Export optimized favicon formats (16x16, 32x32 with thicker lines)
     * [x] Test logo visibility at different sizestasks.
 
+## Discovered During Work
+* [ ] 2025-08-14: Add production deployment automation (OCI Free Tier) – implement CI workflow, split stateful/app compose files, firewall automation script, and integrate new `DEPLOY_OCI_FREE_TIER.md` doc.
+
