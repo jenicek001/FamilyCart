@@ -1,0 +1,204 @@
+version: '3.9'
+
+# GitHub Self-Hosted Runners for FamilyCart
+# This compose file sets up multiple runners for parallel builds
+
+services:
+  runner-1:
+    build: 
+      context: ./github-runners
+      dockerfile: Dockerfile
+    container_name: familycart-runner-1
+    environment:
+      - GITHUB_OWNER=jenicek001
+      - GITHUB_REPO=FamilyCart
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - RUNNER_NAME=familycart-self-hosted-1
+      - RUNNER_LABELS=self-hosted,familycart,ubuntu,docker,runner-1
+      - RUNNER_WORK_DIRECTORY=/home/runner/work
+      - RUNNER_GROUP=default
+    volumes:
+      # Docker socket for Docker-in-Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persistent work directory
+      - runner1-work:/home/runner/work
+      # Shared cache for builds
+      - build-cache:/tmp/build-cache
+      # Host tools and caches
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - ~/.docker:/home/runner/.docker:ro
+    networks:
+      - runners-network
+    restart: unless-stopped
+    # Resource limits to prevent one runner from consuming all resources
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '0.5'
+    # Health check
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  runner-2:
+    build: 
+      context: ./github-runners
+      dockerfile: Dockerfile
+    container_name: familycart-runner-2
+    environment:
+      - GITHUB_OWNER=jenicek001
+      - GITHUB_REPO=FamilyCart
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - RUNNER_NAME=familycart-self-hosted-2
+      - RUNNER_LABELS=self-hosted,familycart,ubuntu,docker,runner-2
+      - RUNNER_WORK_DIRECTORY=/home/runner/work
+      - RUNNER_GROUP=default
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner2-work:/home/runner/work
+      - build-cache:/tmp/build-cache
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - ~/.docker:/home/runner/.docker:ro
+    networks:
+      - runners-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  runner-3:
+    build: 
+      context: ./github-runners
+      dockerfile: Dockerfile
+    container_name: familycart-runner-3
+    environment:
+      - GITHUB_OWNER=jenicek001
+      - GITHUB_REPO=FamilyCart
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - RUNNER_NAME=familycart-self-hosted-3
+      - RUNNER_LABELS=self-hosted,familycart,ubuntu,docker,runner-3
+      - RUNNER_WORK_DIRECTORY=/home/runner/work
+      - RUNNER_GROUP=default
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner3-work:/home/runner/work
+      - build-cache:/tmp/build-cache
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - ~/.docker:/home/runner/.docker:ro
+    networks:
+      - runners-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Registry cache for faster image pulls
+  registry-cache:
+    image: registry:2
+    container_name: familycart-registry-cache
+    environment:
+      - REGISTRY_PROXY_REMOTEURL=https://ghcr.io
+      - REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR=inmemory
+    volumes:
+      - registry-cache:/var/lib/registry
+    ports:
+      - "5000:5000"
+    networks:
+      - runners-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+
+  # Monitoring for runners
+  runner-monitor:
+    image: prom/node-exporter:latest
+    container_name: familycart-runner-monitor
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "9100:9100"
+    networks:
+      - runners-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+
+  # Log aggregator for runners
+  runner-logs:
+    image: grafana/promtail:latest
+    container_name: familycart-runner-logs
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - runners-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.2'
+    # Enable with monitoring profile
+    profiles:
+      - monitoring
+
+networks:
+  runners-network:
+    driver: bridge
+    name: familycart-runners
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16
+
+volumes:
+  runner1-work:
+    name: familycart-runner-1-work
+  runner2-work:
+    name: familycart-runner-2-work
+  runner3-work:
+    name: familycart-runner-3-work
+  build-cache:
+    name: familycart-build-cache
+  registry-cache:
+    name: familycart-registry-cache

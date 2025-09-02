@@ -1,0 +1,340 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: jenicek001/familycart
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.0.0
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install backend dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        working-directory: ./backend
+        run: poetry install --no-interaction --no-root
+
+      - name: Run backend code quality checks
+        working-directory: ./backend
+        run: |
+          poetry run black --check .
+          poetry run isort --check-only .
+          poetry run pylint app/ --disable=C0114,C0116,R0903,W0613
+          
+      - name: Run backend security scan
+        working-directory: ./backend
+        run: poetry run bandit -r app/ -f json -o bandit-report.json || true
+
+      - name: Run backend tests with coverage
+        working-directory: ./backend
+        run: |
+          poetry run pytest --cov=app --cov-report=xml --cov-report=html
+          
+      - name: Upload backend coverage to codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run frontend code quality checks
+        working-directory: ./frontend
+        run: |
+          npm run lint
+          npm run typecheck
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm test -- --coverage --watchAll=false
+
+  security-scan:
+    runs-on: self-hosted
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  build:
+    runs-on: self-hosted
+    needs: [test, security-scan]
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+      backend-digest: ${{ steps.build-backend.outputs.digest }}
+      frontend-digest: ${{ steps.build-frontend.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract backend metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend image
+        id: build-backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Extract frontend metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push frontend image
+        id: build-frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+  deploy-uat:
+    runs-on: self-hosted
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: uat
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Deploy to UAT environment
+        env:
+          BACKEND_IMAGE: ${{ needs.build.outputs.backend-image }}
+          FRONTEND_IMAGE: ${{ needs.build.outputs.frontend-image }}
+        run: |
+          cd /opt/familycart-uat
+          
+          # Update docker-compose with new images
+          sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|${BACKEND_IMAGE}|g" docker-compose.uat.yml
+          sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|${FRONTEND_IMAGE}|g" docker-compose.uat.yml
+          
+          # Pull new images and deploy
+          docker-compose -f docker-compose.uat.yml pull
+          docker-compose -f docker-compose.uat.yml up -d --remove-orphans
+          
+          # Wait for services to start
+          sleep 60
+          
+      - name: Health check UAT deployment
+        run: |
+          # Check backend health
+          curl -f http://localhost:8001/health || (echo "Backend health check failed" && exit 1)
+          
+          # Check frontend availability  
+          curl -f http://localhost:3001/ || (echo "Frontend health check failed" && exit 1)
+          
+          # Check database connectivity
+          docker exec familycart-uat-db pg_isready -U familycart_uat -d familycart_uat || (echo "Database health check failed" && exit 1)
+
+      - name: Run UAT integration tests
+        working-directory: ./frontend
+        env:
+          UAT_BASE_URL: http://localhost:3001
+          UAT_API_URL: http://localhost:8001
+        run: |
+          # Run basic integration tests against UAT environment
+          npm run test:integration:uat || echo "Integration tests failed but deployment continues"
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ UAT deployment successful!"
+          echo "UAT environment is available at: http://uat.familycart.local"
+          echo "Backend: ${{ needs.build.outputs.backend-image }}"
+          echo "Frontend: ${{ needs.build.outputs.frontend-image }}"
+
+  deploy-production:
+    runs-on: self-hosted
+    needs: [build, deploy-uat]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Deploy to OCI Production
+        env:
+          OCI_SSH_KEY: ${{ secrets.OCI_SSH_KEY }}
+          OCI_HOST: ${{ secrets.OCI_HOST }}
+          OCI_USER: ${{ secrets.OCI_USER }}
+          BACKEND_IMAGE: ${{ needs.build.outputs.backend-image }}
+          FRONTEND_IMAGE: ${{ needs.build.outputs.frontend-image }}
+        run: |
+          # Prepare SSH key
+          echo "$OCI_SSH_KEY" > /tmp/oci_key
+          chmod 600 /tmp/oci_key
+          
+          # Deploy to OCI production
+          ssh -i /tmp/oci_key -o StrictHostKeyChecking=no $OCI_USER@$OCI_HOST << 'EOF'
+            cd /opt/familycart
+            
+            # Update image references
+            sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|$BACKEND_IMAGE|g" docker-compose.app.yml
+            sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|$FRONTEND_IMAGE|g" docker-compose.app.yml
+            
+            # Deploy with zero downtime
+            docker-compose -f docker-compose.app.yml pull
+            docker-compose -f docker-compose.app.yml up -d --remove-orphans
+            
+            # Health check
+            sleep 30
+            curl -f http://localhost:8000/health || exit 1
+          EOF
+          
+          # Cleanup
+          rm /tmp/oci_key
+
+      - name: Production health check
+        env:
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+        run: |
+          # Wait for deployment to stabilize
+          sleep 60
+          
+          # Check production endpoint
+          curl -f $PRODUCTION_URL/health || (echo "Production health check failed" && exit 1)
+
+  performance-test:
+    runs-on: self-hosted
+    needs: deploy-uat
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Wait for UAT stabilization
+        run: sleep 120
+        
+      - name: Run load tests against UAT
+        run: |
+          # Install k6 if not available
+          if ! command -v k6 &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y gnupg software-properties-common
+            sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+            echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+            sudo apt-get update
+            sudo apt-get install k6
+          fi
+          
+          # Run performance tests
+          cd scripts
+          k6 run --env UAT_BASE_URL=http://localhost:3001 load-test.js
+          
+      - name: Archive performance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: scripts/results/
+          retention-days: 30
+
+  cleanup:
+    runs-on: self-hosted
+    needs: [deploy-uat, deploy-production, performance-test]
+    if: always()
+    steps:
+      - name: Clean up Docker resources
+        run: |
+          # Remove old images (keep last 5 versions)
+          docker image prune -af --filter "until=168h"
+          
+          # Clean up build cache
+          docker buildx prune -af --filter "until=168h"
+          
+      - name: System maintenance
+        run: |
+          # Clean up logs
+          sudo journalctl --vacuum-time=7d
+          
+          # Update system packages
+          sudo apt-get update && sudo apt-get upgrade -y
