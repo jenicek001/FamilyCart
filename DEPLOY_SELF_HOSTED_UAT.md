@@ -465,8 +465,8 @@ jobs:
       - name: Deploy to UAT
         run: |
           cd /opt/familycart-uat
-          docker-compose -f docker-compose.uat.yml pull
-          docker-compose -f docker-compose.uat.yml up -d --remove-orphans
+          docker compose -f docker-compose.uat.yml pull
+          docker compose -f docker-compose.uat.yml up -d --remove-orphans
           
       - name: Health check UAT deployment
         run: |
@@ -492,7 +492,7 @@ jobs:
           echo "$OCI_SSH_KEY" > /tmp/oci_key
           chmod 600 /tmp/oci_key
           ssh -i /tmp/oci_key -o StrictHostKeyChecking=no ubuntu@$OCI_HOST \
-            'cd /opt/familycart && docker-compose -f docker-compose.app.yml pull && docker-compose -f docker-compose.app.yml up -d --remove-orphans'
+            'cd /opt/familycart && docker compose -f docker-compose.app.yml pull && docker compose -f docker-compose.app.yml up -d --remove-orphans'
           rm /tmp/oci_key
 
   performance-test:
@@ -669,7 +669,7 @@ systemctl status docker || systemctl restart docker
    sudo cp .env.uat .env
    
    # Start UAT environment
-   sudo docker-compose -f docker-compose.uat.yml up -d
+   sudo docker compose -f docker-compose.uat.yml up -d
    ```
 
 ### Regular Maintenance Procedures
