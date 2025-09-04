@@ -1,0 +1,25 @@
+# Add deploy directory to gitignore to avoid committing sensitive files
+/deploy/*.env
+/deploy/ssl/
+/deploy/logs/
+/deploy/backups/
+
+# UAT environment files
+.env.uat
+/uat_postgres_data/
+/uat_redis_data/
+/uat_ollama_data/
+
+# GitHub runners work directories
+/runner*-work/
+/build-cache/
+/registry-cache/
+
+# Monitoring data
+/prometheus_data/
+/grafana_data/
+
+# Security files
+*.key
+*.crt
+*.pem

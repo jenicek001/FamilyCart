@@ -1,0 +1,284 @@
+version: '3.9'
+
+# UAT Environment Configuration for FamilyCart
+# This compose file is designed for User Acceptance Testing
+# with isolated database and services on custom ports
+
+services:
+  uat-db:
+    image: postgres:15-alpine
+    container_name: familycart-uat-db
+    environment:
+      - POSTGRES_DB=familycart_uat
+      - POSTGRES_USER=familycart_uat
+      - POSTGRES_PASSWORD=${UAT_DB_PASSWORD}
+    volumes:
+      - uat_postgres_data:/var/lib/postgresql/data
+      - ./postgres-config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    ports:
+      - "5433:5432"  # Different port from development
+    networks:
+      - uat-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familycart_uat -d familycart_uat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Resource limits for UAT environment
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  uat-redis:
+    image: redis:8.0-alpine
+    container_name: familycart-uat-redis
+    command: ["redis-server", "--requirepass", "${UAT_REDIS_PASSWORD}", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6380:6379"  # Different port from development
+    volumes:
+      - uat_redis_data:/data
+    networks:
+      - uat-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${UAT_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Resource limits for UAT environment
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  uat-backend:
+    image: ghcr.io/jenicek001/familycart-backend:latest
+    container_name: familycart-uat-backend
+    environment:
+      - POSTGRES_SERVER=uat-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=familycart_uat
+      - POSTGRES_USER=familycart_uat
+      - POSTGRES_PASSWORD=${UAT_DB_PASSWORD}
+      - REDIS_HOST=uat-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${UAT_REDIS_PASSWORD}
+      - SECRET_KEY=${UAT_SECRET_KEY}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${UAT_TOKEN_EXPIRE_MINUTES:-60}
+      - ENVIRONMENT=uat
+      - DEBUG=false
+      - ALLOWED_HOSTS=${UAT_ALLOWED_HOSTS:-localhost,127.0.0.1,uat.familycart.local}
+      # AI Configuration for UAT
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OLLAMA_HOST=http://uat-ollama:11434
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # WebSocket configuration
+      - WEBSOCKET_ALLOWED_ORIGINS=${UAT_WEBSOCKET_ORIGINS:-http://localhost:3001,https://uat.familycart.local}
+    ports:
+      - "8001:8000"  # Different port from development
+    depends_on:
+      uat-db:
+        condition: service_healthy
+      uat-redis:
+        condition: service_healthy
+    networks:
+      - uat-network
+    volumes:
+      # Mount logs for debugging
+      - ./logs/backend:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    # Resource limits for UAT environment
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  uat-frontend:
+    image: ghcr.io/jenicek001/familycart-frontend:latest
+    container_name: familycart-uat-frontend
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://uat.familycart.local/api
+      - NEXT_PUBLIC_WEBSOCKET_URL=wss://uat.familycart.local/ws
+      - NEXT_PUBLIC_ENVIRONMENT=uat
+      - NEXT_PUBLIC_APP_VERSION=${UAT_APP_VERSION:-latest}
+      # Feature flags for UAT testing
+      - NEXT_PUBLIC_ENABLE_DEBUG_PANEL=${UAT_DEBUG_PANEL:-true}
+      - NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING=${UAT_PERF_MONITORING:-true}
+    ports:
+      - "3001:3000"  # Different port from development
+    depends_on:
+      - uat-backend
+    networks:
+      - uat-network
+    volumes:
+      # Mount logs for debugging
+      - ./logs/frontend:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    # Resource limits for UAT environment
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Reverse proxy and SSL termination for UAT
+  uat-proxy:
+    image: nginx:alpine
+    container_name: familycart-uat-proxy
+    volumes:
+      - ./nginx/uat.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - uat-frontend
+      - uat-backend
+    networks:
+      - uat-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # Optional: Ollama for AI features in UAT (can be disabled to save resources)
+  uat-ollama:
+    image: ollama/ollama:latest
+    container_name: familycart-uat-ollama
+    ports:
+      - "11435:11434"  # Different port from development
+    volumes:
+      - uat_ollama_data:/home/ollama/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - uat-network
+    user: "1000:1000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+    restart: unless-stopped
+    # Resource limits - Ollama can be resource-intensive
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+    # Disable Ollama by default to save resources
+    profiles:
+      - ollama-enabled
+
+  # Monitoring and metrics collection for UAT
+  uat-prometheus:
+    image: prom/prometheus:latest
+    container_name: familycart-uat-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=7d'  # Short retention for UAT
+    volumes:
+      - ./monitoring/prometheus-uat.yml:/etc/prometheus/prometheus.yml:ro
+      - uat_prometheus_data:/prometheus
+    ports:
+      - "9091:9090"  # Different port from development
+    networks:
+      - uat-network
+    restart: unless-stopped
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+    # Enable monitoring profile for UAT testing
+    profiles:
+      - monitoring-enabled
+
+  # Log aggregation for UAT environment
+  uat-fluentd:
+    image: fluentd:v1.16-debian
+    container_name: familycart-uat-fluentd
+    volumes:
+      - ./logs:/fluentd/log
+      - ./fluentd/uat.conf:/fluentd/etc/fluent.conf:ro
+    ports:
+      - "24224:24224"
+    networks:
+      - uat-network
+    restart: unless-stopped
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+    # Enable logging profile for UAT testing
+    profiles:
+      - logging-enabled
+
+networks:
+  uat-network:
+    driver: bridge
+    name: familycart-uat-network
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  uat_postgres_data:
+    name: familycart-uat-postgres-data
+  uat_redis_data:
+    name: familycart-uat-redis-data
+  uat_ollama_data:
+    name: familycart-uat-ollama-data
+  uat_prometheus_data:
+    name: familycart-uat-prometheus-data

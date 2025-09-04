@@ -1,0 +1,59 @@
+# Prometheus configuration for UAT monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # UAT Backend monitoring
+  - job_name: 'uat-backend'
+    static_configs:
+      - targets: ['uat-backend:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # PostgreSQL monitoring (if metrics endpoint is available)
+  - job_name: 'uat-postgres'
+    static_configs:
+      - targets: ['uat-db:5432']
+    scrape_interval: 60s
+
+  # Redis monitoring (if metrics endpoint is available)
+  - job_name: 'uat-redis'
+    static_configs:
+      - targets: ['uat-redis:6379']
+    scrape_interval: 60s
+
+  # Node exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+    scrape_interval: 15s
+
+  # cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    scrape_interval: 30s
+
+  # GitHub Runners monitoring (if enabled)
+  - job_name: 'github-runners'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+    scrape_interval: 30s
+
+  # Nginx metrics (if nginx-prometheus-exporter is used)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['uat-proxy:9113']
+    scrape_interval: 30s
+    # Enable only if nginx exporter is configured
+    honor_labels: true
