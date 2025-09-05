@@ -12,6 +12,7 @@ from app.core.cache import cache_service
 from app.api.middleware import LoggingMiddleware
 from app.api.auth_logging import AuthLoggingMiddleware
 from app.api.cors import setup_cors_middleware  # Import CORS setup
+from prometheus_fastapi_instrumentator import Instrumentator
 import logging
 
 # Configure detailed logging
@@ -41,6 +42,10 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutdown complete")
 
 app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan)
+
+# Add Prometheus metrics instrumentation
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 
 # Add custom middleware for better error logging
 app.add_middleware(LoggingMiddleware)
