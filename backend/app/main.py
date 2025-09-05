@@ -12,6 +12,7 @@ from app.core.cache import cache_service
 from app.api.middleware import LoggingMiddleware
 from app.api.auth_logging import AuthLoggingMiddleware
 from app.api.cors import setup_cors_middleware  # Import CORS setup
+from prometheus_fastapi_instrumentator import Instrumentator
 import logging
 
 # Configure detailed logging
@@ -48,6 +49,10 @@ app.add_middleware(LoggingMiddleware)
 app.add_middleware(AuthLoggingMiddleware)
 # Setup CORS middleware (needs to be added early in middleware chain)
 setup_cors_middleware(app)
+
+# Setup Prometheus metrics
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 
 # Include v1 Routers
 app.include_router(auth_v1_router.router, prefix=settings.API_V1_STR, tags=["auth"])
