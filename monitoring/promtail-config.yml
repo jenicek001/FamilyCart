@@ -1,0 +1,121 @@
+# Promtail configuration for FamilyCart GitHub Runners log collection
+# Collects logs from GitHub runners and system services
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://localhost:3100/loki/api/v1/push
+
+scrape_configs:
+  # GitHub Runners container logs
+  - job_name: github-runners
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: github-runners
+          environment: self-hosted
+          __path__: /var/lib/docker/containers/*/*-json.log
+
+    # Pipeline to parse Docker JSON logs
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs: attrs
+            timestamp: time
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      - output:
+          source: output
+
+  # System logs (from host)
+  - job_name: system-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system-logs
+          environment: self-hosted
+          __path__: /var/log/syslog
+
+  # GitHub Actions runner logs
+  - job_name: runner-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: runner-logs
+          environment: self-hosted
+          __path__: /var/log/github-runners/*.log
+
+    pipeline_stages:
+      - regex:
+          expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<message>.*)'
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05'
+      - labels:
+          level:
+
+  # Docker system logs
+  - job_name: docker-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker-logs
+          environment: self-hosted
+          __path__: /var/log/docker.log
+
+  # Nginx logs (if running on host)
+  - job_name: nginx-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-access
+          environment: self-hosted
+          __path__: /var/log/nginx/access.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<ip>\S+) \S+ \S+ \[(?P<timestamp>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<size>\d+) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"'
+      - timestamp:
+          source: timestamp
+          format: '02/Jan/2006:15:04:05 -0700'
+      - labels:
+          method:
+          status:
+
+  # Additional system monitoring logs
+  - job_name: auth-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: auth-logs
+          environment: self-hosted
+          __path__: /var/log/auth.log
+
+  # GitHub runner service logs
+  - job_name: systemd-runners
+    journal:
+      max_age: 24h
+      labels:
+        job: systemd-runners
+        environment: self-hosted
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        regex: 'github-runner.*'
+        target_label: __tmp_github_runner
+      - source_labels: ['__tmp_github_runner']
+        regex: '(.*)'
+        target_label: runner_unit

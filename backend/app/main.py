@@ -132,6 +132,160 @@ async def health_check():
             detail=f"Service unhealthy: {str(e)}"
         )
 
+# System information endpoint - detailed system metrics for monitoring
+@app.get("/system/info")
+async def system_info():
+    """
+    Detailed system information endpoint for monitoring and administration.
+    Returns comprehensive system metrics and resource usage.
+    """
+    from datetime import datetime
+    import os
+    
+    try:
+        import psutil
+        
+        # Memory information
+        memory = psutil.virtual_memory()
+        
+        # CPU information
+        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu_count = psutil.cpu_count()
+        
+        # Disk usage for root partition
+        disk = psutil.disk_usage('/')
+        
+        # Process information
+        current_process = psutil.Process(os.getpid())
+        process_memory = current_process.memory_info()
+        
+        # System uptime
+        boot_time = psutil.boot_time()
+        uptime_seconds = int((datetime.now().timestamp() - boot_time))
+        
+        system_data = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "service": {
+                "name": settings.PROJECT_NAME,
+                "version": "1.0.0",
+                "environment": getattr(settings, 'ENVIRONMENT', 'production'),
+                "pid": os.getpid()
+            },
+            "system": {
+                "memory": {
+                    "total_gb": round(memory.total / (1024**3), 2),
+                    "available_gb": round(memory.available / (1024**3), 2),
+                    "used_gb": round(memory.used / (1024**3), 2),
+                    "usage_percent": round(memory.percent, 2)
+                },
+                "cpu": {
+                    "usage_percent": round(cpu_percent, 2),
+                    "count": cpu_count
+                },
+                "disk": {
+                    "total_gb": round(disk.total / (1024**3), 2),
+                    "free_gb": round(disk.free / (1024**3), 2),
+                    "used_gb": round(disk.used / (1024**3), 2),
+                    "usage_percent": round((disk.used / disk.total) * 100, 2)
+                },
+                "uptime_seconds": uptime_seconds,
+                "uptime_formatted": str(datetime.fromtimestamp(boot_time))
+            },
+            "process": {
+                "memory_rss_mb": round(process_memory.rss / (1024**2), 2),
+                "memory_vms_mb": round(process_memory.vms / (1024**2), 2),
+                "cpu_percent": round(current_process.cpu_percent(), 2),
+                "create_time": datetime.fromtimestamp(current_process.create_time()).isoformat() + "Z",
+                "num_threads": current_process.num_threads()
+            }
+        }
+        
+        return system_data
+        
+    except ImportError:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="psutil not available - system information cannot be gathered"
+        )
+    except Exception as e:
+        logger.error(f"System info endpoint failed: {e}")
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to gather system information: {str(e)}"
+        )
+
+# Metrics summary endpoint for monitoring dashboard integration
+@app.get("/metrics/summary")
+async def metrics_summary():
+    """
+    Metrics summary endpoint that provides key metrics for dashboard integration.
+    Aggregates important application and system metrics for monitoring.
+    """
+    from datetime import datetime
+    import os
+    
+    try:
+        # Get cache service metrics
+        cache_status = "healthy"
+        cache_info = {}
+        try:
+            await cache_service.ping()
+            # Try to get cache info if available
+            cache_info = {
+                "status": "connected",
+                "type": "redis"
+            }
+        except Exception as e:
+            logger.warning(f"Cache service check failed: {e}")
+            cache_status = "degraded"
+            cache_info = {
+                "status": "disconnected",
+                "error": str(e)
+            }
+        
+        # Get basic system metrics
+        system_metrics = {}
+        try:
+            import psutil
+            memory = psutil.virtual_memory()
+            system_metrics = {
+                "memory_usage_percent": round(memory.percent, 2),
+                "cpu_usage_percent": round(psutil.cpu_percent(interval=0.1), 2),
+                "disk_usage_percent": round((psutil.disk_usage('/').used / psutil.disk_usage('/').total) * 100, 2)
+            }
+        except Exception as e:
+            logger.warning(f"Could not gather system metrics: {e}")
+        
+        summary_data = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "service": {
+                "name": settings.PROJECT_NAME,
+                "status": "operational",
+                "version": "1.0.0",
+                "environment": getattr(settings, 'ENVIRONMENT', 'production')
+            },
+            "cache": cache_info,
+            "system": system_metrics,
+            "endpoints": {
+                "health": "/health",
+                "system_info": "/system/info",
+                "metrics": "/metrics",
+                "api_docs": f"{settings.API_V1_STR}/docs"
+            }
+        }
+        
+        return summary_data
+        
+    except Exception as e:
+        logger.error(f"Metrics summary endpoint failed: {e}")
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate metrics summary: {str(e)}"
+        )
+
 # Root endpoint
 @app.get("/")
 async def root():
