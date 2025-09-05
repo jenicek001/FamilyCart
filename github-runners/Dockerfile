@@ -24,9 +24,9 @@ LABEL org.opencontainers.image.version="${RUNNER_VERSION}"
 LABEL org.opencontainers.image.created="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 LABEL org.opencontainers.image.source="https://github.com/honzik/FamilyCart"
 
-# Install base dependencies with retry logic
-RUN apt-get update && \
-    apt-get install -y \
+# Install base dependencies
+RUN apt-get update \
+    && apt-get install -y \
         curl \
         wget \
         git \
@@ -37,12 +37,13 @@ RUN apt-get update && \
         apt-transport-https \
         ca-certificates \
         sudo \
-        gnupg \
+        gpg-agent \
         software-properties-common \
         build-essential \
         zlib1g-dev \
         gettext \
         libcurl4-openssl-dev \
+        libedit-dev \
         libssl-dev \
         libffi-dev \
         libicu-dev \
@@ -63,14 +64,16 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.12 (available in Ubuntu 22.04 by default)
-RUN apt-get update \
+# Install Python 3.12
+RUN add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
     && apt-get install -y \
-        python3.11 \
-        python3.11-dev \
-        python3.11-venv \
+        python3.12 \
+        python3.12-dev \
+        python3.12-distutils \
+        python3.12-venv \
         python3-pip \
-    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry (latest version 2.x)
@@ -105,7 +108,7 @@ RUN curl -s https://api.github.com/repos/grafana/k6/releases/latest | jq -r '.as
 # Create runner user
 RUN useradd -m -s /bin/bash runner \
     && usermod -aG sudo runner \
-     \
+    && usermod -aG docker runner \
     && echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Set up runner directory
