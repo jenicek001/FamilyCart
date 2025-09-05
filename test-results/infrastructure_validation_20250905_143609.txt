@@ -1,0 +1,66 @@
+FamilyCart Infrastructure Validation Report
+==========================================
+Date: Fri Sep  5 14:36:09 UTC 2025
+Test Run: 20250905_143609
+
+Test 1: Core Infrastructure Files
+================================
+✅ Main docker-compose file: /home/runner/work/FamilyCart/FamilyCart/docker-compose.yml
+✅ UAT docker-compose file: /home/runner/work/FamilyCart/FamilyCart/docker-compose.uat.yml
+✅ GitHub runners docker-compose file: /home/runner/work/FamilyCart/FamilyCart/docker-compose.runners.yml
+✅ Environment example file: /home/runner/work/FamilyCart/FamilyCart/.env.example
+✅ UAT environment example file: /home/runner/work/FamilyCart/FamilyCart/.env.uat.example
+
+Test 2: GitHub Runners Infrastructure
+====================================
+✅ GitHub runners Dockerfile: /home/runner/work/FamilyCart/FamilyCart/deploy/github-runners/Dockerfile
+✅ GitHub runners entrypoint script: /home/runner/work/FamilyCart/FamilyCart/deploy/github-runners/entrypoint.sh
+✅ Runners setup script: /home/runner/work/FamilyCart/FamilyCart/deploy/scripts/setup-github-runners.sh
+✅ Load testing script: /home/runner/work/FamilyCart/FamilyCart/deploy/scripts/load-test.js
+
+Test 3: Monitoring and Observability
+=====================================
+✅ Prometheus configuration: /home/runner/work/FamilyCart/FamilyCart/monitoring/prometheus/prometheus.yml
+✅ UAT Prometheus configuration: /home/runner/work/FamilyCart/FamilyCart/deploy/monitoring/prometheus-uat.yml
+✅ Promtail configuration: /home/runner/work/FamilyCart/FamilyCart/monitoring/promtail-config.yml
+✅ Grafana dashboard: /home/runner/work/FamilyCart/FamilyCart/monitoring/grafana/dashboards/familycart-overview.json
+
+Test 4: Database and Log Configuration
+=====================================
+✅ PostgreSQL configuration: /home/runner/work/FamilyCart/FamilyCart/postgres-config/postgresql.conf
+✅ Fluentd configuration: /home/runner/work/FamilyCart/FamilyCart/fluentd/uat.conf
+
+Test 5: Nginx and SSL Configuration
+===================================
+✅ Nginx UAT configuration: /home/runner/work/FamilyCart/FamilyCart/deploy/nginx/uat.conf
+✅ SSL setup documentation: /home/runner/work/FamilyCart/FamilyCart/nginx/ssl/README.md
+
+Test 6: Backend Configuration
+=============================
+✅ Backend Python dependencies: /home/runner/work/FamilyCart/FamilyCart/backend/pyproject.toml
+✅ Backend main application: /home/runner/work/FamilyCart/FamilyCart/backend/app/main.py
+✅ Backend Python syntax valid
+
+Test 7: CI/CD Pipeline Configuration
+====================================
+✅ GitHub Actions CI workflow: /home/runner/work/FamilyCart/FamilyCart/.github/workflows/ci.yml
+✅ Self-hosted runners configured in CI
+✅ UAT deployment configured in CI
+
+Test 8: Documentation Completeness
+==================================
+✅ Self-hosted UAT deployment guide: /home/runner/work/FamilyCart/FamilyCart/DEPLOY_SELF_HOSTED_UAT.md
+✅ GitHub authorization setup guide: /home/runner/work/FamilyCart/FamilyCart/GITHUB_AUTHORIZATION_SETUP.md
+✅ Runners version update guide: /home/runner/work/FamilyCart/FamilyCart/GITHUB_RUNNERS_VERSIONS_UPDATE.md
+✅ Main project README: /home/runner/work/FamilyCart/FamilyCart/README.md
+
+Test 9: System Requirements Check
+=================================
+✅ docker available
+✅ curl available
+✅ git available
+📦 Docker version: Docker version 28.0.4, build b8034c0
+✅ Docker daemon running
+
+Validation Summary
+=================
