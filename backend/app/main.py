@@ -43,16 +43,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan)
 
+# Add Prometheus metrics instrumentation
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
 # Add custom middleware for better error logging
 app.add_middleware(LoggingMiddleware)
 # Add auth logging middleware
 app.add_middleware(AuthLoggingMiddleware)
 # Setup CORS middleware (needs to be added early in middleware chain)
 setup_cors_middleware(app)
-
-# Setup Prometheus metrics
-instrumentator = Instrumentator()
-instrumentator.instrument(app).expose(app)
 
 # Include v1 Routers
 app.include_router(auth_v1_router.router, prefix=settings.API_V1_STR, tags=["auth"])
@@ -69,6 +69,68 @@ app.include_router(ai_v1_router.router, prefix=settings.API_V1_STR, tags=["ai"])
 
 # Include WebSocket router for v1
 app.include_router(ws_v1_router.router, prefix=settings.API_V1_STR + "/ws", tags=["websockets"])
+
+# Health check endpoint - required for Docker health checks and load testing
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for monitoring and load balancers.
+    Returns 200 OK with service status information.
+    """
+    from datetime import datetime
+    import os
+    
+    try:
+        # Check cache service connection
+        cache_status = "healthy"
+        try:
+            await cache_service.ping()
+        except Exception as e:
+            logger.warning(f"Cache service check failed: {e}")
+            cache_status = "degraded"
+        
+        # Try to get system info, but don't fail if psutil is not available
+        system_info = {}
+        try:
+            import psutil
+            memory_info = psutil.virtual_memory()
+            system_info = {
+                "memory_usage_percent": round(memory_info.percent, 2),
+                "available_memory_gb": round(memory_info.available / (1024**3), 2)
+            }
+            uptime_seconds = int((datetime.now() - datetime.fromtimestamp(psutil.Process(os.getpid()).create_time())).total_seconds())
+        except ImportError:
+            logger.warning("psutil not available, system info will be limited")
+            uptime_seconds = 0
+        except Exception as e:
+            logger.warning(f"Could not gather system info: {e}")
+            uptime_seconds = 0
+        
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "service": {
+                "name": settings.PROJECT_NAME,
+                "version": "1.0.0",
+                "environment": getattr(settings, 'ENVIRONMENT', 'unknown')
+            },
+            "checks": {
+                "cache": cache_status,
+                **system_info
+            },
+            "uptime_seconds": uptime_seconds
+        }
+        
+        return health_data
+        
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        # Return 503 Service Unavailable for serious health issues
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Service unhealthy: {str(e)}"
+        )
 
 # Root endpoint
 @app.get("/")
