@@ -33,6 +33,34 @@ info() {
     echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $1${NC}"
 }
 
+# Get registration token from GitHub API
+get_registration_token() {
+    log "Getting registration token for https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}"
+    
+    # Clean the PAT token (remove any whitespace/newlines)
+    local clean_pat=$(echo "${GITHUB_PAT}" | tr -d '\n\r\t ')
+    
+    local token_response=$(curl -L \
+        -X POST \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${clean_pat}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runners/registration-token \
+        2>/dev/null)
+    
+    if [[ $? -ne 0 ]]; then
+        error "Failed to get registration token from GitHub API"
+    fi
+    
+    local registration_token=$(echo "$token_response" | jq -r '.token' | tr -d '\n\r\t ')
+    
+    if [[ -z "$registration_token" || "$registration_token" == "null" ]]; then
+        error "Invalid registration token received from GitHub API"
+    fi
+    
+    echo "$registration_token"
+}
+
 # Validate required environment variables
 validate_env() {
     log "Validating environment variables..."
@@ -45,8 +73,8 @@ validate_env() {
         error "GITHUB_REPO environment variable is required"
     fi
     
-    if [[ -z "$GITHUB_TOKEN" ]]; then
-        error "GITHUB_TOKEN environment variable is required"
+    if [[ -z "$GITHUB_PAT" ]]; then
+        error "GITHUB_PAT environment variable is required"
     fi
     
     log "Environment validation successful"
@@ -72,16 +100,21 @@ configure_runner() {
             return 0
         else
             warn "Runner configured for different repository, reconfiguring..."
-            ./config.sh remove --token "$GITHUB_TOKEN" || warn "Failed to remove existing configuration"
+            # Get registration token for removal
+            local removal_token=$(get_registration_token)
+            ./config.sh remove --token "$removal_token" || warn "Failed to remove existing configuration"
         fi
     fi
+    
+    # Get fresh registration token
+    local registration_token=$(get_registration_token)
     
     # Configure the runner
     log "Configuring runner for https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}"
     
     ./config.sh \
         --url "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}" \
-        --token "$GITHUB_TOKEN" \
+        --token "$registration_token" \
         --name "$RUNNER_NAME" \
         --work "$RUNNER_WORK_DIRECTORY" \
         --labels "$RUNNER_LABELS" \
@@ -124,7 +157,8 @@ shutdown_runner() {
     # Remove runner configuration
     if [[ -f ".runner" ]]; then
         log "Removing runner configuration..."
-        ./config.sh remove --token "$GITHUB_TOKEN" --unattended || warn "Failed to remove runner configuration"
+        local removal_token=$(get_registration_token)
+        ./config.sh remove --token "$removal_token" --unattended || warn "Failed to remove runner configuration"
     fi
     
     log "Shutdown complete"

@@ -148,10 +148,11 @@ services:
     command:
       - '--path.rootfs=/host'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--web.listen-address=:9101'
     volumes:
       - /:/host:ro,rslave
     ports:
-      - "9100:9100"
+      - "9101:9101"
     networks:
       - runners-network
     restart: unless-stopped
