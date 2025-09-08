@@ -1,11 +1,23 @@
-# Global Rules for AI IDE
+# Global rules for AI IDE
 
 ## 🔄 Project Awareness & Context
 - **Always read `PLANNING.md`** at the start of a new conversation to understand the project's architecture, goals, style, and constraints.
-- **Check `TASKS.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
+- **Check `TASKS.md`** before starting a new task. If the task isn't listed, add it with a brief description and today's date.
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `PLANNING.md`.
 
-## 🧱 Code Structure & Modularity
+## 🌿 Git Branch Naming Conventions
+- **Feature branches**: `feature/sprint-N-brief-description` (e.g., `feature/sprint-7-visual-identity`)
+- **Hotfix branches**: `hotfix/brief-description` (e.g., `hotfix/ssl-certificate-renewal`)
+- **Release branches**: `release/vN.N.N` (e.g., `release/v2.0.0`)
+- **Bug fix branches**: `bugfix/brief-description` (e.g., `bugfix/websocket-connection-timeout`)
+- **Chore branches**: `chore/brief-description` (e.g., `chore/update-dependencies`)
+- **Documentation branches**: `docs/brief-description` (e.g., `docs/api-documentation-update`)
+- **Always use lowercase with hyphens** for readability and consistency
+- **Keep branch names concise but descriptive** (max 50 characters recommended)
+- **Delete feature branches** after successful merge to keep repository clean
+- **Use `develop` branch** for integration of completed features before production release
+
+## 🧱 Code Structure & Modularity Rules for AI IDE
 - **Never create a file longer than 500 lines of code.** If a file approaches this limit, refactor by splitting it into modules or helper files.
 - **Organize code into clearly separated modules**, grouped by feature or responsibility.
 - **Use clear, consistent imports** (prefer relative imports within packages).
