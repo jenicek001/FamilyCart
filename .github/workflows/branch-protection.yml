@@ -1,0 +1,249 @@
+name: Branch Protection CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop, feature/*, hotfix/*, release/*]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: jenicek001/familycart
+
+jobs:
+  validate-branch-name:
+    runs-on: self-hosted
+    steps:
+      - name: Validate branch name
+        if: github.event_name == 'pull_request'
+        run: |
+          branch_name="${{ github.head_ref }}"
+          if [[ ! "$branch_name" =~ ^(feature|hotfix|bugfix|chore|docs|release)/.+ ]]; then
+            echo "❌ Invalid branch name: $branch_name"
+            echo "Branch name must follow the pattern: feature/, hotfix/, bugfix/, chore/, docs/, or release/"
+            echo "See .github/copilot-instructions.md for naming conventions"
+            exit 1
+          fi
+          echo "✅ Branch name is valid: $branch_name"
+
+  code-quality:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.0.0
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install backend dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        working-directory: ./backend
+        run: poetry install --no-interaction --no-root
+
+      - name: Run backend code quality checks
+        working-directory: ./backend
+        run: |
+          echo "Running Black code formatting check..."
+          poetry run black --check . || (echo "❌ Code formatting issues found. Run 'poetry run black .' to fix." && exit 1)
+          
+          echo "Running Isort import sorting check..."
+          poetry run isort --check-only . || (echo "❌ Import sorting issues found. Run 'poetry run isort .' to fix." && exit 1)
+          
+          echo "Running PyLint code quality check..."
+          poetry run pylint app/ --disable=C0114,C0116,R0903,W0613 --fail-under=8.0 || (echo "❌ Code quality below threshold. Fix PyLint issues." && exit 1)
+          
+          echo "✅ All backend code quality checks passed"
+          
+      - name: Run backend security scan
+        working-directory: ./backend
+        run: |
+          echo "Running Bandit security scan..."
+          poetry run bandit -r app/ -f json -o bandit-report.json
+          
+          # Check for high/medium severity issues
+          high_issues=$(poetry run bandit -r app/ -f json | jq '.results[] | select(.issue_severity == "HIGH" or .issue_severity == "MEDIUM")' | wc -l)
+          if [ "$high_issues" -gt 0 ]; then
+            echo "❌ High/Medium security issues found. Review bandit-report.json"
+            exit 1
+          fi
+          echo "✅ No high/medium security issues found"
+
+      - name: Run backend tests with coverage
+        working-directory: ./backend
+        run: |
+          echo "Running backend tests with coverage..."
+          poetry run pytest --cov=app --cov-report=xml --cov-report=html --cov-fail-under=90
+          echo "✅ Backend tests passed with adequate coverage"
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run frontend code quality checks
+        working-directory: ./frontend
+        run: |
+          echo "Running ESLint..."
+          npm run lint || (echo "❌ ESLint issues found. Run 'npm run lint:fix' to fix." && exit 1)
+          
+          echo "Running TypeScript type checking..."
+          npm run typecheck || (echo "❌ TypeScript errors found. Fix type issues." && exit 1)
+          
+          echo "Running Prettier format check..."
+          npm run format:check || (echo "❌ Code formatting issues found. Run 'npm run format' to fix." && exit 1)
+          
+          echo "✅ All frontend code quality checks passed"
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: |
+          echo "Building frontend..."
+          npm run build
+          echo "✅ Frontend build successful"
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: |
+          echo "Running frontend tests..."
+          npm test -- --coverage --watchAll=false --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}'
+          echo "✅ Frontend tests passed with adequate coverage"
+
+  security-scan:
+    runs-on: self-hosted
+    needs: code-quality
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Trivy scan summary
+        run: |
+          echo "Security scan completed. Check GitHub Security tab for detailed results."
+
+  architecture-compliance:
+    runs-on: self-hosted
+    needs: code-quality
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check file size limits
+        run: |
+          echo "Checking for files exceeding 500 lines..."
+          large_files=$(find . -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | xargs wc -l | awk '$1 > 500 {print $2 " (" $1 " lines)"}' | grep -v total || true)
+          
+          if [ -n "$large_files" ]; then
+            echo "❌ Files exceeding 500 lines found:"
+            echo "$large_files"
+            echo "Please refactor these files according to .github/copilot-instructions.md"
+            exit 1
+          fi
+          echo "✅ All files comply with 500-line limit"
+
+      - name: Check documentation compliance
+        run: |
+          echo "Checking documentation requirements..."
+          
+          # Check if TASKS.md is updated for new features
+          if git diff --name-only HEAD~1 | grep -q "app/\|frontend/src/" && ! git diff --name-only HEAD~1 | grep -q "TASKS.md"; then
+            echo "⚠️  Code changes detected but TASKS.md not updated. Consider updating task status."
+          fi
+          
+          # Check for README updates when dependencies change
+          if git diff --name-only HEAD~1 | grep -q "pyproject.toml\|package.json" && ! git diff --name-only HEAD~1 | grep -q "README.md"; then
+            echo "⚠️  Dependencies changed but README.md not updated. Consider updating setup instructions."
+          fi
+          
+          echo "✅ Documentation compliance checked"
+
+  pr-size-check:
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check PR size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            const additions = pr.data.additions;
+            const deletions = pr.data.deletions;
+            const changedFiles = pr.data.changed_files;
+            
+            console.log(`PR Statistics:
+            - Files changed: ${changedFiles}
+            - Lines added: ${additions}
+            - Lines deleted: ${deletions}
+            - Total changes: ${additions + deletions}`);
+            
+            if (changedFiles > 20) {
+              console.log('⚠️  Large PR detected (>20 files changed). Consider breaking into smaller PRs.');
+            }
+            
+            if (additions + deletions > 1000) {
+              console.log('⚠️  Large PR detected (>1000 line changes). Consider breaking into smaller PRs.');
+            }
+            
+            if (changedFiles <= 20 && (additions + deletions) <= 1000) {
+              console.log('✅ PR size is reasonable for review');
+            }
+
+  status-check:
+    runs-on: self-hosted
+    needs: [validate-branch-name, code-quality, security-scan, architecture-compliance, pr-size-check]
+    if: always()
+    steps:
+      - name: Final status check
+        run: |
+          echo "Branch Protection CI Results:"
+          echo "- Branch name validation: ${{ needs.validate-branch-name.result }}"
+          echo "- Code quality checks: ${{ needs.code-quality.result }}"
+          echo "- Security scanning: ${{ needs.security-scan.result }}"
+          echo "- Architecture compliance: ${{ needs.architecture-compliance.result }}"
+          echo "- PR size check: ${{ needs.pr-size-check.result }}"
+          
+          if [[ "${{ needs.code-quality.result }}" != "success" ]] || [[ "${{ needs.security-scan.result }}" != "success" ]] || [[ "${{ needs.architecture-compliance.result }}" != "success" ]]; then
+            echo "❌ Required checks failed. PR cannot be merged."
+            exit 1
+          fi
+          
+          echo "✅ All required checks passed. PR is ready for review."

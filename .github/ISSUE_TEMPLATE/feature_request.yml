@@ -1,0 +1,146 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible.
+        
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - User Interface/UX
+        - Backend API
+        - Real-time Functionality
+        - AI/ML Features
+        - Mobile Experience
+        - Collaboration Features
+        - Performance Improvement
+        - Security Enhancement
+        - Integration/Third-party
+        - Other
+    validations:
+      required: true
+      
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Describe the feature...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Describe this feature as a user story
+      placeholder: "As a [type of user], I want [goal] so that [benefit]"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: Describe the problem this feature would solve...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: Describe your proposed solution...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: alternative-solutions
+    attributes:
+      label: Alternative Solutions
+      description: Are there alternative approaches you've considered?
+      placeholder: Describe any alternative solutions or features you've considered...
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for user experience
+        - Critical - Essential for core functionality
+    validations:
+      required: true
+      
+  - type: checkboxes
+    id: sprint-alignment
+    attributes:
+      label: Sprint Alignment
+      description: Which future sprint(s) might this feature fit into?
+      options:
+        - label: Sprint 9 - Enhanced Collaboration
+        - label: Sprint 10 - Search & History Features  
+        - label: Sprint 11 - Advanced Item Organization
+        - label: Sprint 12 - Self-Hosted Infrastructure
+        - label: Sprint 13 - Internationalization
+        - label: Future Sprints (Post-MVP)
+        - label: Not sure
+        
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What would need to be true for this feature to be considered complete?
+      placeholder: |
+        - [ ] Feature does X
+        - [ ] User can perform Y
+        - [ ] System responds with Z
+        
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: Technical Considerations
+      description: Any technical aspects to consider (API changes, database changes, etc.)
+      placeholder: Consider technical implications...
+      
+  - type: checkboxes
+    id: implementation-areas
+    attributes:
+      label: Implementation Areas
+      description: Which parts of the system would this feature affect?
+      options:
+        - label: Backend API
+        - label: Frontend UI
+        - label: Database Schema
+        - label: Real-time (WebSocket)
+        - label: Authentication/Authorization
+        - label: AI/ML Integration
+        - label: Mobile Responsiveness
+        - label: Performance
+        - label: Security
+        - label: Documentation
+        
+  - type: textarea
+    id: mockups-wireframes
+    attributes:
+      label: Mockups/Wireframes
+      description: Any visual representations of this feature
+      placeholder: Add mockups, wireframes, or describe the visual design...
+      
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context or information about this feature request
+      placeholder: Add any other context about the feature here...
