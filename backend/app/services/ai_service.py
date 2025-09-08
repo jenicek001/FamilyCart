@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class AIService:
     """
     Unified AI service that delegates operations to the configured AI provider.
-    
+
     This service acts as a facade for different AI providers, ensuring backward
     compatibility while supporting multiple AI backends with automatic fallback.
     """
@@ -63,7 +63,9 @@ class AIService:
         """
         return await self._fallback_service.suggest_category(item_name, db)
 
-    async def suggest_category_async(self, item_name: str, category_names: List[str]) -> str:
+    async def suggest_category_async(
+        self, item_name: str, category_names: List[str]
+    ) -> str:
         """
         Suggest a category for a given item name (async version) with automatic fallback.
 
@@ -74,7 +76,9 @@ class AIService:
         Returns:
             str: The suggested category name.
         """
-        return await self._fallback_service.suggest_category_async(item_name, category_names)
+        return await self._fallback_service.suggest_category_async(
+            item_name, category_names
+        )
 
     async def suggest_icon(self, item_name: str, category_name: str) -> str:
         """
@@ -89,7 +93,9 @@ class AIService:
         """
         return await self._fallback_service.suggest_icon(item_name, category_name)
 
-    async def standardize_and_translate_item_name(self, item_name: str) -> Dict[str, Any]:
+    async def standardize_and_translate_item_name(
+        self, item_name: str
+    ) -> Dict[str, Any]:
         """
         Standardize an item name and provide translations with automatic fallback.
 
@@ -99,12 +105,14 @@ class AIService:
         Returns:
             Dict[str, Any]: A dictionary containing the standardized name and translations.
         """
-        return await self._fallback_service.standardize_and_translate_item_name(item_name)
+        return await self._fallback_service.standardize_and_translate_item_name(
+            item_name
+        )
 
     def get_provider_info(self) -> dict:
         """
         Get information about the current AI provider and fallback status.
-        
+
         Returns:
             dict: Information about the current provider and fallback status.
         """

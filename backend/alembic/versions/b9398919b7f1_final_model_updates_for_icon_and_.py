@@ -59,7 +59,10 @@ def upgrade() -> None:
         sa.Column("quantity", sa.String(50), nullable=True),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column(
-            "is_completed", sa.Boolean(), nullable=False, server_default=sa.text("false")
+            "is_completed",
+            sa.Boolean(),
+            nullable=False,
+            server_default=sa.text("false"),
         ),
         sa.Column("icon_name", sa.String(50), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),

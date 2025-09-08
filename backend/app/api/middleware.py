@@ -5,6 +5,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
 
+
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         try:
@@ -18,7 +19,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 logger.error(f"Request headers: {request.headers}")
             if hasattr(request, "query_params"):
                 logger.error(f"Request query params: {request.query_params}")
-            
+
             # Print traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
             raise

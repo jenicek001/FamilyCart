@@ -15,7 +15,7 @@ class CRUDCategory(CRUDBase[Category, CategoryCreate, CategoryUpdate]):
         db_obj = Category(
             name=obj_in.name,
             icon_name=obj_in.icon_name,
-            translations=obj_in.translations or {}
+            translations=obj_in.translations or {},
         )
         db.add(db_obj)
         db.commit()

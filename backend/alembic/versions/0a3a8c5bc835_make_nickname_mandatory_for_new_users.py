@@ -22,25 +22,25 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     # First, set default nicknames for existing users who don't have one
-    op.execute("""
+    op.execute(
+        """
         UPDATE "user" 
         SET nickname = CASE 
             WHEN first_name IS NOT NULL THEN first_name
             ELSE SPLIT_PART(email, '@', 1)
         END 
         WHERE nickname IS NULL
-    """)
-    
+    """
+    )
+
     # Add a check constraint to ensure new users must have a nickname
     # Note: We're not making the column NOT NULL because existing users might still have NULL temporarily
     op.create_check_constraint(
-        'user_nickname_not_empty', 
-        'user', 
-        "nickname IS NOT NULL AND nickname != ''"
+        "user_nickname_not_empty", "user", "nickname IS NOT NULL AND nickname != ''"
     )
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # Remove the check constraint
-    op.drop_constraint('user_nickname_not_empty', 'user', type_='check')
+    op.drop_constraint("user_nickname_not_empty", "user", type_="check")

@@ -46,69 +46,360 @@ def upgrade() -> None:
     op.add_column(
         "item", sa.Column("quantity_display_text", sa.String(length=100), nullable=True)
     )
-    
+
     # Populate units table with standard units
     from sqlalchemy import table, column, String, Boolean, Numeric
-    
-    unit_table = table('unit',
-        column('id', String),
-        column('name', String), 
-        column('symbol', String),
-        column('category', String),
-        column('base_unit', String),
-        column('conversion_factor', Numeric),
-        column('is_default', Boolean),
-        column('locale', String)
+
+    unit_table = table(
+        "unit",
+        column("id", String),
+        column("name", String),
+        column("symbol", String),
+        column("category", String),
+        column("base_unit", String),
+        column("conversion_factor", Numeric),
+        column("is_default", Boolean),
+        column("locale", String),
     )
-    
+
     # Insert standard units
-    op.bulk_insert(unit_table, [
-        # COUNT Units
-        {'id': 'piece', 'name': 'piece', 'symbol': 'pc', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': True, 'locale': None},
-        {'id': 'pieces', 'name': 'pieces', 'symbol': 'pcs', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'item', 'name': 'item', 'symbol': 'item', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'items', 'name': 'items', 'symbol': 'items', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'pack', 'name': 'pack', 'symbol': 'pack', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'packs', 'name': 'packs', 'symbol': 'packs', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'bottle', 'name': 'bottle', 'symbol': 'bottle', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'bottles', 'name': 'bottles', 'symbol': 'bottles', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'can', 'name': 'can', 'symbol': 'can', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'cans', 'name': 'cans', 'symbol': 'cans', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'box', 'name': 'box', 'symbol': 'box', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'boxes', 'name': 'boxes', 'symbol': 'boxes', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'bag', 'name': 'bag', 'symbol': 'bag', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        {'id': 'bags', 'name': 'bags', 'symbol': 'bags', 'category': 'count', 'base_unit': None, 'conversion_factor': None, 'is_default': False, 'locale': None},
-        
-        # WEIGHT Units
-        {'id': 'g', 'name': 'gram', 'symbol': 'g', 'category': 'weight', 'base_unit': 'g', 'conversion_factor': 1, 'is_default': True, 'locale': None},
-        {'id': 'kg', 'name': 'kilogram', 'symbol': 'kg', 'category': 'weight', 'base_unit': 'g', 'conversion_factor': 1000, 'is_default': False, 'locale': None},
-        {'id': 'lb', 'name': 'pound', 'symbol': 'lb', 'category': 'weight', 'base_unit': 'g', 'conversion_factor': 453.592, 'is_default': False, 'locale': 'US'},
-        {'id': 'oz', 'name': 'ounce', 'symbol': 'oz', 'category': 'weight', 'base_unit': 'g', 'conversion_factor': 28.3495, 'is_default': False, 'locale': 'US'},
-        
-        # VOLUME Units
-        {'id': 'ml', 'name': 'milliliter', 'symbol': 'ml', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 1, 'is_default': True, 'locale': None},
-        {'id': 'l', 'name': 'liter', 'symbol': 'l', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 1000, 'is_default': False, 'locale': None},
-        {'id': 'dl', 'name': 'deciliter', 'symbol': 'dl', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 100, 'is_default': False, 'locale': None},
-        {'id': 'cl', 'name': 'centiliter', 'symbol': 'cl', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 10, 'is_default': False, 'locale': None},
-        {'id': 'fl_oz', 'name': 'fluid ounce', 'symbol': 'fl oz', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 29.5735, 'is_default': False, 'locale': 'US'},
-        {'id': 'cup', 'name': 'cup', 'symbol': 'cup', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 236.588, 'is_default': False, 'locale': 'US'},
-        {'id': 'pint', 'name': 'pint', 'symbol': 'pt', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 473.176, 'is_default': False, 'locale': 'US'},
-        {'id': 'quart', 'name': 'quart', 'symbol': 'qt', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 946.353, 'is_default': False, 'locale': 'US'},
-        {'id': 'gallon', 'name': 'gallon', 'symbol': 'gal', 'category': 'volume', 'base_unit': 'ml', 'conversion_factor': 3785.41, 'is_default': False, 'locale': 'US'},
-        
-        # LENGTH Units
-        {'id': 'm', 'name': 'meter', 'symbol': 'm', 'category': 'length', 'base_unit': 'm', 'conversion_factor': 1, 'is_default': True, 'locale': None},
-        {'id': 'cm', 'name': 'centimeter', 'symbol': 'cm', 'category': 'length', 'base_unit': 'm', 'conversion_factor': 0.01, 'is_default': False, 'locale': None},
-        {'id': 'mm', 'name': 'millimeter', 'symbol': 'mm', 'category': 'length', 'base_unit': 'm', 'conversion_factor': 0.001, 'is_default': False, 'locale': None},
-        {'id': 'ft', 'name': 'foot', 'symbol': 'ft', 'category': 'length', 'base_unit': 'm', 'conversion_factor': 0.3048, 'is_default': False, 'locale': 'US'},
-        {'id': 'in', 'name': 'inch', 'symbol': 'in', 'category': 'length', 'base_unit': 'm', 'conversion_factor': 0.0254, 'is_default': False, 'locale': 'US'},
-    ])
-    
+    op.bulk_insert(
+        unit_table,
+        [
+            # COUNT Units
+            {
+                "id": "piece",
+                "name": "piece",
+                "symbol": "pc",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": True,
+                "locale": None,
+            },
+            {
+                "id": "pieces",
+                "name": "pieces",
+                "symbol": "pcs",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "item",
+                "name": "item",
+                "symbol": "item",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "items",
+                "name": "items",
+                "symbol": "items",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "pack",
+                "name": "pack",
+                "symbol": "pack",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "packs",
+                "name": "packs",
+                "symbol": "packs",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "bottle",
+                "name": "bottle",
+                "symbol": "bottle",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "bottles",
+                "name": "bottles",
+                "symbol": "bottles",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "can",
+                "name": "can",
+                "symbol": "can",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "cans",
+                "name": "cans",
+                "symbol": "cans",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "box",
+                "name": "box",
+                "symbol": "box",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "boxes",
+                "name": "boxes",
+                "symbol": "boxes",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "bag",
+                "name": "bag",
+                "symbol": "bag",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "bags",
+                "name": "bags",
+                "symbol": "bags",
+                "category": "count",
+                "base_unit": None,
+                "conversion_factor": None,
+                "is_default": False,
+                "locale": None,
+            },
+            # WEIGHT Units
+            {
+                "id": "g",
+                "name": "gram",
+                "symbol": "g",
+                "category": "weight",
+                "base_unit": "g",
+                "conversion_factor": 1,
+                "is_default": True,
+                "locale": None,
+            },
+            {
+                "id": "kg",
+                "name": "kilogram",
+                "symbol": "kg",
+                "category": "weight",
+                "base_unit": "g",
+                "conversion_factor": 1000,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "lb",
+                "name": "pound",
+                "symbol": "lb",
+                "category": "weight",
+                "base_unit": "g",
+                "conversion_factor": 453.592,
+                "is_default": False,
+                "locale": "US",
+            },
+            {
+                "id": "oz",
+                "name": "ounce",
+                "symbol": "oz",
+                "category": "weight",
+                "base_unit": "g",
+                "conversion_factor": 28.3495,
+                "is_default": False,
+                "locale": "US",
+            },
+            # VOLUME Units
+            {
+                "id": "ml",
+                "name": "milliliter",
+                "symbol": "ml",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 1,
+                "is_default": True,
+                "locale": None,
+            },
+            {
+                "id": "l",
+                "name": "liter",
+                "symbol": "l",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 1000,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "dl",
+                "name": "deciliter",
+                "symbol": "dl",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 100,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "cl",
+                "name": "centiliter",
+                "symbol": "cl",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 10,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "fl_oz",
+                "name": "fluid ounce",
+                "symbol": "fl oz",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 29.5735,
+                "is_default": False,
+                "locale": "US",
+            },
+            {
+                "id": "cup",
+                "name": "cup",
+                "symbol": "cup",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 236.588,
+                "is_default": False,
+                "locale": "US",
+            },
+            {
+                "id": "pint",
+                "name": "pint",
+                "symbol": "pt",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 473.176,
+                "is_default": False,
+                "locale": "US",
+            },
+            {
+                "id": "quart",
+                "name": "quart",
+                "symbol": "qt",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 946.353,
+                "is_default": False,
+                "locale": "US",
+            },
+            {
+                "id": "gallon",
+                "name": "gallon",
+                "symbol": "gal",
+                "category": "volume",
+                "base_unit": "ml",
+                "conversion_factor": 3785.41,
+                "is_default": False,
+                "locale": "US",
+            },
+            # LENGTH Units
+            {
+                "id": "m",
+                "name": "meter",
+                "symbol": "m",
+                "category": "length",
+                "base_unit": "m",
+                "conversion_factor": 1,
+                "is_default": True,
+                "locale": None,
+            },
+            {
+                "id": "cm",
+                "name": "centimeter",
+                "symbol": "cm",
+                "category": "length",
+                "base_unit": "m",
+                "conversion_factor": 0.01,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "mm",
+                "name": "millimeter",
+                "symbol": "mm",
+                "category": "length",
+                "base_unit": "m",
+                "conversion_factor": 0.001,
+                "is_default": False,
+                "locale": None,
+            },
+            {
+                "id": "ft",
+                "name": "foot",
+                "symbol": "ft",
+                "category": "length",
+                "base_unit": "m",
+                "conversion_factor": 0.3048,
+                "is_default": False,
+                "locale": "US",
+            },
+            {
+                "id": "in",
+                "name": "inch",
+                "symbol": "in",
+                "category": "length",
+                "base_unit": "m",
+                "conversion_factor": 0.0254,
+                "is_default": False,
+                "locale": "US",
+            },
+        ],
+    )
+
     # Migrate existing quantity data
     connection = op.get_bind()
-    
+
     # Update existing items: if quantity is a simple number, convert to structured format
-    connection.execute(sa.text("""
+    connection.execute(
+        sa.text(
+            """
         UPDATE item 
         SET 
             quantity_value = CASE 
@@ -124,8 +415,10 @@ def upgrade() -> None:
                 ELSE quantity 
             END
         WHERE quantity IS NOT NULL
-    """))
-    
+    """
+        )
+    )
+
     # ### end Alembic commands ###
 
 

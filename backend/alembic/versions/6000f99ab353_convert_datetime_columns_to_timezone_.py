@@ -23,61 +23,77 @@ def upgrade() -> None:
     """Upgrade schema."""
     # Convert datetime columns to timestamp with time zone
     # First, convert existing naive timestamps to UTC (assume they are already UTC)
-    
+
     # For item table
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE item 
         ALTER COLUMN created_at TYPE timestamp with time zone 
         USING created_at AT TIME ZONE 'UTC'
-    """)
-    
-    op.execute("""
+    """
+    )
+
+    op.execute(
+        """
         ALTER TABLE item 
         ALTER COLUMN updated_at TYPE timestamp with time zone 
         USING updated_at AT TIME ZONE 'UTC'
-    """)
-    
+    """
+    )
+
     # For shopping_list table
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE shopping_list 
         ALTER COLUMN created_at TYPE timestamp with time zone 
         USING created_at AT TIME ZONE 'UTC'
-    """)
-    
-    op.execute("""
+    """
+    )
+
+    op.execute(
+        """
         ALTER TABLE shopping_list 
         ALTER COLUMN updated_at TYPE timestamp with time zone 
         USING updated_at AT TIME ZONE 'UTC'
-    """)
+    """
+    )
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # Convert back to timestamp without time zone
     # This will lose timezone information
-    
+
     # For item table
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE item 
         ALTER COLUMN created_at TYPE timestamp without time zone 
         USING created_at AT TIME ZONE 'UTC'
-    """)
-    
-    op.execute("""
+    """
+    )
+
+    op.execute(
+        """
         ALTER TABLE item 
         ALTER COLUMN updated_at TYPE timestamp without time zone 
         USING updated_at AT TIME ZONE 'UTC'
-    """)
-    
+    """
+    )
+
     # For shopping_list table
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE shopping_list 
         ALTER COLUMN created_at TYPE timestamp without time zone 
         USING created_at AT TIME ZONE 'UTC'
-    """)
-    
-    op.execute("""
+    """
+    )
+
+    op.execute(
+        """
         ALTER TABLE shopping_list 
         ALTER COLUMN updated_at TYPE timestamp without time zone 
         USING updated_at AT TIME ZONE 'UTC'
-    """);
+    """
+    )

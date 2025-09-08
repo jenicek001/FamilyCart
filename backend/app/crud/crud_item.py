@@ -23,11 +23,11 @@ class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
         return db_obj
 
     def update(
-        self, 
-        db: Session, 
-        *, 
-        db_obj: Item, 
-        obj_in: Union[ItemUpdate, Dict[str, Any]], 
+        self,
+        db: Session,
+        *,
+        db_obj: Item,
+        obj_in: Union[ItemUpdate, Dict[str, Any]],
         last_modified_by_id: int
     ) -> Item:
         # Use the base update method first

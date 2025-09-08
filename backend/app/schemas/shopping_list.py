@@ -7,20 +7,24 @@ from app.schemas.user import UserRead
 if TYPE_CHECKING:
     from app.schemas.item import ItemRead
 
+
 class ShoppingListBase(BaseModel):
     name: str
     description: Optional[str] = None
 
+
 class ShoppingListCreate(ShoppingListBase):
     pass
+
 
 class ShoppingListUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    
+
     def dict(self, *args, **kwargs):
         kwargs.pop("exclude_unset", None)
         return super().dict(*args, exclude_unset=True, **kwargs)
+
 
 class ShoppingListRead(ShoppingListBase):
     id: int
@@ -35,5 +39,5 @@ class ShoppingListRead(ShoppingListBase):
         # Serialize UUIDs as strings to avoid JSON serialization issues
         json_encoders = {
             uuid.UUID: str,
-            datetime: lambda v: v.isoformat() if v else None
+            datetime: lambda v: v.isoformat() if v else None,
         }

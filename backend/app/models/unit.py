@@ -7,7 +7,7 @@ from ..db.base import Base
 
 class Unit(Base):
     """Unit model for quantity measurements."""
-    
+
     __tablename__ = "unit"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)
