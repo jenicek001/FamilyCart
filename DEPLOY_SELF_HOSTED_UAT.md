@@ -71,7 +71,7 @@ This document provides a comprehensive strategy for deploying a self-hosted Ubun
 - **Docker Compose**: V2+
 - **Git**: Latest version
 - **Node.js**: 20+ (for runner actions)
-- **Python**: 3.11+ (for backend builds)
+- **Python**: 3.12+ (for backend builds)
 
 ### Resource Allocation Planning
 ```yaml
@@ -344,7 +344,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
