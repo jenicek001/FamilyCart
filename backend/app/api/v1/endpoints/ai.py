@@ -7,18 +7,23 @@ from app.services.ai_service import ai_service
 
 router = APIRouter()
 
+
 class ItemCategorizationRequest(BaseModel):
     item_name: str
 
+
 class ItemCategorizationResponse(BaseModel):
     category_name: str
+
 
 class IconSuggestionRequest(BaseModel):
     item_name: str
     category_name: Optional[str] = None
 
+
 class IconSuggestionResponse(BaseModel):
-    icon_name: str # e.g., 'shopping-cart', 'milk', 'apple'
+    icon_name: str  # e.g., 'shopping-cart', 'milk', 'apple'
+
 
 class AIProviderStatusResponse(BaseModel):
     provider_name: str
@@ -27,6 +32,7 @@ class AIProviderStatusResponse(BaseModel):
     error: Optional[str] = None
     rate_limit_detected: Optional[bool] = None
     fallback_available: Optional[bool] = None
+
 
 @router.get("/ai/status", response_model=AIProviderStatusResponse)
 async def get_ai_status():
@@ -38,11 +44,9 @@ async def get_ai_status():
         return AIProviderStatusResponse(**provider_info)
     except Exception as e:
         return AIProviderStatusResponse(
-            provider_name="unknown",
-            model_name="unknown",
-            status="error",
-            error=str(e)
+            provider_name="unknown", model_name="unknown", status="error", error=str(e)
         )
+
 
 @router.post("/ai/categorize-item", response_model=ItemCategorizationResponse)
 async def categorize_item(
@@ -73,6 +77,7 @@ async def categorize_item(
             status_code=500, detail="Failed to get category suggestion from AI."
         )
 
+
 @router.post("/ai/suggest-icon", response_model=IconSuggestionResponse)
 async def suggest_icon(
     request: IconSuggestionRequest,
@@ -91,6 +96,7 @@ async def suggest_icon(
         raise HTTPException(
             status_code=500, detail="Failed to get icon suggestion from AI."
         )
+
 
 # This was the original prompt for item categorization created by Firebase Studio:
 # const prompt = ai.definePrompt({

@@ -20,17 +20,17 @@ class AIProviderFactory:
     """
     Factory class for creating AI providers based on configuration.
     """
-    
+
     _instance: Optional[AIProvider] = None
 
     @classmethod
     def get_provider(cls) -> AIProvider:
         """
         Get the configured AI provider instance.
-        
+
         Returns:
             AIProvider: The configured AI provider instance.
-            
+
         Raises:
             ValueError: If an unsupported AI provider is configured.
         """
@@ -42,15 +42,15 @@ class AIProviderFactory:
     def _create_provider(cls) -> AIProvider:
         """
         Create the AI provider based on configuration.
-        
+
         Returns:
             AIProvider: The AI provider instance.
-            
+
         Raises:
             ValueError: If an unsupported AI provider is configured.
         """
         provider_name = settings.AI_PROVIDER.lower()
-        
+
         if provider_name == "gemini":
             logger.info("Initializing Gemini AI provider")
             return GeminiProvider()
@@ -75,7 +75,7 @@ class AIProviderFactory:
     def get_provider_info(cls) -> dict:
         """
         Get information about the current AI provider.
-        
+
         Returns:
             dict: Information about the current provider.
         """
@@ -84,14 +84,14 @@ class AIProviderFactory:
             return {
                 "provider_name": provider.provider_name,
                 "model_name": provider.model_name,
-                "status": "active"
+                "status": "active",
             }
         except Exception as e:
             return {
                 "provider_name": settings.AI_PROVIDER,
                 "model_name": "unknown",
                 "status": "error",
-                "error": str(e)
+                "error": str(e),
             }
 
 
@@ -99,7 +99,7 @@ class AIProviderFactory:
 def get_ai_provider() -> AIProvider:
     """
     Get the AI provider instance.
-    
+
     Returns:
         AIProvider: The configured AI provider.
     """

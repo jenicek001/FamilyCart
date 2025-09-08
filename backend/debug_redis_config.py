@@ -20,10 +20,10 @@ print(f"REDIS_PORT (env): {repr(os.getenv('REDIS_PORT'))}")
 # Check if .env file exists
 print(f"\n=== File System ===")
 print(f".env file exists: {os.path.exists('.env')}")
-if os.path.exists('.env'):
-    with open('.env', 'r') as f:
+if os.path.exists(".env"):
+    with open(".env", "r") as f:
         content = f.read()
         print("REDIS lines in .env:")
-        for line in content.split('\n'):
-            if 'REDIS' in line:
+        for line in content.split("\n"):
+            if "REDIS" in line:
                 print(f"  {line}")

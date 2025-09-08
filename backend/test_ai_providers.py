@@ -27,9 +27,9 @@ async def test_provider_info():
         print(f"Provider: {info['provider_name']}")
         print(f"Model: {info['model_name']}")
         print(f"Status: {info['status']}")
-        if 'error' in info:
+        if "error" in info:
             print(f"Error: {info['error']}")
-        return info['status'] == 'active'
+        return info["status"] == "active"
     except Exception as e:
         print(f"Error getting provider info: {e}")
         return False
@@ -99,7 +99,7 @@ def print_configuration():
     """Print current configuration."""
     print("=== Configuration ===")
     print(f"AI_PROVIDER: {settings.AI_PROVIDER}")
-    
+
     if settings.AI_PROVIDER.lower() == "gemini":
         print(f"GEMINI_MODEL_NAME: {settings.GEMINI_MODEL_NAME}")
         print(f"GOOGLE_API_KEY: {'Set' if settings.GOOGLE_API_KEY else 'Not Set'}")
@@ -113,10 +113,10 @@ async def main():
     """Run all tests."""
     print("AI Provider Integration Test")
     print("=" * 40)
-    
+
     print_configuration()
     print()
-    
+
     tests = [
         ("Provider Info", test_provider_info),
         ("Text Generation", test_text_generation),
@@ -124,9 +124,9 @@ async def main():
         ("Icon Suggestion", test_icon_suggestion),
         ("Name Standardization", test_name_standardization),
     ]
-    
+
     results = {}
-    
+
     for test_name, test_func in tests:
         try:
             success = await test_func()
@@ -134,16 +134,16 @@ async def main():
         except Exception as e:
             print(f"Test {test_name} failed with exception: {e}")
             results[test_name] = False
-    
+
     print("\n=== Test Results ===")
     for test_name, success in results.items():
         status = "PASS" if success else "FAIL"
         print(f"{test_name}: {status}")
-    
+
     total_tests = len(results)
     passed_tests = sum(results.values())
     print(f"\nPassed: {passed_tests}/{total_tests}")
-    
+
     if passed_tests == total_tests:
         print("All tests passed! AI provider integration is working correctly.")
         return 0

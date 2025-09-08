@@ -4,7 +4,8 @@ Simple configuration test
 """
 import os
 import sys
-sys.path.append('/home/honzik/GitHub/FamilyCart/FamilyCart/backend')
+
+sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
 # Test environment variables directly
 print("Environment variables:")
@@ -15,6 +16,7 @@ print(f"  OLLAMA_BASE_URL: {os.getenv('OLLAMA_BASE_URL', 'not set')}")
 # Test Pydantic settings
 try:
     from app.core.config import settings
+
     print("\nPydantic Settings:")
     print(f"  AI_PROVIDER: {settings.AI_PROVIDER}")
     print(f"  OLLAMA_MODEL_NAME: {settings.OLLAMA_MODEL_NAME}")

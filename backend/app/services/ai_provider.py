@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class AIProvider(ABC):
     """
     Abstract base class for AI providers.
-    
+
     All AI providers must implement these methods to ensure consistent
     functionality across different AI services (Gemini, Ollama, etc.).
     """
@@ -46,7 +46,9 @@ class AIProvider(ABC):
         pass
 
     @abstractmethod
-    async def suggest_category_async(self, item_name: str, category_names: List[str]) -> str:
+    async def suggest_category_async(
+        self, item_name: str, category_names: List[str]
+    ) -> str:
         """
         Suggest a category for a given item name (async version).
 
@@ -74,7 +76,9 @@ class AIProvider(ABC):
         pass
 
     @abstractmethod
-    async def standardize_and_translate_item_name(self, item_name: str) -> Dict[str, Any]:
+    async def standardize_and_translate_item_name(
+        self, item_name: str
+    ) -> Dict[str, Any]:
         """
         Standardize an item name and provide translations.
 

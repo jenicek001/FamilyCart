@@ -6,32 +6,33 @@ from sqlalchemy import text
 
 # Category mappings from Czech to English
 CATEGORY_MAPPINGS = {
-    'Mléčné výrobky': 'Dairy',
-    'mléčné výrobky': 'Dairy', 
-    'Ovoce a zelenina': 'Produce',
-    'ovoce a zelenina': 'Produce',
-    'Groceries': 'Other',  # Generic category -> Other
-    'other': 'Other',
-    'dairy': 'Dairy',
-    'pantry': 'Pantry',
+    "Mléčné výrobky": "Dairy",
+    "mléčné výrobky": "Dairy",
+    "Ovoce a zelenina": "Produce",
+    "ovoce a zelenina": "Produce",
+    "Groceries": "Other",  # Generic category -> Other
+    "other": "Other",
+    "dairy": "Dairy",
+    "pantry": "Pantry",
 }
 
 STANDARD_CATEGORIES = [
-    'Produce',      # Fruits, vegetables
-    'Dairy',        # Milk, cheese, yogurt
-    'Meat',         # Meat, seafood, poultry  
-    'Pantry',       # Dry goods, canned items, bread
-    'Frozen',       # Frozen foods, ice cream
-    'Beverages',    # Drinks
-    'Snacks',       # Chips, candy, etc.
-    'Personal Care', # Toiletries, health
-    'Household',    # Cleaning, paper products
-    'Other'         # Everything else
+    "Produce",  # Fruits, vegetables
+    "Dairy",  # Milk, cheese, yogurt
+    "Meat",  # Meat, seafood, poultry
+    "Pantry",  # Dry goods, canned items, bread
+    "Frozen",  # Frozen foods, ice cream
+    "Beverages",  # Drinks
+    "Snacks",  # Chips, candy, etc.
+    "Personal Care",  # Toiletries, health
+    "Household",  # Cleaning, paper products
+    "Other",  # Everything else
 ]
+
 
 def get_migration_sql():
     """Generate SQL for category standardization migration."""
-    
+
     sql = f"""
 -- Category Standardization Migration
 -- Standardizes all categories to English names
@@ -47,7 +48,7 @@ WHERE NOT EXISTS (
 
 -- Step 2: Update items to use standardized categories
 """
-    
+
     for old_name, new_name in CATEGORY_MAPPINGS.items():
         sql += f"""
 -- Map '{old_name}' -> '{new_name}'
@@ -55,11 +56,14 @@ UPDATE item
 SET category_id = (SELECT id FROM category WHERE name = '{new_name}')
 WHERE category_id = (SELECT id FROM category WHERE name = '{old_name}');
 """
-    
-    sql += """
+
+    sql += (
+        """
 -- Step 3: Remove old Czech/mixed categories that are now empty
 DELETE FROM category 
-WHERE name NOT IN """ + str(tuple(STANDARD_CATEGORIES)).replace("'", "''") + """;
+WHERE name NOT IN """
+        + str(tuple(STANDARD_CATEGORIES)).replace("'", "''")
+        + """;
 
 COMMIT;
 
@@ -75,8 +79,10 @@ GROUP BY
 ORDER BY 
     item_count DESC, c.name;
 """
-    
+    )
+
     return sql
+
 
 if __name__ == "__main__":
     print("Category Standardization Migration SQL:")

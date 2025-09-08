@@ -24,19 +24,19 @@ def upgrade() -> None:
     # Check if foreign key constraint exists before creating it
     connection = op.get_bind()
     inspector = sa.inspect(connection)
-    
+
     # Get foreign keys for item table
-    foreign_keys = inspector.get_foreign_keys('item')
-    fk_exists = any(fk['name'] == 'fk_item_quantity_unit_id' for fk in foreign_keys)
-    
+    foreign_keys = inspector.get_foreign_keys("item")
+    fk_exists = any(fk["name"] == "fk_item_quantity_unit_id" for fk in foreign_keys)
+
     if not fk_exists:
         op.create_foreign_key(
-            'fk_item_quantity_unit_id',
-            'item',
-            'unit',
-            ['quantity_unit_id'],
-            ['id'],
-            ondelete='SET NULL'
+            "fk_item_quantity_unit_id",
+            "item",
+            "unit",
+            ["quantity_unit_id"],
+            ["id"],
+            ondelete="SET NULL",
         )
 
 
@@ -45,10 +45,10 @@ def downgrade() -> None:
     # Remove foreign key constraint from quantity_unit_id (if it exists)
     connection = op.get_bind()
     inspector = sa.inspect(connection)
-    
+
     # Get foreign keys for item table
-    foreign_keys = inspector.get_foreign_keys('item')
-    fk_exists = any(fk['name'] == 'fk_item_quantity_unit_id' for fk in foreign_keys)
-    
+    foreign_keys = inspector.get_foreign_keys("item")
+    fk_exists = any(fk["name"] == "fk_item_quantity_unit_id" for fk in foreign_keys)
+
     if fk_exists:
-        op.drop_constraint('fk_item_quantity_unit_id', 'item', type_='foreignkey')
+        op.drop_constraint("fk_item_quantity_unit_id", "item", type_="foreignkey")
