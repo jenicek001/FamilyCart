@@ -57,27 +57,27 @@ scrape_configs:
   # FamilyCart Backend API metrics
   - job_name: 'familycart-backend'
     static_configs:
-      - targets: ['familycart-backend-uat:8001']
+      - targets: ['familycart-uat-backend:8000']
     scrape_interval: 15s
     metrics_path: '/metrics'
     scrape_timeout: 10s
 
-  # Nginx reverse proxy metrics (if nginx-prometheus-exporter is added)
-  - job_name: 'nginx'
-    static_configs:
-      - targets: ['familycart-nginx-uat:9113']
-    scrape_interval: 15s
-    metrics_path: '/metrics'
-    scrape_timeout: 10s
+  # Nginx reverse proxy metrics (disabled - nginx-prometheus-exporter not installed)
+  # - job_name: 'nginx'
+  #   static_configs:
+  #     - targets: ['familycart-nginx-uat:9113']
+  #   scrape_interval: 15s
+  #   metrics_path: '/metrics'
+  #   scrape_timeout: 10s
 
-  # External monitoring (Cloudflare endpoints)
-  - job_name: 'familycart-external'
-    static_configs:
-      - targets: ['uat.familycart.app:443']
-    scrape_interval: 30s
-    metrics_path: '/health'
-    scheme: 'https'
-    scrape_timeout: 10s
+  # External monitoring (disabled - /health endpoint not available)
+  # - job_name: 'familycart-external'
+  #   static_configs:
+  #     - targets: ['uat.familycart.app:443']
+  #   scrape_interval: 30s
+  #   metrics_path: '/health'
+  #   scheme: 'https'
+  #   scrape_timeout: 10s
 
 # Remote write configuration (optional - for long-term storage)
 # remote_write:
@@ -85,9 +85,3 @@ scrape_configs:
 #     basic_auth:
 #       username: "your-username"
 #       password: "your-password"
-
-  - job_name: 'familycart-backend'
-    static_configs:
-      - targets: ['familycart-uat-backend:8000']
-    metrics_path: '/metrics'
-    scrape_interval: 15s

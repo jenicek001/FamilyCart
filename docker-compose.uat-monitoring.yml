@@ -1,0 +1,84 @@
+version: '3.9'
+
+# UAT Monitoring Services for External Access
+# IMPORTANT: This extends existing UAT setup, no separate nginx needed
+# The existing uat-proxy nginx will be extended to handle monitoring domains
+
+services:
+  # Grafana for UAT monitoring dashboards
+  monitoring-grafana:
+    image: grafana/grafana:12.1.0
+    container_name: familycart-monitoring-grafana
+    restart: unless-stopped
+    ports:
+      - "3002:3000"  # Internal port for nginx proxy
+    volumes:
+      - monitoring_grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      # Security settings for external access
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_DEFAULT_THEME=dark
+      - GF_USERS_VIEWERS_CAN_EDIT=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      
+      # Domain configuration for UAT
+      - GF_SERVER_DOMAIN=uat-monitoring.familycart.app
+      - GF_SERVER_ROOT_URL=https://uat-monitoring.familycart.app/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      
+      # Security headers
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_COOKIE_SAMESITE=strict
+      - GF_SECURITY_STRICT_TRANSPORT_SECURITY=true
+      - GF_SECURITY_CONTENT_TYPE_PROTECTION=true
+      - GF_SECURITY_X_CONTENT_TYPE_OPTIONS=true
+      - GF_SECURITY_X_XSS_PROTECTION=true
+      
+      # Data source configuration pointing to UAT Prometheus
+      - GF_DATASOURCES_DEFAULT_DATA_SOURCE_NAME=UAT-Prometheus
+    env_file:
+      - .env.monitoring
+    networks:
+      - uat-network  # Connect to existing UAT network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  # Enhanced node-exporter for monitoring overlay
+  monitoring-node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: familycart-monitoring-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9101:9100"  # Different port to avoid conflict with runners
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - uat-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+
+networks:
+  uat-network:
+    external: true
+    name: familycart-uat-network
+
+volumes:
+  monitoring_grafana_data:
+    name: familycart-monitoring-grafana-data
