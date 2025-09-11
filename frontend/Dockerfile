@@ -24,9 +24,20 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Copy package.json and install only production dependencies
+COPY --from=base /app/package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
 # Copy the built application from the previous stage
 COPY --from=base /app/.next ./.next
-COPY --from=base /app/package.json ./
+COPY --from=base /app/public ./public
+COPY --from=base /app/next.config.* ./
+
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
 # Expose the port the app runs on
 EXPOSE 3000

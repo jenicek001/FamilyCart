@@ -1,0 +1,96 @@
+# Home Assistant service configuration
+# File: /etc/nginx/sites-available/homeassistant
+
+# WebSocket upgrade mapping (nginx best practice for WebSocket proxying)
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    server_name homeassistant.connectedhome.cz;
+    
+    # Health check endpoint (no redirect)
+    location /health {
+        access_log off;
+        return 200 "Home Assistant HTTP Healthy\n";
+        add_header Content-Type text/plain;
+    }
+    
+    # Redirect all other traffic to HTTPS
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+# HTTPS server for Home Assistant
+server {
+    listen 443 ssl http2;
+    server_name homeassistant.connectedhome.cz;
+
+    # SSL Certificate for connectedhome.cz domain
+    ssl_certificate /etc/nginx/ssl/connectedhome.cz/connectedhome.cz.crt;
+    ssl_certificate_key /etc/nginx/ssl/connectedhome.cz/connectedhome.cz.key;
+    
+    # Include common SSL settings
+    include /etc/nginx/conf.d/ssl-common.conf;
+    
+    # Include CloudFlare real IP configuration
+    include /etc/nginx/conf.d/cloudflare-realip.conf;
+
+    # Home Assistant specific security headers (relaxed for HA functionality)
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    # Note: Home Assistant needs flexible frame and CSP policies for proper operation
+
+    # Dedicated logs for Home Assistant
+    access_log /var/log/nginx/homeassistant.access.log main;
+    error_log /var/log/nginx/homeassistant.error.log;
+
+    # Home Assistant proxy configuration
+    location / {
+        limit_req zone=homeassistant burst=30 nodelay;
+        
+        # Proxy to Home Assistant on local network
+        proxy_pass http://homeassistant_service;
+        
+        # Standard proxy headers (as per nginx documentation)
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket support for Home Assistant (essential for real-time updates)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        
+        # Home Assistant specific timeouts (generous for long operations)
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 300s;  # 5 minutes for long HA operations
+        
+        # Disable buffering for real-time updates (important for HA responsiveness)
+        proxy_buffering off;
+        proxy_request_buffering off;
+        
+        # Enable keepalive connections for better performance
+        proxy_set_header Connection "Keep-Alive";
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "Home Assistant HTTPS Healthy\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Block access to sensitive files (security best practice)
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
