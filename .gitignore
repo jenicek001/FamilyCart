@@ -77,6 +77,18 @@ backend/.env
 # VS Code
 .vscode/
 
+# SSL Certificates and Private Keys (NEVER commit these!)
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+# Allow SSL directories and README files, but ignore certificate files
+**/ssl/**/*.crt
+**/ssl/**/*.key
+**/ssl/**/*.pem
+
 # Ignore these files and directories
 env
 *.pyc

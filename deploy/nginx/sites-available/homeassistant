@@ -1,12 +1,6 @@
 # Home Assistant service configuration
 # File: /etc/nginx/sites-available/homeassistant
 
-# WebSocket upgrade mapping (nginx best practice for WebSocket proxying)
-map $http_upgrade $connection_upgrade {
-    default upgrade;
-    ''      close;
-}
-
 # HTTP to HTTPS redirect
 server {
     listen 80;
@@ -27,7 +21,8 @@ server {
 
 # HTTPS server for Home Assistant
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name homeassistant.connectedhome.cz;
 
     # SSL Certificate for connectedhome.cz domain
@@ -51,21 +46,14 @@ server {
 
     # Home Assistant proxy configuration
     location / {
-        limit_req zone=homeassistant burst=30 nodelay;
-        
-        # Proxy to Home Assistant on local network
-        proxy_pass http://homeassistant_service;
-        
-        # Standard proxy headers (as per nginx documentation)
+        # Direct proxy to Home Assistant (using your proven working parameters)
+        proxy_pass http://192.168.3.30:8123;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # WebSocket support for Home Assistant (essential for real-time updates)
-        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # Important for correct logging on backend
+        proxy_set_header X-Forwarded-Proto $scheme; # Let backend know the original protocol
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Connection "upgrade";
         
         # Home Assistant specific timeouts (generous for long operations)
         proxy_connect_timeout 10s;
@@ -75,9 +63,6 @@ server {
         # Disable buffering for real-time updates (important for HA responsiveness)
         proxy_buffering off;
         proxy_request_buffering off;
-        
-        # Enable keepalive connections for better performance
-        proxy_set_header Connection "Keep-Alive";
     }
 
     # Health check endpoint
