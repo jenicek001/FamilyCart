@@ -1,0 +1,86 @@
+# Grafana service configuration
+# File: /etc/nginx/sites-available/grafana
+
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    server_name grafana.connectedhome.cz;
+    
+    # Health check endpoint (no redirect)
+    location /health {
+        access_log off;
+        return 200 "Grafana HTTP Healthy\n";
+        add_header Content-Type text/plain;
+    }
+    
+    # Redirect all other traffic to HTTPS
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+# HTTPS server for Grafana
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name grafana.connectedhome.cz;
+
+    # SSL Certificate for connectedhome.cz domain
+    ssl_certificate /etc/nginx/ssl/connectedhome.cz/connectedhome.cz.crt;
+    ssl_certificate_key /etc/nginx/ssl/connectedhome.cz/connectedhome.cz.key;
+    
+    # Include common SSL settings
+    include /etc/nginx/conf.d/ssl-common.conf;
+    
+    # Include CloudFlare real IP configuration
+    include /etc/nginx/conf.d/cloudflare-realip.conf;
+
+    # Grafana-specific security headers (allows frames for dashboards)
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Dedicated logs for Grafana
+    access_log /var/log/nginx/grafana.access.log main;
+    error_log /var/log/nginx/grafana.error.log;
+
+    # Grafana proxy configuration with optimized settings
+    location / {
+        limit_req zone=grafana burst=30 nodelay;
+        
+        proxy_pass http://grafana_service;
+        
+        # Standard proxy headers (as per nginx documentation)
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Grafana-specific settings (optimized for dashboard performance)
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # WebSocket support for live updates (nginx best practice)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        
+        # Enable keepalive connections for better performance
+        proxy_set_header Connection "Keep-Alive";
+        
+        # Buffer settings for better performance with large dashboards
+        proxy_buffer_size 4k;
+        proxy_buffers 8 4k;
+        proxy_busy_buffers_size 8k;
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "Grafana HTTPS Healthy\n";
+        add_header Content-Type text/plain;
+    }
+}
