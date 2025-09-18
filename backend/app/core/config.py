@@ -6,11 +6,17 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Shared Shopping List API"
     API_V1_STR: str = "/api/v1"
+    
+    # Server Configuration
+    PORT: int = 8005
+    HOST: str = "0.0.0.0"
+    
     # Database
     POSTGRES_SERVER: str = ""
     POSTGRES_USER: str = ""
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
+    POSTGRES_PORT: int = 5432
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
     SQLALCHEMY_DATABASE_URI_ASYNC: Optional[str] = None
 
@@ -24,11 +30,11 @@ class Settings(BaseSettings):
         ):
             self.SQLALCHEMY_DATABASE_URI = (
                 f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
-                f"{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+                f"{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
             )
             self.SQLALCHEMY_DATABASE_URI_ASYNC = (
                 f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
-                f"{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+                f"{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
             )
         return self
 

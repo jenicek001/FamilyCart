@@ -3,6 +3,7 @@
  */
 
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
+import { API_CONFIG } from '@/config/constants';
 
 interface ApiRequestOptions extends RequestInit {
   sessionId?: string;
@@ -26,7 +27,7 @@ export function useApiClient() {
       // Client-side: use relative URLs and let Next.js proxy handle it
       if (typeof window === 'undefined') {
         // Server-side rendering: use absolute URLs
-        const fallbackUrl = 'http://localhost:8005';
+        const fallbackUrl = API_CONFIG.FALLBACK_URL;
         fullUrl = `${baseUrl || fallbackUrl}${url}`;
       } else {
         // Client-side: use relative URLs and let Next.js proxy handle it

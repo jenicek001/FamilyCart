@@ -5,7 +5,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
+import { API_CONFIG } from '@/config/constants';
+
+// WebSocket connection states
 
 export interface WebSocketMessage {
   type: 'item_change' | 'list_change' | 'pong' | 'connection_established';
@@ -169,7 +173,7 @@ export function useWebSocket({
         // Auto-detect: use current window host with backend port
         // This works for both localhost and network access
         const currentHost = window.location.hostname;
-        const apiPort = currentHost === 'localhost' ? '8005' : '8005'; // Same port for all environments
+        const apiPort = currentHost === 'localhost' ? API_CONFIG.DEFAULT_PORT.toString() : API_CONFIG.DEFAULT_PORT.toString(); // Same port for all environments
         host = `${currentHost}:${apiPort}`;
       }
       
