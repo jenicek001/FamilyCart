@@ -72,7 +72,11 @@ yarn.lock # If using Yarn and package.json is authoritative
 
 # Environments
 .env
+.env.*
+**/.env
+**/.env.*
 backend/.env
+frontend/.env
 
 # VS Code
 .vscode/
