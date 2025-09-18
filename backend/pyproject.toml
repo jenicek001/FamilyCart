@@ -45,6 +45,19 @@ pytest-asyncio = "^0.23.8"
 black = "^24.10.0"
 isort = "^6.0.1"
 pylint = "^3.3.8"
+pytest-cov = "^7.0.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+testpaths = ["app/tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--strict-markers"
+markers = [
+    "integration: marks tests as integration tests",
+]
+pytest-cov = "^7.0.0"
 
 [tool.black]
 line-length = 88

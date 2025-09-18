@@ -13,6 +13,9 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 from app.db.session import get_session
+from app.models.category import Category
+from app.models.shopping_list import ShoppingList
+from app.models.user import User
 
 # Create a test database engine
 # Replace the database name in the connection string
@@ -108,3 +111,38 @@ async def token_header(client: AsyncClient, test_user: dict) -> dict:
 
     data = response.json()
     return {"Authorization": f"Bearer {data['access_token']}"}
+
+
+# Helper functions for creating test objects
+def create_test_user(**kwargs) -> User:
+    """Create a test user with default values."""
+    defaults = {
+        "email": "test@example.com",
+        "hashed_password": "hashed_password",
+        "is_active": True,
+        "is_superuser": False,
+        "is_verified": True,
+        "nickname": "TestUser",
+    }
+    defaults.update(kwargs)
+    return User(**defaults)
+
+
+def create_test_category(**kwargs) -> Category:
+    """Create a test category with default values."""
+    defaults = {
+        "name": "Test Category",
+        "icon_name": "category-icon",
+    }
+    defaults.update(kwargs)
+    return Category(**defaults)
+
+
+def create_test_shopping_list(**kwargs) -> ShoppingList:
+    """Create a test shopping list with default values."""
+    defaults = {
+        "name": "Test Shopping List",
+        "is_completed": False,
+    }
+    defaults.update(kwargs)
+    return ShoppingList(**defaults)

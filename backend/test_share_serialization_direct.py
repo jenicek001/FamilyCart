@@ -16,7 +16,8 @@ from app.api.v1.endpoints.shopping_lists import share_shopping_list
 from app.db.session import get_session
 from app.models.shopping_list import ShoppingList
 from app.models.user import User
-from app.schemas.shopping_list import ShareRequest, ShoppingListRead
+from app.schemas.share import ShareRequest
+from app.schemas.shopping_list import ShoppingListRead
 
 
 async def test_share_serialization():
