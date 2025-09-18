@@ -3,8 +3,9 @@ name: Branch Protection CI
 on:
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened]
   push:
-    branches: [develop, feature/*, hotfix/*, release/*]
+    branches: [develop, feature/*, hotfix/*, bugfix/*, release/*, chore/*, docs/*]
 
 env:
   REGISTRY: ghcr.io
