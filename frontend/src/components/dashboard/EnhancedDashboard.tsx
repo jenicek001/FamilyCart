@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import apiClient from '@/lib/api';
+import { useWebSocketContext } from '@/contexts/WebSocketContext';
+import { useApiClient } from '@/hooks/use-api-client';
 import type { ShoppingList, Item, ItemCreate } from '@/types';
 import { ShoppingListSelector } from '@/components/ShoppingList/ShoppingListSelector';
 import { RealtimeShoppingList } from '@/components/ShoppingList/RealtimeShoppingList';
@@ -11,41 +12,42 @@ import { CreateListDialog } from '@/components/ShoppingList/CreateListDialog';
 import { useToast } from '@/hooks/use-toast';
 import { setLastActiveListId, getLastActiveListId } from '@/utils/localStorage';
 
+
 export default function EnhancedDashboard() {
   const { user, loading: authLoading, token } = useAuth();
+  const { trackLocalAction, ignoreNextCreate } = useWebSocketContext();
+  const { apiClient } = useApiClient();
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [selectedList, setSelectedList] = useState<ShoppingList | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { toast } = useToast();
 
   const fetchLists = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
+    setError(null);
     try {
-      const { data } = await apiClient.get<ShoppingList[]>('/api/v1/shopping-lists/');
+      const data = await apiClient('/api/v1/shopping-lists/', { method: 'GET' });
       const sortedLists = data.sort((a: ShoppingList, b: ShoppingList) => 
         new Date(b.updated_at).getTime() - new Date(a.created_at).getTime()
       );
       setLists(sortedLists);
-      
-      // Try to restore the last active list from localStorage
-      if (!selectedList && sortedLists.length > 0) {
+      // Only set selectedList if it is not already set
+      if (selectedList === null && sortedLists.length > 0) {
         const lastActiveListId = getLastActiveListId();
         const lastActiveList = lastActiveListId 
-          ? sortedLists.find(list => list.id === lastActiveListId)
+          ? sortedLists.find((list: ShoppingList) => list.id === lastActiveListId)
           : null;
-        
-        // Use last active list if found, otherwise use most recently updated
         const listToSelect = lastActiveList || sortedLists[0];
         setSelectedList(listToSelect);
-        
-        // Save the selected list to localStorage
         setLastActiveListId(listToSelect.id);
       }
-    } catch (error) {
-      console.error("Error fetching lists: ", error);
+    } catch (err: any) {
+      console.error("Error fetching lists: ", err);
+      setError(err?.message || 'Could not fetch shopping lists.');
       toast({ 
         title: "Error", 
         description: "Could not fetch shopping lists.", 
@@ -54,7 +56,7 @@ export default function EnhancedDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, toast, selectedList]);
+  }, [token, toast, apiClient]);
 
   const handleCreateList = async (name: string, description?: string) => {
     try {
@@ -63,7 +65,10 @@ export default function EnhancedDashboard() {
         payload.description = description;
       }
       
-      const { data } = await apiClient.post<ShoppingList>('/api/v1/shopping-lists/', payload);
+      const data = await apiClient('/api/v1/shopping-lists/', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
       
       setLists(prev => [data, ...prev]);
       setSelectedList(data);
@@ -84,10 +89,14 @@ export default function EnhancedDashboard() {
     }
   };
 
-  const handleSelectList = (list: ShoppingList) => {
-    setSelectedList(list);
-    // Persist the selected list to localStorage
-    setLastActiveListId(list.id);
+  const handleSelectList = (list: ShoppingList | null) => {
+    if (list) {
+      setSelectedList(list);
+      // Persist the selected list to localStorage
+      setLastActiveListId(list.id);
+    } else {
+      setSelectedList(null);
+    }
   };
 
   const handleBackToSelector = () => {
@@ -98,7 +107,17 @@ export default function EnhancedDashboard() {
     if (!selectedList) return;
     
     try {
-      const { data } = await apiClient.put<Item>(`/api/v1/items/${itemId}`, updates);
+      // Track this local action BEFORE making the API call
+      const actionKey = `updated-${itemId}`;
+      console.log('[EnhancedDashboard] 🟢 TRACKING action before API call:', actionKey);
+      trackLocalAction(actionKey);
+      
+      const data = await apiClient(`/api/v1/items/${itemId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      });
+      
+      console.log('[EnhancedDashboard] ✅ Update action tracked, proceeding with state update');
       
       // Update the item in the selected list
       setSelectedList(prev => ({
@@ -133,7 +152,16 @@ export default function EnhancedDashboard() {
     if (!selectedList) return;
     
     try {
-      await apiClient.delete(`/api/v1/items/${itemId}`);
+      // Track this local action BEFORE making the API call
+      const actionKey = `deleted-${itemId}`;
+      console.log('[EnhancedDashboard] 🟢 TRACKING action before API call:', actionKey);
+      trackLocalAction(actionKey);
+      
+      await apiClient(`/api/v1/items/${itemId}`, {
+        method: 'DELETE'
+      });
+      
+      console.log('[EnhancedDashboard] ✅ Delete action tracked, proceeding with state update');
       
       // Remove the item from the selected list
       setSelectedList(prev => ({
@@ -169,7 +197,21 @@ export default function EnhancedDashboard() {
     if (!selectedList) return;
     
     try {
-      const { data } = await apiClient.post<Item>(`/api/v1/shopping-lists/${selectedList.id}/items/`, item);
+      // CRITICAL: Set flag to ignore the next create WebSocket message
+      console.log('[EnhancedDashboard] � Setting ignore next create flag BEFORE API call');
+      ignoreNextCreate();
+      
+      const data = await apiClient(`/api/v1/shopping-lists/${selectedList.id}/items/`, {
+        method: 'POST',
+        body: JSON.stringify(item)
+      });
+      
+      // Also track with the real ID for update/delete operations
+      const realActionKey = `created-${data.id}`;
+      console.log('[EnhancedDashboard] 🔄 ALSO tracking with real ID for future updates:', realActionKey);
+      trackLocalAction(realActionKey);
+      
+      console.log('[EnhancedDashboard] ✅ Create protection active, proceeding with state update');
       
       // Add the item to the selected list
       setSelectedList(prev => ({
@@ -205,7 +247,9 @@ export default function EnhancedDashboard() {
     if (!authLoading) {
       fetchLists();
     }
-  }, [authLoading, fetchLists]);
+    // Only depend on authLoading to avoid infinite loop from fetchLists
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
 
   if (authLoading || isLoading) {
     return (
@@ -213,6 +257,23 @@ export default function EnhancedDashboard() {
         <div className="text-center">
           <div className="w-12 h-12 mx-auto mb-4 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-slate-600">Loading your shopping lists...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-700 mb-2">Error loading shopping lists</h2>
+          <p className="text-slate-600 mb-4">{error}</p>
+          <button
+            className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
+            onClick={() => fetchLists()}
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
