@@ -2,8 +2,9 @@
 """Test script to verify quantity fields and Unit relationship are working."""
 
 import asyncio
-import httpx
 import os
+
+import httpx
 from dotenv import load_dotenv
 
 load_dotenv()

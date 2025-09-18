@@ -3,10 +3,12 @@ CORS middleware for handling cross-origin requests properly.
 This is important to ensure proper behavior with modern browsers.
 """
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import settings
-import logging
 
 logger = logging.getLogger(__name__)
 

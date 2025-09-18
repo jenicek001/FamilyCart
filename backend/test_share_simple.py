@@ -2,8 +2,9 @@
 """
 Simple synchronous test for the share endpoint
 """
-import requests
 import json
+
+import requests
 
 
 def test_share_endpoint_simple():

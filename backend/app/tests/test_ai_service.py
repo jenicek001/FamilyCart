@@ -1,13 +1,13 @@
-import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from sqlalchemy.orm import Session
 
-from app.services.ai_service import AIService
 from app.core.cache import CacheService
-from app.models.category import Category
 from app.crud.crud_category import CRUDCategory
+from app.models.category import Category
+from app.services.ai_service import AIService
 
 # Using pytest-asyncio for async tests
 pytestmark = pytest.mark.asyncio

@@ -18,17 +18,18 @@ Requirements:
     - Test items list for consistent benchmarking
 """
 
+import argparse
 import asyncio
 import json
-import time
-import statistics
-import argparse
-from typing import List, Dict, Any, Tuple
-from dataclasses import dataclass, asdict
 import os
+import statistics
 import sys
-import httpx
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
+
+import httpx
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")

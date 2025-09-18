@@ -2,16 +2,17 @@
 Base configuration and fixtures for tests.
 """
 
-import pytest
 import asyncio
-from typing import Generator, AsyncGenerator
+from typing import AsyncGenerator, Generator
+
+import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import get_session
 from app.core.config import settings
+from app.db.session import get_session
 
 # Create a test database engine
 # Replace the database name in the connection string

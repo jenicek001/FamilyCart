@@ -7,8 +7,8 @@ a comprehensive comparison of all models tested.
 """
 
 import json
-import sys
 import os
+import sys
 from collections import defaultdict
 
 

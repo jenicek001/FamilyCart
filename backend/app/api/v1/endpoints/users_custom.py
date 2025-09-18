@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 from uuid import UUID
 
-from app.core.fastapi_users import fastapi_users, current_user
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.core.fastapi_users import current_user, fastapi_users
 from app.models.user import User
 from app.schemas.user import UserRead, UserUpdate
 

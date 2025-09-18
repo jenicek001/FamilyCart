@@ -3,8 +3,8 @@
 Simple test to check providers.
 """
 
-import sys
 import os
+import sys
 
 # Add the backend directory to Python path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")

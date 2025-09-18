@@ -3,8 +3,9 @@
 Test script to verify the share endpoint serialization fix.
 """
 import asyncio
-import aiohttp
 import json
+
+import aiohttp
 
 
 async def test_share_endpoint():

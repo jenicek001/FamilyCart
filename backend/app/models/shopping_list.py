@@ -1,16 +1,16 @@
-from sqlalchemy import String, ForeignKey, Table, Column, DateTime
-from sqlalchemy.orm import Mapped, relationship, mapped_column
-from typing import List, TYPE_CHECKING
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, List
+
+from sqlalchemy import Column, DateTime, ForeignKey, String, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.base import Base
 from ..utils.timezone import utc_now
 
-
 if TYPE_CHECKING:
-    from .user import User
     from .item import Item
+    from .user import User
 
 # Association table for many-to-many relationship between users and shopping lists
 user_shopping_list = Table(

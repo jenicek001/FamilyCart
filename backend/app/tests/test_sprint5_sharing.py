@@ -1,15 +1,16 @@
+import asyncio
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, AsyncMock
-import asyncio
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_shopping_list
+from app.models.item import Item
 from app.models.shopping_list import ShoppingList
 from app.models.user import User
-from app.models.item import Item
 from app.schemas.share import ShareRequest
 from app.services.notification_service import send_list_invitation_email
 

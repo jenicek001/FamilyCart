@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 import logging
+from typing import List, Optional
 
-from app.core.fastapi_users import current_user
-from app.models import User, Item, ShoppingList, Category
-from app.schemas.item import ItemRead, ItemCreate, ItemUpdate, ItemCreateStandalone
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
 from app.api.deps import get_session, set_session_context
+from app.core.fastapi_users import current_user
+from app.models import Category, Item, ShoppingList, User
+from app.schemas.item import (ItemCreate, ItemCreateStandalone, ItemRead,
+                              ItemUpdate)
 from app.services.ai_service import ai_service
 from app.services.websocket_service import websocket_service
 

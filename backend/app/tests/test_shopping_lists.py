@@ -6,8 +6,8 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User, ShoppingList, Item, Category
 from app.core.fastapi_users import current_user
+from app.models import Category, Item, ShoppingList, User
 
 
 # Shared fixture for creating test data

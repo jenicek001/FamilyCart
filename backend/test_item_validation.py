@@ -3,17 +3,18 @@
 Test script to debug the 422 Unprocessable Entity error when updating item quantity
 """
 import asyncio
-import sys
 import os
+import sys
 
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import ValidationError
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.session import AsyncSessionLocal
 from app.models.item import Item
 from app.schemas.item import ItemUpdate
-from pydantic import ValidationError
 
 
 async def test_item_update_validation():

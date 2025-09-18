@@ -4,8 +4,8 @@ Test script to verify the shopping list rename functionality after the fix.
 """
 
 import asyncio
-import sys
 import os
+import sys
 
 # Add the backend directory to Python path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
@@ -17,8 +17,9 @@ async def test_shopping_list_rename():
 
     try:
         # Import required modules
-        from app.api.v1.endpoints.shopping_lists import update_shopping_list
         from sqlalchemy.orm import selectinload
+
+        from app.api.v1.endpoints.shopping_lists import update_shopping_list
         from app.models.item import Item
 
         print("✅ Imports successful")

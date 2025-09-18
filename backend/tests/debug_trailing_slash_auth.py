@@ -8,9 +8,10 @@ This script:
 """
 
 import json
-import requests
 import random
 import string
+
+import requests
 
 # Configuration
 BASE_URL = "http://localhost:8000"

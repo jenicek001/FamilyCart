@@ -3,8 +3,9 @@
 Test script to verify that the share endpoint works correctly for existing users.
 """
 import asyncio
-import aiohttp
 import json
+
+import aiohttp
 
 
 async def test_share_endpoint():

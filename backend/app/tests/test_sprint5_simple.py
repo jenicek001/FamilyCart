@@ -3,8 +3,9 @@ Test Sprint 5: List Sharing & Collaboration functionality.
 Testing permission system, sharing endpoints, and collaborative features.
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 
 
 class TestSharingPermissions:
@@ -24,14 +25,16 @@ class TestSharingPermissions:
 
     def test_notification_service_import(self):
         """Test notification service can be imported."""
-        from app.services.notification_service import send_list_invitation_email
+        from app.services.notification_service import \
+            send_list_invitation_email
 
         assert callable(send_list_invitation_email)
 
     @pytest.mark.asyncio
     async def test_send_list_invitation_email_mock(self):
         """Test email invitation service with mock data."""
-        from app.services.notification_service import send_list_invitation_email
+        from app.services.notification_service import \
+            send_list_invitation_email
 
         list_data = {
             "id": 1,

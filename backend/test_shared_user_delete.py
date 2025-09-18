@@ -6,9 +6,10 @@ cannot delete items from Honzík's (owner) shopping list.
 Usage: poetry run python test_shared_user_delete.py
 """
 
-import requests
 import json
 import sys
+
+import requests
 
 
 def test_shared_user_item_deletion():

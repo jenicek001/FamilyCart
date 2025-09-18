@@ -2,8 +2,8 @@
 """
 Test the quantity validation fix
 """
-import sys
 import os
+import sys
 
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 

@@ -1,13 +1,15 @@
-import logging
 import json
-from typing import Dict, Any
+import logging
+from typing import Any, Dict
+
 import google.generativeai as genai
-from app.core.config import settings
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.category import Category
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
 from app.core.cache import cache_service
+from app.core.config import settings
+from app.models.category import Category
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

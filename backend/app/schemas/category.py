@@ -1,5 +1,6 @@
+from typing import Dict, Optional
+
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, Dict
 
 
 class CategoryBase(BaseModel):

@@ -5,9 +5,10 @@ Tests all endpoints for both owners and shared users.
 """
 
 import asyncio
-import aiohttp
 import json
 import sys
+
+import aiohttp
 
 # Test configuration
 BASE_URL = "http://localhost:8000"

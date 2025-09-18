@@ -19,12 +19,14 @@ Tests the AI provider pattern         mock_settings.AI_PROVIDER = "gemini"
 provider selection, and basic functionality of both Gemini and Ollama providers.
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+
+from app.core.config import settings
 from app.services.ai_factory import AIProviderFactory, get_ai_provider
 from app.services.gemini_provider import GeminiProvider
 from app.services.ollama_provider import OllamaProvider
-from app.core.config import settings
 
 
 class TestAIProviderFactory:

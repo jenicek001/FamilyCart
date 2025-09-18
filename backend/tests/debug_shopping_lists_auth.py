@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 # API URLs
 BASE_URL = "http://localhost:8000"  # Adjust if your API is hosted elsewhere

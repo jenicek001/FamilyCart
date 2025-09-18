@@ -5,10 +5,10 @@ to debug the "Connection issue" error.
 """
 
 import asyncio
-import websockets
 import json
 import sys
 
+import websockets
 
 #!/usr/bin/env python3
 """
@@ -16,10 +16,11 @@ WebSocket debugging utility to test real-time notifications for shopping lists.
 """
 
 import asyncio
-import websockets
 import json
-import sys
 import os
+import sys
+
+import websockets
 
 # Add the parent directory to the Python path to import from app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

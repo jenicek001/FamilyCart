@@ -7,11 +7,12 @@ configured provider with automatic fallback support.
 """
 
 import logging
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.fallback_ai_service import fallback_ai_service
 from app.core.config import settings
+from app.services.fallback_ai_service import fallback_ai_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

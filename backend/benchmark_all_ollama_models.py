@@ -10,19 +10,19 @@ This script benchmarks all available Ollama models against Gemini for:
 """
 
 import asyncio
-import time
 import json
-import sys
 import os
-from typing import Dict, List, Tuple
 import statistics
+import sys
+import time
+from typing import Dict, List, Tuple
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
+from app.core.config import settings
 from app.services.gemini_provider import GeminiProvider
 from app.services.ollama_provider import OllamaProvider
-from app.core.config import settings
 
 
 class ModelBenchmark:

@@ -4,9 +4,9 @@ This service integrates with API endpoints to send real-time notifications.
 """
 
 import logging
-from typing import Optional, Dict, Any
-from datetime import datetime
 from contextvars import ContextVar
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

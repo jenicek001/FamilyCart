@@ -8,11 +8,12 @@ This helps confirm that both versions work correctly and don't suffer from
 authentication issues or redirects.
 """
 
-import requests
 import json
 import os
 import sys
 import time
+
+import requests
 
 
 # Set up colored output for better readability

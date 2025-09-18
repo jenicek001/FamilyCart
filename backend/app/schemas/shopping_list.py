@@ -1,7 +1,9 @@
 import uuid
-from pydantic import BaseModel
-from typing import Optional, List, Any, TYPE_CHECKING
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, List, Optional
+
+from pydantic import BaseModel
+
 from app.schemas.user import UserRead
 
 if TYPE_CHECKING:

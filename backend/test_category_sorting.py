@@ -3,13 +3,11 @@ Test category-based sorting functionality
 """
 
 import pytest
+
 from app.api.v1.endpoints.shopping_lists import sort_items_by_category
-from app.models import Item, Category, User, ShoppingList
-from app.tests.conftest import (
-    create_test_user,
-    create_test_category,
-    create_test_shopping_list,
-)
+from app.models import Category, Item, ShoppingList, User
+from app.tests.conftest import (create_test_category,
+                                create_test_shopping_list, create_test_user)
 
 
 def test_sort_items_by_category_basic():

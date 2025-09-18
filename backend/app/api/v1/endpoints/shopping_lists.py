@@ -1,26 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
-from sqlalchemy.orm import selectinload
 import logging
+from typing import List
 
-from app.core.fastapi_users import current_user  # Use the same dependency as users.py
-from app.models import User
-from app.models.shopping_list import ShoppingList
-from app.models.item import Item
-from app.models.category import Category
-from app.schemas.shopping_list import (
-    ShoppingListRead,
-    ShoppingListCreate,
-    ShoppingListUpdate,
-)
-from app.schemas.item import ItemCreate, ItemRead
-from app.schemas.user import UserRead
-from app.schemas.share import ShareRequest
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
 from app.api.deps import get_session, set_session_context
-from app.services.notification_service import send_list_invitation_email
+from app.core.fastapi_users import \
+    current_user  # Use the same dependency as users.py
+from app.models import User
+from app.models.category import Category
+from app.models.item import Item
+from app.models.shopping_list import ShoppingList
+from app.schemas.item import ItemCreate, ItemRead
+from app.schemas.share import ShareRequest
+from app.schemas.shopping_list import (ShoppingListCreate, ShoppingListRead,
+                                       ShoppingListUpdate)
+from app.schemas.user import UserRead
 from app.services.ai_service import ai_service
+from app.services.notification_service import send_list_invitation_email
 from app.services.websocket_service import websocket_service
 
 logger = logging.getLogger(__name__)
@@ -97,8 +96,8 @@ async def create_shopping_list(
     # Eagerly load owner and shared_with
     await session.refresh(db_list, attribute_names=["owner", "shared_with", "items"])
 
-    from app.schemas.user import UserRead
     from app.schemas.item import ItemRead
+    from app.schemas.user import UserRead
 
     items = []
     # Members: shared_with + owner if not already included

@@ -1,6 +1,7 @@
-import requests
 import json
 from pprint import pprint
+
+import requests
 
 # API URLs
 BASE_URL = "http://localhost:8000"

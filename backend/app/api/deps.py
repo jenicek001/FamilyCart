@@ -1,9 +1,9 @@
 from typing import AsyncGenerator, Optional
 
-from fastapi import Depends, HTTPException, Header
+from fastapi import Depends, Header, HTTPException
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.db.session import AsyncSessionLocal, get_session

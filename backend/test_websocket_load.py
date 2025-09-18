@@ -4,12 +4,13 @@ Tests multiple concurrent connections and message broadcasting.
 """
 
 import asyncio
-import websockets
 import json
-import time
 import statistics
+import time
 from datetime import datetime
 from typing import List
+
+import websockets
 
 # Configuration
 WS_BASE_URL = "ws://localhost:8000/api/v1/ws/lists"

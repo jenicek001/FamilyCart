@@ -1,17 +1,19 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, Query, Depends
-from typing import Dict, List, Optional, Set
 import json
-import jwt
 import logging
 import uuid
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
+import jwt
+from fastapi import (APIRouter, Depends, Query, WebSocket, WebSocketDisconnect,
+                     status)
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_session
 from app.core.config import settings
 from app.models import User
-from app.api.deps import get_session
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

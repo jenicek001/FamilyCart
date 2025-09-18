@@ -3,12 +3,13 @@ Simple verification test for item completion functionality.
 This test verifies the Pydantic schemas and basic logic without requiring database setup.
 """
 
-import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from app.schemas.item import ItemUpdate, ItemRead, ItemCreate
+import pytest
+
 from app.models.item import Item
+from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 
 
 def test_item_update_schema_includes_is_completed():

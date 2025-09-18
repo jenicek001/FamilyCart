@@ -6,10 +6,11 @@ This script helps testers verify that the frontend duplicate items bug is fixed.
 It provides instructions and a simple API test to verify the backend is working correctly.
 """
 
-import requests
 import json
 import time
 from datetime import datetime
+
+import requests
 
 # Configuration
 API_BASE_URL = "http://localhost:8000"

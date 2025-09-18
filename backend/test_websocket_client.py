@@ -5,11 +5,12 @@ This script connects to the WebSocket endpoint and tests basic functionality.
 """
 
 import asyncio
-import websockets
 import json
-import requests
 import sys
 from datetime import datetime
+
+import requests
+import websockets
 
 # Configuration
 BASE_URL = "http://localhost:8000"

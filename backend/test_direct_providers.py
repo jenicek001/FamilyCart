@@ -4,8 +4,8 @@ Test direct provider calls to see where the issue lies.
 """
 
 import asyncio
-import sys
 import os
+import sys
 
 # Add the backend directory to Python path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")

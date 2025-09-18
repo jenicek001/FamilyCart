@@ -1,13 +1,13 @@
 import sys
-from pathlib import Path
 from logging.config import fileConfig
+from pathlib import Path
 
 from dotenv import load_dotenv
-
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from alembic import context
 
 # Add the project root to sys.path and load .env
 # The root is the 'backend' directory
@@ -33,13 +33,12 @@ if config.config_file_name is not None:
 # Now that env is loaded, we can import settings and models
 # This will now be populated correctly from the loaded .env file
 from app.core.config import settings
-
+from app.db.base import Base  # Adjust if your Base is elsewhere
+from app.models.category import Category
+from app.models.item import Item
+from app.models.shopping_list import ShoppingList
 # Explicitly import all models to ensure they are registered with Base
 from app.models.user import User
-from app.models.category import Category
-from app.models.shopping_list import ShoppingList
-from app.models.item import Item
-from app.db.base import Base  # Adjust if your Base is elsewhere
 
 target_metadata = Base.metadata
 

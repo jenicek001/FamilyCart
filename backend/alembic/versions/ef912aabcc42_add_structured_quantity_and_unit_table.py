@@ -8,9 +8,9 @@ Create Date: 2025-07-18 14:30:28.308112
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "ef912aabcc42"
@@ -48,7 +48,7 @@ def upgrade() -> None:
     )
 
     # Populate units table with standard units
-    from sqlalchemy import table, column, String, Boolean, Numeric
+    from sqlalchemy import Boolean, Numeric, String, column, table
 
     unit_table = table(
         "unit",

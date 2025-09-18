@@ -2,8 +2,9 @@
 """Test script to verify login functionality is restored."""
 
 import asyncio
-import httpx
 import os
+
+import httpx
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
