@@ -6,6 +6,12 @@ on:
   push:
     branches: [develop, feature/*, hotfix/*, release/*]
 
+# Grant necessary permissions for GitHub Actions to access PR data
+permissions:
+  contents: read
+  pull-requests: read
+  security-events: write  # For SARIF uploads
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: jenicek001/familycart
@@ -199,32 +205,37 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-            
-            const additions = pr.data.additions;
-            const deletions = pr.data.deletions;
-            const changedFiles = pr.data.changed_files;
-            
-            console.log(`PR Statistics:
-            - Files changed: ${changedFiles}
-            - Lines added: ${additions}
-            - Lines deleted: ${deletions}
-            - Total changes: ${additions + deletions}`);
-            
-            if (changedFiles > 20) {
-              console.log('⚠️  Large PR detected (>20 files changed). Consider breaking into smaller PRs.');
-            }
-            
-            if (additions + deletions > 1000) {
-              console.log('⚠️  Large PR detected (>1000 line changes). Consider breaking into smaller PRs.');
-            }
-            
-            if (changedFiles <= 20 && (additions + deletions) <= 1000) {
-              console.log('✅ PR size is reasonable for review');
+            try {
+              const pr = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              
+              const additions = pr.data.additions;
+              const deletions = pr.data.deletions;
+              const changedFiles = pr.data.changed_files;
+              
+              console.log(`PR Statistics:
+              - Files changed: ${changedFiles}
+              - Lines added: ${additions}
+              - Lines deleted: ${deletions}
+              - Total changes: ${additions + deletions}`);
+              
+              if (changedFiles > 20) {
+                console.log('⚠️  Large PR detected (>20 files changed). Consider breaking into smaller PRs.');
+              }
+              
+              if (additions + deletions > 1000) {
+                console.log('⚠️  Large PR detected (>1000 line changes). Consider breaking into smaller PRs.');
+              }
+              
+              if (changedFiles <= 20 && (additions + deletions) <= 1000) {
+                console.log('✅ PR size is reasonable for review');
+              }
+            } catch (error) {
+              console.error('Failed to fetch PR data:', error.message);
+              console.log('⚠️  Unable to check PR size - continuing with workflow');
             }
 
   status-check:
