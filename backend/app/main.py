@@ -11,8 +11,9 @@ from app.api.v1.endpoints import ai as ai_v1_router  # Import the new AI router
 from app.api.v1.endpoints import auth as auth_v1_router
 from app.api.v1.endpoints import items as items_v1_router
 from app.api.v1.endpoints import shopping_lists as sl_v1_router
-from app.api.v1.endpoints import \
-    shopping_lists_no_slash as sl_noslash_v1_router  # No trailing slash router
+from app.api.v1.endpoints import (
+    shopping_lists_no_slash as sl_noslash_v1_router,  # No trailing slash router
+)
 from app.api.v1.endpoints import users as users_v1_router
 from app.api.v1.ws import notifications as ws_v1_router  # WebSocket router
 from app.core.cache import cache_service

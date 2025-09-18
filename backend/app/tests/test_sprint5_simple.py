@@ -25,16 +25,14 @@ class TestSharingPermissions:
 
     def test_notification_service_import(self):
         """Test notification service can be imported."""
-        from app.services.notification_service import \
-            send_list_invitation_email
+        from app.services.notification_service import send_list_invitation_email
 
         assert callable(send_list_invitation_email)
 
     @pytest.mark.asyncio
     async def test_send_list_invitation_email_mock(self):
         """Test email invitation service with mock data."""
-        from app.services.notification_service import \
-            send_list_invitation_email
+        from app.services.notification_service import send_list_invitation_email
 
         list_data = {
             "id": 1,

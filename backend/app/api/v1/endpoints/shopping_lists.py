@@ -7,16 +7,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_session, set_session_context
-from app.core.fastapi_users import \
-    current_user  # Use the same dependency as users.py
+from app.core.fastapi_users import current_user  # Use the same dependency as users.py
 from app.models import User
 from app.models.category import Category
 from app.models.item import Item
 from app.models.shopping_list import ShoppingList
 from app.schemas.item import ItemCreate, ItemRead
 from app.schemas.share import ShareRequest
-from app.schemas.shopping_list import (ShoppingListCreate, ShoppingListRead,
-                                       ShoppingListUpdate)
+from app.schemas.shopping_list import (
+    ShoppingListCreate,
+    ShoppingListRead,
+    ShoppingListUpdate,
+)
 from app.schemas.user import UserRead
 from app.services.ai_service import ai_service
 from app.services.notification_service import send_list_invitation_email

@@ -11,8 +11,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_session
-from app.api.v1.endpoints.shopping_lists import (create_shopping_list,
-                                                 read_shopping_lists)
+from app.api.v1.endpoints.shopping_lists import (
+    create_shopping_list,
+    read_shopping_lists,
+)
 from app.core.fastapi_users import current_user
 from app.models.user import User
 from app.schemas.shopping_list import ShoppingListCreate, ShoppingListRead

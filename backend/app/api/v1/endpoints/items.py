@@ -9,8 +9,7 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import get_session, set_session_context
 from app.core.fastapi_users import current_user
 from app.models import Category, Item, ShoppingList, User
-from app.schemas.item import (ItemCreate, ItemCreateStandalone, ItemRead,
-                              ItemUpdate)
+from app.schemas.item import ItemCreate, ItemCreateStandalone, ItemRead, ItemUpdate
 from app.services.ai_service import ai_service
 from app.services.websocket_service import websocket_service
 

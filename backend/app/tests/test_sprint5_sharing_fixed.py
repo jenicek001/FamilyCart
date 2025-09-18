@@ -455,8 +455,7 @@ class TestNotificationService:
         """Test email invitation sending (mocked)."""
         # This test verifies the function exists and can be called
         # In a real implementation, this would test email sending logic
-        from app.services.notification_service import \
-            send_list_invitation_email
+        from app.services.notification_service import send_list_invitation_email
 
         # Mock the email sending
         with patch(

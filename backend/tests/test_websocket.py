@@ -11,8 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi.websockets import WebSocket
 
-from app.api.v1.ws.notifications import (ListConnectionManager,
-                                         connection_manager)
+from app.api.v1.ws.notifications import ListConnectionManager, connection_manager
 from app.core.config import settings
 from app.main import app
 from app.services.websocket_service import websocket_service

@@ -6,8 +6,7 @@ from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 import jwt
-from fastapi import (APIRouter, Depends, Query, WebSocket, WebSocketDisconnect,
-                     status)
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

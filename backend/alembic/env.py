@@ -37,6 +37,7 @@ from app.db.base import Base  # Adjust if your Base is elsewhere
 from app.models.category import Category
 from app.models.item import Item
 from app.models.shopping_list import ShoppingList
+
 # Explicitly import all models to ensure they are registered with Base
 from app.models.user import User
 
