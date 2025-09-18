@@ -25,13 +25,17 @@ def ai_service_mocker():
     This fixture automatically patches all external dependencies for ai_service
     for every test in this module.
     """
-    with patch(
-        "google.generativeai.GenerativeModel", new_callable=MagicMock
-    ) as mock_genai_model, patch(
-        "app.services.ai_service.cache_service", spec=CacheService
-    ) as mock_cache_service, patch(
-        "app.services.ai_service.crud_category", spec=CRUDCategory
-    ) as mock_crud_category:
+    with (
+        patch(
+            "google.generativeai.GenerativeModel", new_callable=MagicMock
+        ) as mock_genai_model,
+        patch(
+            "app.services.ai_service.cache_service", spec=CacheService
+        ) as mock_cache_service,
+        patch(
+            "app.services.ai_service.crud_category", spec=CRUDCategory
+        ) as mock_crud_category,
+    ):
 
         # Configure default mock behaviors
         mock_genai_model.return_value.generate_content_async = AsyncMock()
