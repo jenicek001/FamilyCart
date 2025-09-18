@@ -18,7 +18,7 @@ from app.schemas.shopping_list import (
 from app.schemas.item import ItemCreate, ItemRead
 from app.schemas.user import UserRead
 from app.schemas.share import ShareRequest
-from app.api.deps import get_session
+from app.api.deps import get_session, set_session_context
 from app.services.notification_service import send_list_invitation_email
 from app.services.ai_service import ai_service
 from app.services.websocket_service import websocket_service
@@ -222,6 +222,7 @@ async def update_shopping_list(
     list_in: ShoppingListUpdate,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
+    _session_context: str = Depends(set_session_context),
 ):
     """
     Update a shopping list details.
@@ -291,6 +292,7 @@ async def delete_shopping_list(
     list_id: int,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
+    _session_context: str = Depends(set_session_context),
 ):
     """
     Delete a shopping list.
@@ -318,6 +320,7 @@ async def create_item_for_list(
     item_in: ItemCreate,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
+    _session_context: str = Depends(set_session_context),
 ):
     """
     Add an item to a specific shopping list.
@@ -326,6 +329,18 @@ async def create_item_for_list(
     # Get shopping list with permission check
     shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
     user_id = current_user.id
+    # Capture all values immediately to avoid lazy loading issues during AI operations
+    shopping_list_id = shopping_list.id
+    
+    # Extract all values from item_in to avoid any potential async context issues
+    item_name = item_in.name
+    item_quantity = item_in.quantity
+    item_comment = item_in.comment
+    item_category_name = item_in.category_name
+    item_icon_name = getattr(item_in, 'icon_name', None)
+    item_quantity_value = item_in.quantity_value
+    item_quantity_unit_id = item_in.quantity_unit_id
+    item_quantity_display_text = item_in.quantity_display_text
 
     # Use AI to suggest category and standardize name
     category = None
@@ -344,10 +359,10 @@ async def create_item_for_list(
 
         # Start category and translation tasks in parallel
         category_task = asyncio.create_task(
-            ai_service.suggest_category_async(item_in.name, category_names)
+            ai_service.suggest_category_async(item_name, category_names)
         )
         translation_task = asyncio.create_task(
-            ai_service.standardize_and_translate_item_name(item_in.name)
+            ai_service.standardize_and_translate_item_name(item_name)
         )
 
         # Wait for both with timeout (max 10 seconds each)
@@ -384,12 +399,12 @@ async def create_item_for_list(
             if category:
                 try:
                     icon_name = await asyncio.wait_for(
-                        ai_service.suggest_icon(item_in.name, category.name),
+                        ai_service.suggest_icon(item_name, category.name),
                         timeout=10.0,  # Max 10 seconds for icon
                     )
                 except asyncio.TimeoutError:
                     logger.warning(
-                        f"Icon suggestion timed out for item '{item_in.name}'"
+                        f"Icon suggestion timed out for item '{item_name}'"
                     )
                     icon_name = "shopping_cart"  # Default fallback
                 except Exception as e:
@@ -398,7 +413,7 @@ async def create_item_for_list(
 
         except asyncio.TimeoutError:
             logger.warning(
-                f"AI processing timed out for item '{item_in.name}' - using fallbacks"
+                f"AI processing timed out for item '{item_name}' - using fallbacks"
             )
             category_name = None
             standardized_name = None
@@ -406,29 +421,29 @@ async def create_item_for_list(
 
     except Exception as e:
         # Log the error but continue with item creation
-        logger.error(f"Error during AI processing for item '{item_in.name}': {e}")
+        logger.error(f"Error during AI processing for item '{item_name}': {e}")
 
         # Fallback: use provided category if any
-        if item_in.category_name:
-            category = await get_or_create_category(item_in.category_name, session)
+        if item_category_name:
+            category = await get_or_create_category(item_category_name, session)
 
     # Create new item with AI-enhanced data
     db_item = Item(
-        name=item_in.name,
-        quantity=item_in.quantity,
-        comment=item_in.comment,
-        shopping_list_id=shopping_list.id,
+        name=item_name,
+        quantity=item_quantity,
+        comment=item_comment,
+        shopping_list_id=shopping_list_id,
         owner_id=user_id,
         last_modified_by_id=user_id,
         category_id=category.id if category else None,
         icon_name=icon_name
-        or (item_in.icon_name if hasattr(item_in, "icon_name") else None),
+        or item_icon_name,
         standardized_name=standardized_name,
         translations=translations,
         # New structured quantity fields
-        quantity_value=item_in.quantity_value,
-        quantity_unit_id=item_in.quantity_unit_id,
-        quantity_display_text=item_in.quantity_display_text,
+        quantity_value=item_quantity_value,
+        quantity_unit_id=item_quantity_unit_id,
+        quantity_display_text=item_quantity_display_text,
     )
 
     session.add(db_item)
@@ -485,6 +500,7 @@ async def share_shopping_list(
     share_data: ShareRequest,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
+    _session_context: str = Depends(set_session_context),
 ):
     """
     Share a shopping list with another user by email.
@@ -597,6 +613,7 @@ async def remove_member_from_list(
     user_email: str,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(current_user),
+    _session_context: str = Depends(set_session_context),
 ):
     """
     Remove a member from a shared shopping list.

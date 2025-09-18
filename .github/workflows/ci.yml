@@ -1,11 +1,29 @@
-name: CI/CD Pipeline
+# CI/CD Pipeline for FamilyCart
+# 
+# This workflow requires the following GitHub Environment configurations:
+#
+# UAT Environment (repository Settings → Environments → uat):
+#   - UAT_HOST (optional): Remote UAT server hostname/IP
+#   - UAT_USER (optional): Username for remote UAT server  
+#   - UAT_SSH_KEY (optional): SSH private key for remote UAT server
+#   - UAT_BASE_URL (optional): UAT frontend URL (default: http://localhost:3001)
+#   - UAT_API_URL (optional): UAT backend URL (default: http://localhost:8001)
+#
+# Production Environment (repository Settings → Environments → production):
+#   - PRODUCTION_SSH_KEY: SSH private key for production server
+#   - PRODUCTION_HOST: Production server hostname/IP
+#   - PRODUCTION_USER: Username for production server
+#   - PRODUCTION_URL: Production application URL
+#
+# Note: If UAT_HOST/UAT_USER/UAT_SSH_KEY are not set, UAT deployment will run locally on the self-hosted runner
+
+name: CI/CD
 
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
 
 env:
   REGISTRY: ghcr.io
@@ -191,36 +209,70 @@ jobs:
         env:
           BACKEND_IMAGE: ${{ needs.build.outputs.backend-image }}
           FRONTEND_IMAGE: ${{ needs.build.outputs.frontend-image }}
+          UAT_HOST: ${{ secrets.UAT_HOST }}
+          UAT_USER: ${{ secrets.UAT_USER }}
+          UAT_SSH_KEY: ${{ secrets.UAT_SSH_KEY }}
         run: |
-          cd /opt/familycart-uat
-          
-          # Update docker-compose with new images
-          sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|${BACKEND_IMAGE}|g" docker-compose.uat.yml
-          sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|${FRONTEND_IMAGE}|g" docker-compose.uat.yml
-          
-          # Pull new images and deploy
-          docker-compose -f docker-compose.uat.yml pull
-          docker-compose -f docker-compose.uat.yml up -d --remove-orphans
-          
-          # Wait for services to start
-          sleep 60
+          # Prepare SSH key if deploying to remote UAT
+          if [ -n "$UAT_SSH_KEY" ] && [ -n "$UAT_HOST" ]; then
+            echo "$UAT_SSH_KEY" > /tmp/uat_key
+            chmod 600 /tmp/uat_key
+            
+            # Deploy to remote UAT server
+            ssh -i /tmp/uat_key -o StrictHostKeyChecking=no $UAT_USER@$UAT_HOST << 'EOF'
+              cd /opt/familycart-uat
+              
+              # Update docker-compose with new images
+              sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|$BACKEND_IMAGE|g" docker-compose.uat.yml
+              sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|$FRONTEND_IMAGE|g" docker-compose.uat.yml
+              
+              # Pull new images and deploy
+              docker-compose -f docker-compose.uat.yml pull
+              docker-compose -f docker-compose.uat.yml up -d --remove-orphans
+              
+              # Wait for services to start
+              sleep 60
+          EOF
+            
+            # Cleanup SSH key
+            rm /tmp/uat_key
+          else
+            # Local UAT deployment (self-hosted runner)
+            cd /opt/familycart-uat
+            
+            # Update docker-compose with new images
+            sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|${BACKEND_IMAGE}|g" docker-compose.uat.yml
+            sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|${FRONTEND_IMAGE}|g" docker-compose.uat.yml
+            
+            # Pull new images and deploy
+            docker-compose -f docker-compose.uat.yml pull
+            docker-compose -f docker-compose.uat.yml up -d --remove-orphans
+            
+            # Wait for services to start
+            sleep 60
+          fi
           
       - name: Health check UAT deployment
+        env:
+          UAT_BASE_URL: ${{ secrets.UAT_BASE_URL || 'http://localhost:3001' }}
+          UAT_API_URL: ${{ secrets.UAT_API_URL || 'http://localhost:8001' }}
         run: |
           # Check backend health
-          curl -f http://localhost:8001/health || (echo "Backend health check failed" && exit 1)
+          curl -f ${UAT_API_URL}/health || (echo "Backend health check failed" && exit 1)
           
           # Check frontend availability  
-          curl -f http://localhost:3001/ || (echo "Frontend health check failed" && exit 1)
+          curl -f ${UAT_BASE_URL}/ || (echo "Frontend health check failed" && exit 1)
           
-          # Check database connectivity
-          docker exec familycart-uat-db pg_isready -U familycart_uat -d familycart_uat || (echo "Database health check failed" && exit 1)
+          # Check database connectivity (if local deployment)
+          if [ -z "$UAT_HOST" ]; then
+            docker exec familycart-uat-db pg_isready -U familycart_uat -d familycart_uat || (echo "Database health check failed" && exit 1)
+          fi
 
       - name: Run UAT integration tests
         working-directory: ./frontend
         env:
-          UAT_BASE_URL: http://localhost:3001
-          UAT_API_URL: http://localhost:8001
+          UAT_BASE_URL: ${{ secrets.UAT_BASE_URL || 'http://localhost:3001' }}
+          UAT_API_URL: ${{ secrets.UAT_API_URL || 'http://localhost:8001' }}
         run: |
           # Run basic integration tests against UAT environment
           npm run test:integration:uat || echo "Integration tests failed but deployment continues"
@@ -242,20 +294,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Deploy to OCI Production
+      - name: Deploy to Production
         env:
-          OCI_SSH_KEY: ${{ secrets.OCI_SSH_KEY }}
-          OCI_HOST: ${{ secrets.OCI_HOST }}
-          OCI_USER: ${{ secrets.OCI_USER }}
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
           BACKEND_IMAGE: ${{ needs.build.outputs.backend-image }}
           FRONTEND_IMAGE: ${{ needs.build.outputs.frontend-image }}
         run: |
           # Prepare SSH key
-          echo "$OCI_SSH_KEY" > /tmp/oci_key
-          chmod 600 /tmp/oci_key
+          echo "$PRODUCTION_SSH_KEY" > /tmp/production_key
+          chmod 600 /tmp/production_key
           
-          # Deploy to OCI production
-          ssh -i /tmp/oci_key -o StrictHostKeyChecking=no $OCI_USER@$OCI_HOST << 'EOF'
+          # Deploy to production server
+          ssh -i /tmp/production_key -o StrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_HOST << EOF
             cd /opt/familycart
             
             # Update image references
@@ -271,8 +323,8 @@ jobs:
             curl -f http://localhost:8000/health || exit 1
           EOF
           
-          # Cleanup
-          rm /tmp/oci_key
+          # Cleanup SSH key
+          rm /tmp/production_key
 
       - name: Production health check
         env:
@@ -283,6 +335,9 @@ jobs:
           
           # Check production endpoint
           curl -f $PRODUCTION_URL/health || (echo "Production health check failed" && exit 1)
+          
+          # Optional: Run production smoke tests
+          curl -f $PRODUCTION_URL/ || (echo "Production frontend check failed" && exit 1)
 
   performance-test:
     runs-on: self-hosted
