@@ -650,15 +650,9 @@ async def remove_member_from_list(
 
     # Send real-time notification
     try:
-        from app.schemas.shopping_list import ShoppingListRead
-
-        list_data = ShoppingListRead.model_validate(
-            shopping_list, from_attributes=True
-        ).model_dump(mode="json")
         await websocket_service.notify_member_removed(
             list_id=list_id,
-            list_data=list_data,
-            removed_member_email=user_email,
+            removed_user_id=str(user_to_remove.id),
             user_id=current_user_id,
         )
     except Exception:
