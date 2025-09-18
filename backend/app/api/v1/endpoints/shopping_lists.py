@@ -331,13 +331,13 @@ async def create_item_for_list(
     user_id = current_user.id
     # Capture all values immediately to avoid lazy loading issues during AI operations
     shopping_list_id = shopping_list.id
-    
+
     # Extract all values from item_in to avoid any potential async context issues
     item_name = item_in.name
     item_quantity = item_in.quantity
     item_comment = item_in.comment
     item_category_name = item_in.category_name
-    item_icon_name = getattr(item_in, 'icon_name', None)
+    item_icon_name = getattr(item_in, "icon_name", None)
     item_quantity_value = item_in.quantity_value
     item_quantity_unit_id = item_in.quantity_unit_id
     item_quantity_display_text = item_in.quantity_display_text
@@ -403,9 +403,7 @@ async def create_item_for_list(
                         timeout=10.0,  # Max 10 seconds for icon
                     )
                 except asyncio.TimeoutError:
-                    logger.warning(
-                        f"Icon suggestion timed out for item '{item_name}'"
-                    )
+                    logger.warning(f"Icon suggestion timed out for item '{item_name}'")
                     icon_name = "shopping_cart"  # Default fallback
                 except Exception as e:
                     logger.error(f"Icon suggestion failed: {e}")
@@ -436,8 +434,7 @@ async def create_item_for_list(
         owner_id=user_id,
         last_modified_by_id=user_id,
         category_id=category.id if category else None,
-        icon_name=icon_name
-        or item_icon_name,
+        icon_name=icon_name or item_icon_name,
         standardized_name=standardized_name,
         translations=translations,
         # New structured quantity fields

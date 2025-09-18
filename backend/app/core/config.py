@@ -6,11 +6,11 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Shared Shopping List API"
     API_V1_STR: str = "/api/v1"
-    
+
     # Server Configuration
     PORT: int = 8005
     HOST: str = "0.0.0.0"
-    
+
     # Database
     POSTGRES_SERVER: str = ""
     POSTGRES_USER: str = ""

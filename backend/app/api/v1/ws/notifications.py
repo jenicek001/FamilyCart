@@ -152,11 +152,13 @@ class ListConnectionManager:
 
         # Register websocket for cleanup
         self.websocket_registry[websocket] = (user.id, list_id, session_id)
-        
+
         # Register session for session-based exclusion
         self.session_registry[session_id] = websocket
 
-        logger.info(f"User {user.nickname} connected to list {list_id} with session {session_id}")
+        logger.info(
+            f"User {user.nickname} connected to list {list_id} with session {session_id}"
+        )
 
         # Send welcome message with session ID
         await self.send_to_websocket(
@@ -179,28 +181,33 @@ class ListConnectionManager:
                 # Handle legacy format if exists
                 user_id, list_id = registry_data
                 session_id = "unknown"
-            
+
             self.websocket_registry.pop(websocket)
-            
+
             # Remove from connections
             if list_id in self.list_connections:
                 # Remove the tuple with this websocket
                 self.list_connections[list_id] = {
-                    conn for conn in self.list_connections[list_id] 
+                    conn
+                    for conn in self.list_connections[list_id]
                     if conn[0] != websocket
                 }
-                
+
                 # Clean up empty sets
                 if not self.list_connections[list_id]:
                     del self.list_connections[list_id]
-            
+
             # Remove from session registry (only if we have a valid session_id)
             if session_id != "unknown" and session_id in self.session_registry:
                 del self.session_registry[session_id]
-            
-            logger.info(f"User {user_id} disconnected from list {list_id} (session {session_id})")
+
+            logger.info(
+                f"User {user_id} disconnected from list {list_id} (session {session_id})"
+            )
         else:
-            logger.warning("Attempted to disconnect a websocket that was not in the registry")
+            logger.warning(
+                "Attempted to disconnect a websocket that was not in the registry"
+            )
 
     async def send_to_websocket(self, websocket: WebSocket, data: dict):
         """Send data to a specific websocket with proper UUID serialization"""
@@ -213,7 +220,12 @@ class ListConnectionManager:
             logger.debug(f"Failed data: {data}")
 
     async def broadcast_to_list(
-        self, list_id: int, data: dict, exclude_user_id: Optional[str] = None, exclude_websocket: Optional[WebSocket] = None, exclude_session_id: Optional[str] = None
+        self,
+        list_id: int,
+        data: dict,
+        exclude_user_id: Optional[str] = None,
+        exclude_websocket: Optional[WebSocket] = None,
+        exclude_session_id: Optional[str] = None,
     ):
         """Broadcast message to all users connected to a specific list"""
         if list_id not in self.list_connections:
@@ -225,19 +237,26 @@ class ListConnectionManager:
             # Skip the specific session that triggered the update (for same-user multi-device sync)
             if exclude_session_id and session_id == exclude_session_id:
                 continue
-                
+
             # Skip the specific websocket connection that triggered the update
             if exclude_websocket and websocket == exclude_websocket:
                 continue
-            
+
             # Legacy: Skip the user who triggered the update (deprecated - use exclude_session_id instead)
-            if exclude_user_id and user_id == exclude_user_id and exclude_session_id is None and exclude_websocket is None:
+            if (
+                exclude_user_id
+                and user_id == exclude_user_id
+                and exclude_session_id is None
+                and exclude_websocket is None
+            ):
                 continue
 
             try:
                 await self.send_to_websocket(websocket, data)
             except Exception as e:
-                logger.error(f"Error broadcasting to user {user_id} (session {session_id}): {e}")
+                logger.error(
+                    f"Error broadcasting to user {user_id} (session {session_id}): {e}"
+                )
                 disconnected_websockets.append(websocket)
 
         # Clean up disconnected websockets
@@ -245,7 +264,14 @@ class ListConnectionManager:
             await self.disconnect(websocket)
 
     async def broadcast_item_change(
-        self, list_id: int, event_type: str, item_data: dict, user_id: str, exclude_websocket: Optional[WebSocket] = None, exclude_session_id: Optional[str] = None, exclude_user_id: Optional[str] = None
+        self,
+        list_id: int,
+        event_type: str,
+        item_data: dict,
+        user_id: str,
+        exclude_websocket: Optional[WebSocket] = None,
+        exclude_session_id: Optional[str] = None,
+        exclude_user_id: Optional[str] = None,
     ):
         """Broadcast item changes to list members"""
         message = {
@@ -256,10 +282,23 @@ class ListConnectionManager:
             "timestamp": datetime.now(UTC).isoformat(),
             "user_id": user_id,
         }
-        await self.broadcast_to_list(list_id, message, exclude_websocket=exclude_websocket, exclude_session_id=exclude_session_id, exclude_user_id=exclude_user_id)
+        await self.broadcast_to_list(
+            list_id,
+            message,
+            exclude_websocket=exclude_websocket,
+            exclude_session_id=exclude_session_id,
+            exclude_user_id=exclude_user_id,
+        )
 
     async def broadcast_list_change(
-        self, list_id: int, event_type: str, list_data: dict, user_id: str, exclude_websocket: Optional[WebSocket] = None, exclude_session_id: Optional[str] = None, exclude_user_id: Optional[str] = None
+        self,
+        list_id: int,
+        event_type: str,
+        list_data: dict,
+        user_id: str,
+        exclude_websocket: Optional[WebSocket] = None,
+        exclude_session_id: Optional[str] = None,
+        exclude_user_id: Optional[str] = None,
     ):
         """Broadcast list changes to list members"""
         message = {
@@ -270,7 +309,13 @@ class ListConnectionManager:
             "timestamp": datetime.now(UTC).isoformat(),
             "user_id": user_id,
         }
-        await self.broadcast_to_list(list_id, message, exclude_websocket=exclude_websocket, exclude_session_id=exclude_session_id, exclude_user_id=exclude_user_id)
+        await self.broadcast_to_list(
+            list_id,
+            message,
+            exclude_websocket=exclude_websocket,
+            exclude_session_id=exclude_session_id,
+            exclude_user_id=exclude_user_id,
+        )
 
 
 # Global connection manager instance

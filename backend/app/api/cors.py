@@ -21,7 +21,7 @@ def setup_cors_middleware(app: FastAPI) -> None:
         f"http://localhost:{settings.PORT}",  # Backend dev port
         f"http://127.0.0.1:{settings.PORT}",  # Alternative localhost for backend dev
     ]
-    
+
     origins = [
         "http://localhost:3000",  # Next.js development server (UAT)
         "http://localhost:9002",  # Frontend dev port

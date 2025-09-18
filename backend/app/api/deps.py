@@ -37,5 +37,5 @@ async def set_session_context(
         websocket_service.set_current_session_id(x_session_id)
     else:
         websocket_service.set_current_session_id(None)
-    
+
     return x_session_id
