@@ -149,9 +149,9 @@ export function ShoppingListView({
                 
                 {/* Items in this category */}
                 <div className="space-y-2 pl-2 sm:pl-4">
-                  {pendingItemsByCategory[categoryName].map((item: Item) => (
+                  {pendingItemsByCategory[categoryName].map((item: Item, index: number) => (
                     <ShoppingListItem
-                      key={item.id}
+                      key={`${item.id}-pending-${index}`}
                       item={item}
                       onToggleComplete={() => handleToggleComplete(item)}
                       onUpdate={(updates: Partial<Item>) => onUpdateItem(item.id, updates)}
@@ -183,9 +183,9 @@ export function ShoppingListView({
                   
                   {/* Completed items in this category */}
                   <div className="space-y-2 pl-2 sm:pl-4">
-                    {completedItemsByCategory[categoryName].map((item: Item) => (
+                    {completedItemsByCategory[categoryName].map((item: Item, index: number) => (
                       <ShoppingListItem
-                        key={item.id}
+                        key={`${item.id}-completed-${index}`}
                         item={item}
                         onToggleComplete={() => handleToggleComplete(item)}
                         onUpdate={(updates: Partial<Item>) => onUpdateItem(item.id, updates)}

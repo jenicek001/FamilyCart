@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/AuthContext';
+import { WebSocketProvider } from '@/contexts/WebSocketContext';
 
 export const metadata: Metadata = {
   title: 'FamilyCart',
@@ -46,7 +47,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-slate-50">
         <AuthProvider>
-          {children}
+          <WebSocketProvider>
+            {children}
+          </WebSocketProvider>
         </AuthProvider>
         <Toaster />
       </body>
