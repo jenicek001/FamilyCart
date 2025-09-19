@@ -61,7 +61,7 @@ export function SmartSearchBar({
       name: searchQuery.trim(),
       quantity: '1',
       category_name: suggestedCategory,
-      description: null,
+      comment: null,
       icon_name: null
     });
 
