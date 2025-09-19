@@ -8,7 +8,7 @@ import { Label } from '../ui/label';
 import { ShoppingList } from '../../types';
 import { useToast } from '../../hooks/use-toast';
 import { Edit3, AlertCircle } from 'lucide-react';
-import apiClient from '../../lib/api';
+import apiClient from '@/lib/api';
 
 interface RenameListDialogProps {
   isOpen: boolean;

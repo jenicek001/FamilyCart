@@ -8,7 +8,7 @@ const API_CONFIG = {
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // Enable TypeScript checking during build
   },
   eslint: {
     ignoreDuringBuilds: true,
