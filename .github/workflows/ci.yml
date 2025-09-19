@@ -53,23 +53,103 @@ jobs:
         uses: actions/cache@v4
         with:
           path: backend/.venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-with-dev
 
       - name: Install backend dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         working-directory: ./backend
-        run: poetry install --no-interaction --no-root
+        run: |
+          echo "📦 Installing backend dependencies with code quality tools..."
+          poetry install --no-interaction --no-root --with dev
+          echo "✅ Dependencies installed successfully!"
 
       - name: Run backend code quality checks
         working-directory: ./backend
         run: |
+          echo "🔍 Running code quality checks with balanced standards..."
+          
+          echo "=== Black Code Formatting ==="
           poetry run black --check .
+          
+          echo "=== Import Sorting ==="
           poetry run isort --check-only .
-          poetry run pylint app/ --disable=C0114,C0116,R0903,W0613
+          
+          echo "=== Pylint Code Quality ==="
+          poetry run pylint app/ --score=y
+          
+          echo "✅ Code quality checks completed successfully!"
           
       - name: Run backend security scan
         working-directory: ./backend
-        run: poetry run bandit -r app/ -f json -o bandit-report.json || true
+        run: |
+          echo "🔒 Running security scan with balanced criteria..."
+          
+          # Run bandit with our configured standards
+          poetry run bandit -c pyproject.toml -r app/
+          
+          # Optional: Generate report for analysis (don't fail on issues)
+          poetry run bandit -c pyproject.toml -r app/ -f json -o bandit-report.json || true
+          
+          echo "✅ Security scan completed successfully!"
+
+      - name: Generate code quality report
+        if: always()
+        working-directory: ./backend
+        run: |
+          echo "📊 Generating comprehensive code quality report..."
+          
+          # Generate detailed pylint report
+          poetry run pylint app/ --output-format=json > pylint-report.json || true
+          poetry run pylint app/ --output-format=text > pylint-report.txt || true
+          
+          # Generate coverage report if not already done
+          if [ ! -f coverage.xml ]; then
+            poetry run pytest --cov=app --cov-report=xml --cov-report=html > /dev/null 2>&1 || true
+          fi
+          
+          echo "✅ Code quality report generated!"
+
+      - name: Upload code quality artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-code-quality-reports
+          path: |
+            backend/pylint-report.json
+            backend/pylint-report.txt
+            backend/bandit-report.json
+            backend/coverage.xml
+            backend/htmlcov/
+          retention-days: 30
+
+      - name: Code quality summary
+        if: always()
+        working-directory: ./backend
+        run: |
+          echo "📋 Code Quality Summary:"
+          echo "======================"
+          
+          # Extract pylint score if available
+          if [ -f pylint-report.txt ]; then
+            PYLINT_SCORE=$(grep -oP "Your code has been rated at \K[\d\.]+" pylint-report.txt || echo "N/A")
+            echo "🔍 Pylint Score: $PYLINT_SCORE/10"
+          fi
+          
+          # Check if bandit found issues
+          if [ -f bandit-report.json ]; then
+            BANDIT_ISSUES=$(python3 -c "import json; data=json.load(open('bandit-report.json')); print(len(data.get('results', [])))" 2>/dev/null || echo "0")
+            echo "🔒 Security Issues: $BANDIT_ISSUES"
+          fi
+          
+          # Coverage info
+          if [ -f coverage.xml ]; then
+            COVERAGE=$(python3 -c "import xml.etree.ElementTree as ET; tree=ET.parse('coverage.xml'); print(f'{float(tree.getroot().attrib[\"line-rate\"])*100:.1f}%')" 2>/dev/null || echo "N/A")
+            echo "📊 Test Coverage: $COVERAGE"
+          fi
+          
+          echo "======================"
+          echo "✅ Quality checks completed with balanced standards!"
+          echo "📄 Reports available in artifacts"
 
       - name: Run backend tests with coverage
         working-directory: ./backend

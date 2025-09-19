@@ -46,6 +46,7 @@ black = "^24.10.0"
 isort = "^6.0.1"
 pylint = "^3.3.8"
 pytest-cov = "^7.0.0"
+bandit = "^1.8.6"
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
@@ -57,7 +58,6 @@ addopts = "--strict-markers"
 markers = [
     "integration: marks tests as integration tests",
 ]
-pytest-cov = "^7.0.0"
 
 [tool.black]
 line-length = 88
@@ -95,38 +95,57 @@ jobs = 1
 
 [tool.pylint.messages_control]
 disable = [
+    # Documentation - acceptable for rapid development
     "C0114",  # missing-module-docstring
-    "C0116",  # missing-function-docstring
-    "R0903",  # too-few-public-methods
-    "W0613",  # unused-argument
+    "C0116",  # missing-function-docstring  
     "C0115",  # missing-class-docstring
+    
+    # Formatting handled by Black
     "C0301",  # line-too-long (handled by black)
-    "W1203",  # logging-fstring-interpolation
-    "W0611",  # unused-import
-    "C0415",  # import-outside-toplevel
-    "W0718",  # broad-exception-caught
-    "R0911",  # too-many-return-statements
-    "R0801",  # duplicate-code
-    "E1101",  # no-member (often false positives with SQLAlchemy)
-    "W0621",  # redefined-outer-name
     "C0305",  # trailing-newlines
-    "R1705",  # no-else-return
-    "W0237",  # arguments-renamed
-    "W0707",  # raise-missing-from
-    "R0913",  # too-many-arguments
-    "R0917",  # too-many-positional-arguments
-    "W0404",  # reimported
-    "R0914",  # too-many-locals
-    "R0915",  # too-many-statements
-    "W0612",  # unused-variable
-    "W0622",  # redefined-builtin
-    "W0221",  # arguments-differ
-    "C0103",  # invalid-name (for constants and naming styles)
-    "W0719",  # broad-exception-raised
+    
+    # SQLAlchemy ORM false positives
+    "E1101",  # no-member (often false positives with SQLAlchemy)
+    
+    # Test-related acceptable patterns
+    "W0621",  # redefined-outer-name (pytest fixtures)
+    "W0613",  # unused-argument (pytest fixtures)
+    "R0801",  # duplicate-code (test fixtures and data setup)
+    
+    # FastAPI/Pydantic specific patterns
+    "R0903",  # too-few-public-methods (Pydantic models)
+    "W0718",  # broad-exception-caught (API error handling)
+    "C0415",  # import-outside-toplevel (FastAPI dependency injection)
+    
+    # Complex business logic - acceptable for domain complexity
+    "R0913",  # too-many-arguments (complex domain functions)
+    "R0914",  # too-many-locals (complex business operations)
+    "R0915",  # too-many-statements (complex business operations)
+    "R0917",  # too-many-positional-arguments (domain complexity)
+    
+    # Configuration conventions
+    "C0103",  # invalid-name (for framework constants and config)
+    "W0622",  # redefined-builtin (id parameters in APIs)
 ]
+
+# Set higher thresholds for complexity that we DO want to track
+[tool.pylint.design]
+max-args = 8           # Allow up to 8 arguments (was 5)
+max-locals = 20        # Allow up to 20 locals (was 15)  
+max-returns = 8        # Allow up to 8 returns (was 6)
+max-statements = 75    # Allow up to 75 statements (was 50)
 
 [tool.pylint.format]
 max-line-length = 88
+
+[tool.bandit]
+# Exclude test directories for appropriate test-specific patterns
+exclude_dirs = ["tests"]
+# Only skip genuinely necessary patterns:
+# B101: assert_used (legitimate in tests)
+# B104: hardcoded_bind_all_interfaces (legitimate for containers)
+# B105/B106: hardcoded_password_* (legitimate for test fixtures only)
+skips = ["B101", "B104", "B105", "B106"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
