@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { ShoppingList } from '../../types';
-import { useToast } from '../../hooks/use-toast';
+import { ShoppingList } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 import { Edit3, AlertCircle } from 'lucide-react';
-import apiClient from '@/lib/api';
+import { useApiClient } from '@/hooks/use-api-client';
 
 interface RenameListDialogProps {
   isOpen: boolean;
@@ -22,6 +22,7 @@ export function RenameListDialog({ isOpen, onClose, list, onListUpdate }: Rename
   const [isLoading, setIsLoading] = useState(false);
   const [nameError, setNameError] = useState('');
   const { toast } = useToast();
+  const { apiClient } = useApiClient();
 
   // Reset form when dialog opens/closes or list changes
   useEffect(() => {
@@ -72,7 +73,10 @@ export function RenameListDialog({ isOpen, onClose, list, onListUpdate }: Rename
     try {
       const updateData = { name: trimmedName };
 
-      const { data } = await apiClient.put<ShoppingList>(`/api/v1/shopping-lists/${list.id}`, updateData);
+      const data = await apiClient(`/api/v1/shopping-lists/${list.id}/`, {
+        method: 'PUT',
+        body: JSON.stringify(updateData)
+      });
       
       // Update parent component
       onListUpdate?.(data);
@@ -90,12 +94,12 @@ export function RenameListDialog({ isOpen, onClose, list, onListUpdate }: Rename
       
       // Handle specific error cases
       let errorMessage = "Could not rename list. Please try again.";
-      if (error.response?.status === 403) {
+      if (error.message?.includes('403')) {
         errorMessage = "You don't have permission to edit this list.";
-      } else if (error.response?.status === 404) {
+      } else if (error.message?.includes('404')) {
         errorMessage = "List not found.";
-      } else if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       toast({
