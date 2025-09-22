@@ -41,6 +41,23 @@ const nextConfig = {
     // Use process.cwd() for CI compatibility
     const projectRoot = process.cwd();
     const srcPath = path.join(projectRoot, 'src');
+    const fs = require('fs');
+    
+    // Debug output for CI troubleshooting
+    console.log('=== Webpack Debug Info ===');
+    console.log('process.cwd():', projectRoot);
+    console.log('__dirname:', __dirname);
+    console.log('srcPath:', srcPath);
+    
+    // Check if files actually exist
+    const utilsPath = path.join(srcPath, 'lib', 'utils.ts');
+    const utilsExists = fs.existsSync(utilsPath);
+    console.log('utils.ts path:', utilsPath);
+    console.log('utils.ts exists:', utilsExists);
+    
+    if (utilsExists) {
+      console.log('utils.ts content preview:', fs.readFileSync(utilsPath, 'utf8').slice(0, 100));
+    }
     
     // Clear any existing aliases to avoid conflicts
     config.resolve.alias = {
@@ -58,11 +75,6 @@ const nextConfig = {
     // Force webpack to look in the right places
     config.resolve.roots = [projectRoot];
     
-    // Debug output for CI troubleshooting
-    console.log('=== Webpack Debug Info ===');
-    console.log('process.cwd():', projectRoot);
-    console.log('__dirname:', __dirname);
-    console.log('srcPath:', srcPath);
     console.log('aliases:', config.resolve.alias);
     console.log('modules:', config.resolve.modules);
     console.log('===========================');
