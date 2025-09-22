@@ -1,5 +1,4 @@
 {
-  // TypeScript configuration for Next.js with proper path resolution
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -14,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "plugins": [
       {

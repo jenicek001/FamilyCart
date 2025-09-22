@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 // API Configuration - centralized port management
 const API_CONFIG = {
@@ -8,7 +9,7 @@ const API_CONFIG = {
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
-    ignoreBuildErrors: false, // Enable TypeScript checking during build
+    ignoreBuildErrors: false, // Enable TypeScript checking for proper error handling
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -33,6 +34,15 @@ const nextConfig: NextConfig = {
         },
       },
     },
+  },
+  // Webpack configuration to ensure path aliases work consistently
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Ensure path aliases are properly resolved in webpack
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, './src'),
+    }
+    return config
   },
   async rewrites() {
     let apiUrl: string;
