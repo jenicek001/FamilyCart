@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 
 interface LogoProps {
   variant?: 'cart-family' | 'connected-containers' | 'list' | 'logo' | 'tech-cart';

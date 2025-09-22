@@ -38,10 +38,22 @@ const nextConfig = {
   // Webpack configuration to ensure path aliases work consistently
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Ensure path aliases are properly resolved in webpack
+    const srcPath = path.resolve(__dirname, 'src');
+    
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, './src'),
+      '@': srcPath,
+      '@/lib': path.resolve(srcPath, 'lib'),
+      '@/components': path.resolve(srcPath, 'components'),
     };
+    
+    // Also ensure the modules can be resolved
+    config.resolve.modules = [
+      ...(config.resolve.modules || []),
+      srcPath,
+      path.resolve(__dirname, 'node_modules')
+    ];
+    
     return config;
   },
   async rewrites() {
