@@ -15,17 +15,17 @@
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "./",
-    "rootDir": "./",
+    "baseUrl": ".",
+    "rootDir": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["src/*"],
-      "@/lib/*": ["src/lib/*"],
-      "@/components/*": ["src/components/*"]
+      "@/*": ["./src/*"],
+      "@/lib/*": ["./src/lib/*"], 
+      "@/components/*": ["./src/components/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },

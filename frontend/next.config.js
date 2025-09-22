@@ -38,21 +38,34 @@ const nextConfig = {
   // Webpack configuration to ensure path aliases work consistently
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Ensure path aliases are properly resolved in webpack
-    const srcPath = path.resolve(__dirname, 'src');
+    // Use process.cwd() for CI compatibility
+    const projectRoot = process.cwd();
+    const srcPath = path.join(projectRoot, 'src');
     
+    // Clear any existing aliases to avoid conflicts
     config.resolve.alias = {
-      ...config.resolve.alias,
       '@': srcPath,
-      '@/lib': path.resolve(srcPath, 'lib'),
-      '@/components': path.resolve(srcPath, 'components'),
+      '@/lib': path.join(srcPath, 'lib'),
+      '@/components': path.join(srcPath, 'components'),
     };
     
-    // Also ensure the modules can be resolved
+    // Ensure proper module resolution order
     config.resolve.modules = [
-      ...(config.resolve.modules || []),
       srcPath,
-      path.resolve(__dirname, 'node_modules')
+      'node_modules'
     ];
+    
+    // Force webpack to look in the right places
+    config.resolve.roots = [projectRoot];
+    
+    // Debug output for CI troubleshooting
+    console.log('=== Webpack Debug Info ===');
+    console.log('process.cwd():', projectRoot);
+    console.log('__dirname:', __dirname);
+    console.log('srcPath:', srcPath);
+    console.log('aliases:', config.resolve.alias);
+    console.log('modules:', config.resolve.modules);
+    console.log('===========================');
     
     return config;
   },
