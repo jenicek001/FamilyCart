@@ -2,7 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn } from '../../lib/utils';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+// Inline cn function to avoid import issues in CI
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 interface LogoProps {
   variant?: 'cart-family' | 'connected-containers' | 'list' | 'logo' | 'tech-cart';
