@@ -132,13 +132,17 @@ jobs:
           echo "=== ESLint Code Quality ==="
           npm run lint || (echo "❌ ESLint issues found. Fix ESLint warnings/errors." && exit 1)
           
+          echo "=== TypeScript Type Checking ==="
+          npm run typecheck || (echo "❌ TypeScript errors found. Fix type issues." && exit 1)
+          
           echo "✅ All frontend code quality checks passed!"
-          echo "Note: TypeScript checking will be done during build step"
 
       - name: Build frontend
         working-directory: ./frontend
         run: |
           echo "🏗️ Building frontend..."
+          echo "Clearing any cached build artifacts..."
+          rm -rf .next
           npm run build
           echo "✅ Frontend build successful!"
 
