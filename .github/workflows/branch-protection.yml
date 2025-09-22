@@ -8,9 +8,11 @@ on:
 
 # Grant necessary permissions for GitHub Actions to access PR data
 permissions:
+  actions: read
   contents: read
   pull-requests: read
   security-events: write  # For SARIF uploads
+  statuses: write         # For status updates
 
 env:
   REGISTRY: ghcr.io
@@ -164,12 +166,24 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true  # Don't fail the entire workflow if upload fails
         with:
           sarif_file: 'trivy-results.sarif'
+
+      - name: Check SARIF file exists
+        run: |
+          if [ -f "trivy-results.sarif" ]; then
+            echo "✅ SARIF file generated successfully"
+            echo "File size: $(stat -c%s trivy-results.sarif) bytes"
+          else
+            echo "❌ SARIF file not found"
+            exit 1
+          fi
 
       - name: Trivy scan summary
         run: |
           echo "Security scan completed. Check GitHub Security tab for detailed results."
+          echo "Note: If SARIF upload failed due to permissions, the scan itself was still successful."
 
   architecture-compliance:
     runs-on: self-hosted
