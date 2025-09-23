@@ -6,8 +6,11 @@ version: '3.9'
 services:
   runner-1:
     build: 
-      context: ./github-runners
+      context: ./deploy/github-runners
       dockerfile: Dockerfile
+      args:
+        # Pass host docker group ID to ensure proper permissions
+        DOCKER_GID: 984
     container_name: familycart-runner-1
     environment:
       - GITHUB_OWNER=jenicek001
@@ -49,8 +52,10 @@ services:
 
   runner-2:
     build: 
-      context: ./github-runners
+      context: ./deploy/github-runners
       dockerfile: Dockerfile
+      args:
+        DOCKER_GID: 984
     container_name: familycart-runner-2
     environment:
       - GITHUB_OWNER=jenicek001
@@ -86,8 +91,10 @@ services:
 
   runner-3:
     build: 
-      context: ./github-runners
+      context: ./deploy/github-runners
       dockerfile: Dockerfile
+      args:
+        DOCKER_GID: 984
     container_name: familycart-runner-3
     environment:
       - GITHUB_OWNER=jenicek001

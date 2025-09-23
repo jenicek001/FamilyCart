@@ -32,46 +32,22 @@ env:
 jobs:
   test:
     runs-on: self-hosted
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_familycart
-          POSTGRES_HOST_AUTH_METHOD: trust
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Ensure Docker daemon is running for service containers
+      - name: Start database services with Docker Compose
         run: |
-          echo "🐳 Checking Docker daemon status for service containers..."
+          echo "🐳 Starting PostgreSQL and Redis services for testing..."
           
-          # Check if Docker daemon is running
-          if ! docker info &> /dev/null; then
-            echo "⚠️  Docker daemon not accessible, attempting to start services..."
+          # Check if Docker is accessible
+          if command -v docker &> /dev/null && docker info &> /dev/null; then
+            echo "✅ Docker daemon is accessible"
+          else
+            echo "⚠️  Docker daemon not accessible, attempting to start..."
             
-            # Try to start Docker daemon if it's not running
+            # Try to start Docker daemon
             if ! pgrep dockerd > /dev/null; then
               echo "🔄 Starting Docker daemon..."
               sudo systemctl start docker || echo "Could not start docker service"
@@ -82,32 +58,74 @@ jobs:
             if ! groups | grep -q docker; then
               echo "👥 Adding user to docker group..."
               sudo usermod -a -G docker $USER
-              echo "⚠️  Note: Group membership requires logout/login to take effect"
+              echo "⚠️  Note: Will use newgrp to apply group membership"
             fi
             
             # Test Docker access again
             if ! docker info &> /dev/null; then
-              echo "❌ Docker daemon still not accessible"
-              echo "🔧 Will use Docker Compose fallback for database services"
-              
-              # Start services with Docker Compose using dedicated compose file
-              echo "🚀 Starting test services with Docker Compose..."
-              newgrp docker << 'EOF2'
-              docker-compose -f docker-compose.ci.yml down --remove-orphans || true
-              docker-compose -f docker-compose.ci.yml up -d
-              echo "⏳ Waiting for services to be ready..."
-              sleep 30
-              docker-compose -f docker-compose.ci.yml ps
-          EOF2
-              
-              # Set flag for cleanup
-              echo "USING_COMPOSE_FALLBACK=true" >> $GITHUB_ENV
+              echo "❌ Docker daemon still not accessible, using newgrp workaround"
+              USE_NEWGRP=true
             else
-              echo "✅ Docker daemon is accessible for service containers"
+              echo "✅ Docker daemon is now accessible"
+              USE_NEWGRP=false
             fi
-          else
-            echo "✅ Docker daemon is running and accessible"
           fi
+          
+          # Start database services
+          echo "🚀 Starting test database services..."
+          if [ "$USE_NEWGRP" = "true" ]; then
+            newgrp docker << 'EOF'
+            docker-compose -f docker-compose.ci.yml down --remove-orphans || true
+            docker-compose -f docker-compose.ci.yml up -d
+            echo "⏳ Waiting for services to be ready..."
+            sleep 30
+            docker-compose -f docker-compose.ci.yml ps
+          EOF
+          else
+            docker-compose -f docker-compose.ci.yml down --remove-orphans || true
+            docker-compose -f docker-compose.ci.yml up -d
+            echo "⏳ Waiting for services to be ready..."
+            sleep 30
+            docker-compose -f docker-compose.ci.yml ps
+          fi
+          
+          # Set environment variable for cleanup
+          echo "DATABASE_SERVICES_STARTED=true" >> $GITHUB_ENV
+
+      - name: Verify database services are running
+        run: |
+          echo "🔍 Verifying database services are healthy..."
+          
+          # Wait for PostgreSQL to be ready
+          echo "⏳ Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U test_user; then
+              echo "✅ PostgreSQL is ready!"
+              break
+            fi
+            echo "PostgreSQL not ready, waiting... ($i/30)"
+            sleep 2
+          done
+          
+          # Test PostgreSQL connection
+          echo "🔌 Testing PostgreSQL connection..."
+          PGPASSWORD=test_password psql -h localhost -U test_user -d test_familycart -c "SELECT 1;" || {
+            echo "❌ Failed to connect to PostgreSQL"
+            echo "🐳 Checking Docker container status..."
+            docker-compose -f docker-compose.ci.yml logs postgres-ci || true
+            exit 1
+          }
+          
+          # Test Redis connection
+          echo "🔌 Testing Redis connection..."
+          if ! redis-cli -h localhost -p 6379 ping; then
+            echo "❌ Failed to connect to Redis"
+            echo "🐳 Checking Docker container status..."
+            docker-compose -f docker-compose.ci.yml logs redis-ci || true
+            exit 1
+          fi
+          
+          echo "✅ All database services are ready!"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -116,10 +134,10 @@ jobs:
       
       - name: Install PostgreSQL client
         run: |
-          echo "📦 Installing PostgreSQL client tools..."
+          echo "📦 Installing PostgreSQL and Redis client tools..."
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
-          echo "✅ PostgreSQL client installed!"
+          sudo apt-get install -y postgresql-client redis-tools
+          echo "✅ Database client tools installed!"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -599,7 +617,7 @@ jobs:
           echo "🧹 Cleaning up test services..."
           
           # Clean up Docker Compose test services if they were used
-          if [ "$USING_COMPOSE_FALLBACK" = "true" ] || [ -f "docker-compose.ci.yml" ]; then
+          if [ "$DATABASE_SERVICES_STARTED" = "true" ] || [ -f "docker-compose.ci.yml" ]; then
             echo "🐳 Stopping Docker Compose test services..."
             docker-compose -f docker-compose.ci.yml down --remove-orphans --volumes || true
             echo "✅ Docker Compose test services cleaned up"

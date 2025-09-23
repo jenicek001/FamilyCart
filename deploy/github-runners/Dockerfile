@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set runner version and architecture
 ARG RUNNER_VERSION=2.317.0
 ARG RUNNER_ARCH=x64
+ARG DOCKER_GID=999
 
 # Labels
 LABEL org.opencontainers.image.title="FamilyCart GitHub Runner"
@@ -89,8 +90,11 @@ RUN wget https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linu
 # Create runner user
 RUN useradd -m -s /bin/bash runner \
     && usermod -aG sudo runner \
-    && usermod -aG docker runner \
     && echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Fix docker group GID to match host and add runner to docker group
+RUN groupmod -g ${DOCKER_GID} docker \
+    && usermod -aG docker runner
 
 # Set up runner directory
 WORKDIR /home/runner
