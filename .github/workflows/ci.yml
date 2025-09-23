@@ -75,7 +75,7 @@ jobs:
           poetry run isort --check-only .
           
           echo "=== Pylint Code Quality ==="
-          poetry run pylint app/ --score=y
+          poetry run pylint app/ --rcfile=pyproject.toml --score=y
           
           echo "✅ Code quality checks completed successfully!"
           
@@ -99,8 +99,8 @@ jobs:
           echo "📊 Generating comprehensive code quality report..."
           
           # Generate detailed pylint report
-          poetry run pylint app/ --output-format=json > pylint-report.json || true
-          poetry run pylint app/ --output-format=text > pylint-report.txt || true
+          poetry run pylint app/ --rcfile=pyproject.toml --output-format=json > pylint-report.json || true
+          poetry run pylint app/ --rcfile=pyproject.toml --output-format=text > pylint-report.txt || true
           
           # Generate coverage report if not already done
           if [ ! -f coverage.xml ]; then
@@ -461,11 +461,19 @@ jobs:
     steps:
       - name: Clean up Docker resources
         run: |
-          # Remove old images (keep last 5 versions)
-          docker image prune -af --filter "until=168h"
-          
-          # Clean up build cache
-          docker buildx prune -af --filter "until=168h"
+          # Check if Docker is available before attempting cleanup
+          if command -v docker &> /dev/null && docker info &> /dev/null; then
+            echo "Docker is available, performing cleanup..."
+            # Remove old images (keep last 5 versions)
+            docker image prune -af --filter "until=168h" || echo "Docker image prune failed, continuing..."
+            
+            # Clean up build cache
+            docker buildx prune -af --filter "until=168h" || echo "Docker buildx prune failed, continuing..."
+            
+            echo "✅ Docker cleanup completed"
+          else
+            echo "⚠️  Docker not available or daemon not running, skipping Docker cleanup"
+          fi
           
       - name: System maintenance
         run: |

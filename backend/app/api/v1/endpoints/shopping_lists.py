@@ -2,14 +2,13 @@ import logging
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import delete, select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_session, set_session_context
 from app.core.fastapi_users import current_user
 from app.models import User
-from app.models.category import Category
 from app.models.item import Item
 from app.models.shopping_list import ShoppingList
 from app.schemas.item import ItemCreate, ItemRead

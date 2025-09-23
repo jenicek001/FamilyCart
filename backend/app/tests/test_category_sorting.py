@@ -2,11 +2,7 @@
 Tests for category-based sorting functionality.
 """
 
-import pytest
-
-from app.api.v1.endpoints.shopping_lists import sort_items_by_category
-from app.models.category import Category
-from app.models.item import Item
+from app.api.v1.helpers.shopping_list_helpers import sort_items_by_category
 
 
 class MockCategory:
