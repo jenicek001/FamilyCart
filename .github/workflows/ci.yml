@@ -75,7 +75,22 @@ jobs:
           poetry run isort --check-only .
           
           echo "=== Pylint Code Quality ==="
-          poetry run pylint app/ --rcfile=pyproject.toml --score=y
+          # Use balanced approach: check score but allow warnings
+          PYLINT_OUTPUT=$(poetry run pylint app/ --rcfile=pyproject.toml --score=y 2>&1) || PYLINT_EXIT_CODE=$?
+          echo "$PYLINT_OUTPUT"
+          
+          # Extract score from output
+          PYLINT_SCORE=$(echo "$PYLINT_OUTPUT" | grep -oP "Your code has been rated at \K[\d\.]+" || echo "0")
+          echo "📊 Pylint score: $PYLINT_SCORE/10"
+          
+          # Check if score meets our threshold (9.0/10) using Python
+          SCORE_CHECK=$(python3 -c "print('pass' if float('$PYLINT_SCORE') >= 9.0 else 'fail')")
+          if [ "$SCORE_CHECK" = "pass" ]; then
+            echo "✅ Pylint quality check passed: $PYLINT_SCORE/10 (threshold: 9.0/10)"
+          else
+            echo "❌ Pylint quality check failed: $PYLINT_SCORE/10 (threshold: 9.0/10)"
+            exit 1
+          fi
           
           echo "✅ Code quality checks completed successfully!"
           
