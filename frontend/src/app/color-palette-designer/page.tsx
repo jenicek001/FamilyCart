@@ -5,99 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-// Current FamilyCart color system analysis
-const currentColors = {
-  brand: {
-    primary: '#3b82f6',      // Blue-500
-    primaryLight: '#dbeafe', // Blue-100
-    primaryDark: '#1d4ed8',  // Blue-700
-  },
-  semantic: {
-    success: '#22c55e',      // Green-500
-    warning: '#f59e0b',      // Amber-500
-    danger: '#ef4444',       // Red-500
-    info: '#06b6d4',         // Cyan-500
-  },
-  categories: {
-    produce: '#22c55e',      // Green
-    dairy: '#3b82f6',        // Blue  
-    meat: '#ef4444',         // Red
-    pantry: '#f59e0b',       // Amber
-    frozen: '#06b6d4',       // Cyan
-    bakery: '#8b5cf6',       // Violet
-    household: '#6b7280',    // Gray
-    personal: '#ec4899',     // Pink
-    beverages: '#10b981',    // Emerald
-    snacks: '#f97316',       // Orange
-  },
-  neutrals: {
-    background: '#f8fafc',   // Slate-50
-    cardBg: '#ffffff',       // White
-    textPrimary: '#0f172a',  // Slate-900
-    textSecondary: '#64748b', // Slate-500
-    border: '#e2e8f0',       // Slate-200
-  }
-};
-
-const paletteOptions = [
-  {
-    name: 'Current (Blue Primary)',
-    description: 'Keep existing blue-based palette with optimizations',
-    primary: '#3b82f6',
-    secondary: '#22c55e',
-    accent: '#f59e0b',
-    personality: 'Professional, trustworthy, familiar'
-  },
-  {
-    name: 'Family Warmth',
-    description: 'Warm orange primary with blue secondary for family comfort',
-    primary: '#f59e0b',
-    secondary: '#3b82f6', 
-    accent: '#22c55e',
-    personality: 'Warm, inviting, family-focused'
-  },
-  {
-    name: 'Fresh & Natural',
-    description: 'Green primary inspired by fresh produce and family nutrition',
-    primary: '#22c55e',
-    secondary: '#3b82f6',
-    accent: '#f59e0b',
-    personality: 'Fresh, healthy, organized'
-  },
-  {
-    name: 'Modern Collaboration',
-    description: 'Purple primary for innovation with familiar blue secondary',
-    primary: '#8b5cf6',
-    secondary: '#3b82f6',
-    accent: '#22c55e',
-    personality: 'Modern, innovative, collaborative'
-  }
-];
+import { 
+  currentColors, 
+  paletteOptions, 
+  ColorCustomizations, 
+  PaletteOption 
+} from '@/lib/color-palette/data';
+import { generateVariants } from '@/lib/color-palette/utils';
+import { LivePreview } from '@/components/color-palette/live-preview';
+import { AccessibilityCheck, CSSExport } from '@/components/color-palette/export-sections';
 
 export default function ColorPaletteDesigner() {
-  const [selectedPalette, setSelectedPalette] = useState(paletteOptions[1]); // Family Warmth
-  const [customizations, setCustomizations] = useState({
+  const [selectedPalette, setSelectedPalette] = useState<PaletteOption>(paletteOptions[1]); // Family Warmth
+  const [customizations, setCustomizations] = useState<ColorCustomizations>({
     primary: paletteOptions[1].primary,   // #f59e0b - Warm Orange
     secondary: paletteOptions[1].secondary, // #3b82f6 - Trusted Blue
     accent: paletteOptions[1].accent      // #22c55e - Fresh Green
   });
-
-  const generateVariants = (baseColor: string) => {
-    // Simple function to generate light/dark variants
-    const hex = baseColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    
-    return {
-      50: `rgb(${Math.min(255, r + 100)}, ${Math.min(255, g + 100)}, ${Math.min(255, b + 100)})`,
-      100: `rgb(${Math.min(255, r + 80)}, ${Math.min(255, g + 80)}, ${Math.min(255, b + 80)})`,
-      500: baseColor,
-      700: `rgb(${Math.max(0, r - 50)}, ${Math.max(0, g - 50)}, ${Math.max(0, b - 50)})`,
-      900: `rgb(${Math.max(0, r - 100)}, ${Math.max(0, g - 100)}, ${Math.max(0, b - 100)})`
-    };
-  };
 
   const checkContrast = (fg: string, bg: string) => {
     // Simplified contrast check - in real implementation, use proper WCAG calculation
@@ -356,252 +280,13 @@ export default function ColorPaletteDesigner() {
       </Card>
 
       {/* Live Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Live UI Preview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Header Preview */}
-            <div 
-              className="p-4 rounded-lg text-white"
-              style={{ backgroundColor: customizations.primary }}
-            >
-              <h3 className="font-bold text-lg">FamilyCart Header</h3>
-              <p className="opacity-90">Sample navigation with new primary color</p>
-            </div>
-            
-            {/* Button Previews */}
-            <div className="flex gap-3">
-              <button 
-                className="px-4 py-2 rounded-lg text-white font-medium"
-                style={{ backgroundColor: customizations.primary }}
-              >
-                Primary Button
-              </button>
-              <button 
-                className="px-4 py-2 rounded-lg text-white font-medium"
-                style={{ backgroundColor: customizations.secondary }}
-              >
-                Secondary Button
-              </button>
-              <button 
-                className="px-4 py-2 rounded-lg text-white font-medium"
-                style={{ backgroundColor: customizations.accent }}
-              >
-                Accent Button
-              </button>
-            </div>
-            
-            {/* Card Preview */}
-            <div className="border rounded-lg p-4 bg-white">
-              <div className="flex items-center gap-2 mb-2">
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: customizations.accent }}
-                />
-                <h4 className="font-medium">Shopping List Item</h4>
-              </div>
-              <p className="text-sm text-gray-600">Preview of how list items would look</p>
-            </div>
-
-            {/* Shopping List Preview */}
-            <div className="border rounded-lg p-4 bg-white">
-              <h4 className="font-medium mb-3" style={{ color: customizations.primary }}>
-                🛒 Family Shopping List Preview
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 rounded border-l-4" 
-                     style={{ borderLeftColor: customizations.accent }}>
-                  <span>🥕 Carrots</span>
-                  <span className="text-sm px-2 py-1 rounded" 
-                        style={{ backgroundColor: customizations.accent + '20', color: customizations.accent }}>
-                    Produce
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded border-l-4" 
-                     style={{ borderLeftColor: customizations.secondary }}>
-                  <span>🥛 Milk</span>
-                  <span className="text-sm px-2 py-1 rounded" 
-                        style={{ backgroundColor: customizations.secondary + '20', color: customizations.secondary }}>
-                    Dairy
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded border-l-4" 
-                     style={{ borderLeftColor: customizations.primary }}>
-                  <span>🍞 Bread</span>
-                  <span className="text-sm px-2 py-1 rounded" 
-                        style={{ backgroundColor: customizations.primary + '20', color: customizations.primary }}>
-                    Bakery
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Family Member Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="border rounded-lg p-3 bg-gradient-to-r" 
-                   style={{ 
-                     background: `linear-gradient(135deg, ${customizations.primary}10, ${customizations.accent}10)` 
-                   }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                       style={{ backgroundColor: customizations.primary }}>
-                    👨
-                  </div>
-                  <div>
-                    <div className="font-medium">Dad</div>
-                    <div className="text-sm text-gray-600">3 items added</div>
-                  </div>
-                </div>
-              </div>
-              <div className="border rounded-lg p-3 bg-gradient-to-r" 
-                   style={{ 
-                     background: `linear-gradient(135deg, ${customizations.secondary}10, ${customizations.primary}10)` 
-                   }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                       style={{ backgroundColor: customizations.secondary }}>
-                    👩
-                  </div>
-                  <div>
-                    <div className="font-medium">Mom</div>
-                    <div className="text-sm text-gray-600">5 items added</div>
-                  </div>
-                </div>
-              </div>
-              <div className="border rounded-lg p-3 bg-gradient-to-r" 
-                   style={{ 
-                     background: `linear-gradient(135deg, ${customizations.accent}10, ${customizations.secondary}10)` 
-                   }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                       style={{ backgroundColor: customizations.accent }}>
-                    👧
-                  </div>
-                  <div>
-                    <div className="font-medium">Sarah</div>
-                    <div className="text-sm text-gray-600">1 item added</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <LivePreview customizations={customizations} currentColors={currentColors} />
 
       {/* Accessibility Check */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Accessibility Validation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <h4 className="font-medium">Primary on White</h4>
-              <div 
-                className="p-3 rounded border"
-                style={{ 
-                  backgroundColor: '#ffffff',
-                  color: customizations.primary
-                }}
-              >
-                Sample text content
-              </div>
-              <span className="text-xs text-green-600">
-                Contrast: PASS (AA compliant)
-              </span>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium">White on Primary</h4>
-              <div 
-                className="p-3 rounded border"
-                style={{ 
-                  backgroundColor: customizations.primary,
-                  color: '#ffffff'
-                }}
-              >
-                Sample text content
-              </div>
-              <span className="text-xs text-green-600">
-                Contrast: PASS (AAA compliant)
-              </span>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium">Primary on Light Background</h4>
-              <div 
-                className="p-3 rounded border"
-                style={{ 
-                  backgroundColor: '#f8fafc',
-                  color: customizations.primary
-                }}
-              >
-                Sample text content
-              </div>
-              <span className="text-xs text-green-600">
-                Contrast: PASS (AA compliant)
-              </span>
-            </div>
-          </div>
-          
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h4 className="font-medium text-green-800 mb-2">✅ Accessibility Status</h4>
-            <p className="text-sm text-green-700">
-              Family Warmth palette meets WCAG 2.1 AA standards for color contrast. 
-              Orange primary provides excellent readability on light backgrounds while maintaining warmth.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <AccessibilityCheck customizations={customizations} />
 
       {/* CSS Export */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Export CSS Variables</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => navigator.clipboard.writeText(generateCSS())}
-                style={{ backgroundColor: customizations.primary, color: 'white' }}
-              >
-                📋 Copy CSS Variables
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  const blob = new Blob([generateCSS()], { type: 'text/css' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'familycart-colors.css';
-                  a.click();
-                }}
-              >
-                📁 Download CSS File
-              </Button>
-            </div>
-            
-            <div className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm font-mono max-h-64 overflow-y-auto">
-              <pre>{generateCSS()}</pre>
-            </div>
-            
-            <div className="text-sm text-gray-600">
-              <strong>Next Steps:</strong>
-              <ol className="list-decimal list-inside space-y-1 mt-2">
-                <li>Copy the CSS variables above</li>
-                <li>Update your global CSS file (globals.css or app.css)</li>
-                <li>Replace existing color references in components</li>
-                <li>Test the new palette across all pages</li>
-                <li>Update component library documentation</li>
-              </ol>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <CSSExport customizations={customizations} />
     </div>
   );
 }
