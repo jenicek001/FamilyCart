@@ -56,8 +56,14 @@ validate_env() {
 configure_runner() {
     log "Configuring GitHub runner: $RUNNER_NAME"
     
-    # Create work directory
+    # Create work directory with proper permissions
     mkdir -p "$RUNNER_WORK_DIRECTORY"
+    chmod 755 "$RUNNER_WORK_DIRECTORY"
+    
+    # Ensure the runner user owns the work directory
+    if [[ $(id -u) -eq 0 ]]; then
+        chown -R runner:runner "$RUNNER_WORK_DIRECTORY"
+    fi
     
     # Check if runner is already configured
     if [[ -f ".runner" ]]; then

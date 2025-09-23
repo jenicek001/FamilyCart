@@ -126,6 +126,11 @@ RUN curl -L "https://github.com/actions/runner/releases/download/v${RUNNER_VERSI
 # Install runner dependencies
 RUN ./bin/installdependencies.sh
 
+# Create work directory with proper permissions
+RUN mkdir -p /home/runner/work \
+    && chown -R runner:runner /home/runner/work \
+    && chmod -R 755 /home/runner/work
+
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
