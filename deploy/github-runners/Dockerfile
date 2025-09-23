@@ -60,8 +60,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python3 - \
+    && ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry \
+    && chmod +x /opt/poetry/bin/poetry
 
 # Install additional tools for FamilyCart builds
 RUN npm install -g \
