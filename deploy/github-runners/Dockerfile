@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -49,15 +49,14 @@ RUN curl -fsSL https://get.docker.com | sh \
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Install Python 3.11
-RUN add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update \
+# Install Python 3.12 (native in Ubuntu 24.04)
+RUN apt-get update \
     && apt-get install -y \
-        python3.11 \
-        python3.11-dev \
-        python3.11-distutils \
+        python3.12 \
+        python3.12-dev \
+        python3.12-venv \
         python3-pip \
-    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
@@ -69,14 +68,33 @@ RUN npm install -g \
         typescript \
         eslint \
         prettier \
-        @playwright/test \
-    && python3 -m pip install \
-        black \
-        isort \
-        pylint \
-        bandit \
-        pytest \
-        pytest-cov
+        @playwright/test
+
+# Create minimal Poetry project for runner tools
+RUN mkdir -p /runner-tools && cd /runner-tools && \
+    echo '[tool.poetry]' > pyproject.toml && \
+    echo 'name = "github-runner-tools"' >> pyproject.toml && \
+    echo 'version = "0.1.0"' >> pyproject.toml && \
+    echo 'description = "Development tools for GitHub Actions runner"' >> pyproject.toml && \
+    echo 'authors = ["FamilyCart Team"]' >> pyproject.toml && \
+    echo 'package-mode = false' >> pyproject.toml && \
+    echo '' >> pyproject.toml && \
+    echo '[tool.poetry.dependencies]' >> pyproject.toml && \
+    echo 'python = "^3.12"' >> pyproject.toml && \
+    echo '' >> pyproject.toml && \
+    echo '[tool.poetry.group.dev.dependencies]' >> pyproject.toml && \
+    echo 'black = "*"' >> pyproject.toml && \
+    echo 'isort = "*"' >> pyproject.toml && \
+    echo 'pylint = "*"' >> pyproject.toml && \
+    echo 'bandit = "*"' >> pyproject.toml && \
+    echo 'pytest = "*"' >> pyproject.toml && \
+    echo 'pytest-cov = "*"' >> pyproject.toml && \
+    echo '' >> pyproject.toml && \
+    echo '[build-system]' >> pyproject.toml && \
+    echo 'requires = ["poetry-core"]' >> pyproject.toml && \
+    echo 'build-backend = "poetry.core.masonry.api"' >> pyproject.toml && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-root
 
 # Install security scanning tools
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
@@ -110,10 +128,6 @@ RUN ./bin/installdependencies.sh
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-# Copy runner configuration script
-COPY configure-runner.sh /configure-runner.sh
-RUN chmod +x /configure-runner.sh
 
 USER runner
 

@@ -61,27 +61,31 @@ configure_runner() {
     
     # Check if runner is already configured
     if [[ -f ".runner" ]]; then
-        warn "Runner appears to already be configured, checking configuration..."
-        
-        # Read existing configuration
-        local configured_url=$(jq -r '.gitHubUrl' .runner 2>/dev/null || echo "")
-        local expected_url="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}"
-        
-        if [[ "$configured_url" == "$expected_url" ]]; then
-            log "Runner is already configured for the correct repository"
-            return 0
-        else
-            warn "Runner configured for different repository, reconfiguring..."
-            ./config.sh remove --token "$GITHUB_TOKEN" || warn "Failed to remove existing configuration"
-        fi
+        warn "Runner appears to already be configured, removing old configuration..."
+        ./config.sh remove --unattended || warn "Failed to remove existing configuration"
     fi
+    
+    # Get fresh registration token
+    log "Fetching registration token from GitHub..."
+    local response=$(curl -s -X POST \
+        -H "Authorization: token $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runners/registration-token")
+    
+    local reg_token=$(echo "$response" | sed -n 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    
+    if [[ -z "$reg_token" ]]; then
+        error "Failed to get registration token. Response: $response"
+    fi
+    
+    log "Registration token obtained successfully"
     
     # Configure the runner
     log "Configuring runner for https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}"
     
     ./config.sh \
         --url "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}" \
-        --token "$GITHUB_TOKEN" \
+        --token "$reg_token" \
         --name "$RUNNER_NAME" \
         --work "$RUNNER_WORK_DIRECTORY" \
         --labels "$RUNNER_LABELS" \
@@ -124,7 +128,7 @@ shutdown_runner() {
     # Remove runner configuration
     if [[ -f ".runner" ]]; then
         log "Removing runner configuration..."
-        ./config.sh remove --token "$GITHUB_TOKEN" --unattended || warn "Failed to remove runner configuration"
+        ./config.sh remove --unattended || warn "Failed to remove runner configuration"
     fi
     
     log "Shutdown complete"

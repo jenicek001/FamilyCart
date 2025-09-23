@@ -1,5 +1,3 @@
-version: '3.9'
-
 # GitHub Self-Hosted Runners for FamilyCart
 # This compose file sets up multiple runners for parallel builds
 
