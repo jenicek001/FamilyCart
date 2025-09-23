@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_session, set_session_context
-from app.core.fastapi_users import current_user  # Use the same dependency as users.py
+from app.core.fastapi_users import current_user
 from app.models import User
-from app.models.category import Category
 from app.models.item import Item
+from app.models.category import Category
 from app.models.shopping_list import ShoppingList
 from app.schemas.item import ItemCreate, ItemRead
 from app.schemas.share import ShareRequest
@@ -20,62 +20,18 @@ from app.schemas.shopping_list import (
     ShoppingListUpdate,
 )
 from app.schemas.user import UserRead
-from app.services.ai_service import ai_service
-from app.services.notification_service import send_list_invitation_email
-from app.services.websocket_service import websocket_service
+
+# Import extracted modules
+from ..helpers import shopping_list_helpers as helpers
+from ..services import shopping_list_services as services
+from .item_ai_service import ItemAIProcessor
+from .websocket_helpers import WebSocketNotifier
+from .response_builders import ResponseBuilder
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-async def get_shopping_list_by_id(
-    list_id: int,
-    session: AsyncSession,
-    current_user: User,
-):
-    """
-    Helper function to retrieve a ShoppingList by ID,
-    ensuring current_user is owner or shared member.
-    """
-    result = await session.execute(
-        select(ShoppingList)
-        .where(ShoppingList.id == list_id)
-        .options(
-            selectinload(ShoppingList.shared_with),
-            selectinload(ShoppingList.items),
-            selectinload(ShoppingList.owner),
-        )
-    )
-    shopping_list = result.scalars().first()
-    if not shopping_list:
-        raise HTTPException(status_code=404, detail="Shopping list not found")
-    if (
-        shopping_list.owner_id != current_user.id
-        and current_user not in shopping_list.shared_with
-    ):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to access this list"
-        )
-    return shopping_list
-
-
-async def get_or_create_category(name: str, session: AsyncSession) -> Category:
-    """Find an existing category or create a new one."""
-    if not name:
-        return None
-
-    result = await session.execute(
-        select(Category).where(Category.name == name.strip())
-    )
-    category = result.scalars().first()
-
-    if not category:
-        category = Category(name=name.strip())
-        session.add(category)
-        await session.commit()
-        await session.refresh(category)
-
-    return category
 
 
 @router.post("/", response_model=ShoppingListRead)
@@ -168,33 +124,9 @@ async def read_shopping_lists(
             shared_lists = []
 
         lists = list(owned_lists) + list(shared_lists)
-        # Build Pydantic models with items and members
-        result_models = []
-        for l in lists:
-            # Sort items by category before converting to Pydantic models
-            sorted_items = sort_items_by_category(l.items) if l.items else []
-            items = [
-                ItemRead.model_validate(i, from_attributes=True) for i in sorted_items
-            ]
-            # Members: shared_with + owner if not already included
-            members = [
-                UserRead.model_validate(u, from_attributes=True) for u in l.shared_with
-            ]
-            if l.owner_id != current_user.id:
-                members.append(UserRead.model_validate(l.owner, from_attributes=True))
-            result_models.append(
-                ShoppingListRead(
-                    id=l.id,
-                    name=l.name,
-                    description=l.description,
-                    owner_id=l.owner_id,
-                    created_at=l.created_at,
-                    updated_at=l.updated_at,
-                    items=items,
-                    members=members,
-                )
-            )
-        return result_models
+        # Use response builder for cleaner code
+        return await ResponseBuilder.build_lists_response(lists, current_user)
+        
     except Exception as e:
         print(f"Error in read_shopping_lists: {e}")
         raise
@@ -210,11 +142,11 @@ async def read_shopping_list(
     Get a specific shopping list by ID.
     """
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
 
     # Use helper function to build proper Pydantic response
     # The helper will handle eager loading, sorting, and conversion to Pydantic models
-    return await build_shopping_list_response(shopping_list, session, current_user)
+    return await helpers.build_shopping_list_response(shopping_list, session, current_user)
 
 
 @router.put("/{list_id}", response_model=ShoppingListRead)
@@ -232,7 +164,7 @@ async def update_shopping_list(
     current_user_id = str(current_user.id)
 
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
 
     # Update list attributes
     update_data = list_in.dict(exclude_unset=True)
@@ -279,8 +211,10 @@ async def update_shopping_list(
     # Send real-time notification to list members
     try:
         list_data = list_read.model_dump(mode="json")
-        await websocket_service.notify_list_updated(
-            list_id=shopping_list.id, list_data=list_data, user_id=current_user_id
+        await WebSocketNotifier.notify_list_updated(
+            list_id=list_id,
+            list_data=list_data,
+            user_id=current_user_id,
         )
     except Exception:
         logger.exception("Failed to send WebSocket list_updated notification")
@@ -302,14 +236,15 @@ async def delete_shopping_list(
     user_id = str(current_user.id)
 
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
     await session.delete(shopping_list)
     await session.commit()
 
     # Notify via WebSocket
     try:
-        await websocket_service.notify_list_deleted(
-            list_id=shopping_list.id, user_id=user_id
+        await WebSocketNotifier.notify_list_deleted(
+            list_id=list_id,
+            user_id=user_id,
         )
     except Exception:
         logger.exception("Failed to send WebSocket list_deleted notification")
@@ -328,7 +263,7 @@ async def create_item_for_list(
     Uses AI to automatically categorize items and standardize names.
     """
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
     user_id = current_user.id
     # Capture all values immediately to avoid lazy loading issues during AI operations
     shopping_list_id = shopping_list.id
@@ -343,88 +278,10 @@ async def create_item_for_list(
     item_quantity_unit_id = item_in.quantity_unit_id
     item_quantity_display_text = item_in.quantity_display_text
 
-    # Use AI to suggest category and standardize name
-    category = None
-    standardized_name = None
-    translations = None
-    icon_name = None
-
-    try:
-        # Get existing categories for AI context
-        categories_result = await session.execute(select(Category))
-        existing_categories = categories_result.scalars().all()
-        category_names = [cat.name for cat in existing_categories]
-
-        # OPTIMIZED: Run AI calls in parallel with timeout
-        import asyncio
-
-        # Start category and translation tasks in parallel
-        category_task = asyncio.create_task(
-            ai_service.suggest_category_async(item_name, category_names)
-        )
-        translation_task = asyncio.create_task(
-            ai_service.standardize_and_translate_item_name(item_name)
-        )
-
-        # Wait for both with timeout (max 10 seconds each)
-        try:
-            category_name, standardization_result = await asyncio.wait_for(
-                asyncio.gather(category_task, translation_task, return_exceptions=True),
-                timeout=15.0,  # Max 15 seconds for both calls
-            )
-
-            # Handle category result
-            if isinstance(category_name, Exception):
-                logger.error(f"Category suggestion failed: {category_name}")
-                category_name = None
-            elif category_name:
-                category = await get_or_create_category(category_name, session)
-
-            # Handle translation result
-            if isinstance(standardization_result, Exception):
-                logger.error(f"Translation failed: {standardization_result}")
-                standardization_result = {}
-
-            standardized_name = (
-                standardization_result.get("standardized_name")
-                if standardization_result
-                else None
-            )
-            translations = (
-                standardization_result.get("translations", {})
-                if standardization_result
-                else {}
-            )
-
-            # Get icon suggestion only if we have a category (can't parallelize this one)
-            if category:
-                try:
-                    icon_name = await asyncio.wait_for(
-                        ai_service.suggest_icon(item_name, category.name),
-                        timeout=10.0,  # Max 10 seconds for icon
-                    )
-                except asyncio.TimeoutError:
-                    logger.warning(f"Icon suggestion timed out for item '{item_name}'")
-                    icon_name = "shopping_cart"  # Default fallback
-                except Exception as e:
-                    logger.error(f"Icon suggestion failed: {e}")
-                    icon_name = "shopping_cart"  # Default fallback
-
-        except asyncio.TimeoutError:
-            logger.warning(
-                f"AI processing timed out for item '{item_name}' - using fallbacks"
-            )
-            category_name = None
-            standardized_name = None
-            translations = {}
-
-    except Exception as e:
-        # Log the error but continue with item creation
-        logger.error(f"Error during AI processing for item '{item_name}': {e}")
-
-        # Fallback: use provided category if any
-        if item_category_name:
-            category = await get_or_create_category(item_category_name, session)
+    # Use AI to process the item
+    category, standardized_name, translations, icon_name = await ItemAIProcessor.process_item_with_ai(
+        item_name, item_category_name, session
+    )
 
     # Create new item with AI-enhanced data
     db_item = Item(
@@ -451,18 +308,11 @@ async def create_item_for_list(
     await session.refresh(db_item, attribute_names=["category", "owner"])
 
     # Send real-time notification to list members
-    try:
-        from app.schemas.item import ItemRead
-
-        item_data = ItemRead.model_validate(db_item, from_attributes=True).model_dump(
-            mode="json"
-        )
-        await websocket_service.notify_item_created(
-            list_id=list_id, item_data=item_data, user_id=str(user_id)
-        )
-    except Exception as e:
-        logger.error(f"Failed to send WebSocket notification for item creation: {e}")
-        logger.exception("Full exception details:")
+    from app.schemas.item import ItemRead
+    item_data = ItemRead.model_validate(db_item, from_attributes=True).model_dump(mode="json")
+    await WebSocketNotifier.notify_item_created(
+        list_id=list_id, item_data=item_data, user_id=str(user_id)
+    )
 
     return db_item
 
@@ -477,7 +327,7 @@ async def read_items_from_list(
     Get all items from a specific shopping list.
     """
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
     # Eagerly load category for all items
     result = await session.execute(
         select(Item)
@@ -508,7 +358,7 @@ async def share_shopping_list(
     current_user_email = current_user.email
 
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
 
     # Only owner can share
     if shopping_list.owner_id != current_user.id:
@@ -538,7 +388,7 @@ async def share_shopping_list(
                 "members": [],  # Empty for non-existent user
             }
 
-            await send_list_invitation_email(
+            await services.SharingService.send_invitation_email(
                 to_email=share_data.email,
                 list_data=list_data,
                 inviter_email=current_user_email,
@@ -552,12 +402,12 @@ async def share_shopping_list(
             )
 
         # Return the shopping list without changes (user will be added when they register)
-        return await build_shopping_list_response(shopping_list, session, current_user)
+        return await helpers.build_shopping_list_response(shopping_list, session, current_user)
 
     # User exists - proceed with normal sharing
     # Check if already shared
     if user_to_share_with in shopping_list.shared_with:
-        return await build_shopping_list_response(
+        return await helpers.build_shopping_list_response(
             shopping_list, session, current_user
         )  # Already shared, just return the list
 
@@ -581,28 +431,16 @@ async def share_shopping_list(
         ],
     }
 
-    # Send notifications: WebSocket and email
-    # WebSocket
-    try:
-        await websocket_service.notify_list_shared(
-            list_id=list_id,
-            list_data=list_data,
-            new_member_email=share_data.email,
-            user_id=current_user_id,
-        )
-    except Exception:
-        logger.exception("Failed to send WebSocket list_shared notification")
-    # Email notification for existing user
-    try:
-        await send_list_invitation_email(
-            to_email=share_data.email,
-            list_data=list_data,
-            inviter_email=current_user_email,
-        )
-    except Exception:
-        logger.exception("Failed to send list invitation email")
+    # Send notifications
+    await services.SharingService.notify_list_shared(
+        list_id=list_id,
+        list_data=list_data,
+        new_member_email=share_data.email,
+        current_user_id=current_user_id,
+        inviter_email=current_user_email,
+    )
 
-    return await build_shopping_list_response(shopping_list, session, current_user)
+    return await helpers.build_shopping_list_response(shopping_list, session, current_user)
 
 
 @router.delete("/{list_id}/share/{user_email}", response_model=ShoppingListRead)
@@ -621,7 +459,7 @@ async def remove_member_from_list(
     current_user_id = str(current_user.id)
 
     # Get shopping list with permission check
-    shopping_list = await get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
 
     # Only owner can remove members
     if shopping_list.owner_id != current_user.id:
@@ -649,84 +487,13 @@ async def remove_member_from_list(
     await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
 
     # Send real-time notification
-    try:
-        await websocket_service.notify_member_removed(
-            list_id=list_id,
-            removed_user_id=str(user_to_remove.id),
-            user_id=current_user_id,
-        )
-    except Exception:
-        logger.exception("Failed to send WebSocket member_removed notification")
+    await services.SharingService.notify_member_removed(
+        list_id=list_id,
+        removed_user_id=str(user_to_remove.id),
+        current_user_id=current_user_id,
+    )
 
     return shopping_list
 
 
-async def build_shopping_list_response(
-    shopping_list, session: AsyncSession, current_user: User
-) -> ShoppingListRead:
-    """
-    Helper function to safely build a ShoppingListRead response from a SQLAlchemy model.
-    Ensures all relationships are properly loaded and converted to Pydantic models.
-    """
-    # Eagerly load all relationships
-    result = await session.execute(
-        select(ShoppingList)
-        .where(ShoppingList.id == shopping_list.id)
-        .options(
-            selectinload(ShoppingList.items).selectinload(Item.category),
-            selectinload(ShoppingList.items).selectinload(Item.owner),
-            selectinload(ShoppingList.items).selectinload(Item.last_modified_by),
-            selectinload(ShoppingList.shared_with),
-            selectinload(ShoppingList.owner),
-        )
-    )
-    fresh_shopping_list = result.scalars().first()
 
-    # Convert items to Pydantic models
-    items = []
-    if fresh_shopping_list.items:
-        sorted_items = sort_items_by_category(fresh_shopping_list.items)
-        items = [ItemRead.model_validate(i, from_attributes=True) for i in sorted_items]
-
-    # Convert members to Pydantic models
-    members = [
-        UserRead.model_validate(u, from_attributes=True)
-        for u in fresh_shopping_list.shared_with
-    ]
-    if fresh_shopping_list.owner_id != current_user.id:
-        members.append(
-            UserRead.model_validate(fresh_shopping_list.owner, from_attributes=True)
-        )
-
-    # Build and return Pydantic model
-    return ShoppingListRead(
-        id=fresh_shopping_list.id,
-        name=fresh_shopping_list.name,
-        description=fresh_shopping_list.description,
-        owner_id=fresh_shopping_list.owner_id,
-        created_at=fresh_shopping_list.created_at,
-        updated_at=fresh_shopping_list.updated_at,
-        items=items,
-        members=members,
-    )
-
-
-def sort_items_by_category(items: List[Item]) -> List[Item]:
-    """
-    Sort items by category, then by completion status, then by name.
-    Items with categories come first, sorted alphabetically by category name.
-    Items without categories come last.
-    Within each category, uncompleted items come first.
-    """
-
-    def sort_key(item: Item):
-        # Primary sort: category name (None/empty comes last)
-        category_name = item.category.name if item.category else "zzz_uncategorized"
-        # Secondary sort: completion status (False comes before True)
-        completion_status = item.is_completed
-        # Tertiary sort: item name
-        item_name = item.name.lower()
-
-        return (category_name, completion_status, item_name)
-
-    return sorted(items, key=sort_key)
