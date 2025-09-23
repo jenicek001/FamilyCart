@@ -32,15 +32,13 @@ from typing import Any, Dict, List, Tuple
 import httpx
 
 from benchmark_config import (
-    BenchmarkResult, 
-    ProviderStats, 
-    TEST_ITEMS, 
-    TEST_PROMPTS, 
     DEFAULT_CONFIG,
-    print_benchmark_results
+    TEST_ITEMS,
+    TEST_PROMPTS,
+    BenchmarkResult,
+    ProviderStats,
+    print_benchmark_results,
 )
-
-import httpx
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
@@ -49,9 +47,6 @@ from app.core.config import settings
 from app.services.ai_factory import get_ai_provider
 from app.services.gemini_provider import GeminiProvider
 from app.services.ollama_provider import OllamaProvider
-
-
-
 
 
 class AIProviderBenchmark:
@@ -321,16 +316,20 @@ class AIProviderBenchmark:
         ollama_results: List[BenchmarkResult],
     ):
         """Print comprehensive benchmark results."""
-        gemini_stats = self.calculate_stats(gemini_results, "Gemini") if gemini_results else None
-        ollama_stats = self.calculate_stats(ollama_results, "Ollama") if ollama_results else None
-        
+        gemini_stats = (
+            self.calculate_stats(gemini_results, "Gemini") if gemini_results else None
+        )
+        ollama_stats = (
+            self.calculate_stats(ollama_results, "Ollama") if ollama_results else None
+        )
+
         print_benchmark_results(
-            gemini_results, 
-            ollama_results, 
-            gemini_stats, 
-            ollama_stats, 
-            self.test_items, 
-            settings
+            gemini_results,
+            ollama_results,
+            gemini_stats,
+            ollama_stats,
+            self.test_items,
+            settings,
         )
 
     def save_detailed_results(

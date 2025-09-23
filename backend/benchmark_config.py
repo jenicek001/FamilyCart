@@ -42,15 +42,15 @@ class ProviderStats:
 # Test items covering different categories
 TEST_ITEMS = [
     "organic apples",
-    "whole milk", 
+    "whole milk",
     "chicken breast",
     "sourdough bread",
     "frozen pizza",
     "olive oil",
-    "orange juice", 
+    "orange juice",
     "shampoo",
     "paper towels",
-    "greek yogurt"
+    "greek yogurt",
 ]
 
 # Test prompts for different operations
@@ -58,14 +58,19 @@ TEST_PROMPTS = {
     "categorization": "Please categorize this grocery item: {item_name}",
     "icon_suggestion": "Suggest an appropriate icon for: {item_name}",
     "standardization": "Standardize this item name: {item_name}",
-    "text_generation": "Describe the shopping item '{item_name}' in one sentence."
+    "text_generation": "Describe the shopping item '{item_name}' in one sentence.",
 }
 
 # Default configuration
 DEFAULT_CONFIG = {
     "runs": 3,
     "timeout": 120,
-    "operations": ["categorization", "icon_suggestion", "standardization", "text_generation"]
+    "operations": [
+        "categorization",
+        "icon_suggestion",
+        "standardization",
+        "text_generation",
+    ],
 }
 
 
@@ -75,7 +80,7 @@ def print_benchmark_results(
     gemini_stats,
     ollama_stats,
     test_items: List[str],
-    settings
+    settings,
 ):
     """Print comprehensive benchmark results."""
     print("\n" + "=" * 80)
@@ -107,10 +112,7 @@ def print_benchmark_results(
     # Performance comparison
     if gemini_results and ollama_results:
         print(f"\n⚡ PERFORMANCE COMPARISON:")
-        if (
-            gemini_stats.avg_response_time > 0
-            and ollama_stats.avg_response_time > 0
-        ):
+        if gemini_stats.avg_response_time > 0 and ollama_stats.avg_response_time > 0:
             speed_ratio = (
                 gemini_stats.avg_response_time / ollama_stats.avg_response_time
             )
@@ -141,9 +143,7 @@ def print_benchmark_results(
                     / len([r for r in gemini_results if r.operation == operation])
                     * 100
                 )
-                print(
-                    f"     Gemini: {avg_time:.3f}s avg, {success_rate:.1f}% success"
-                )
+                print(f"     Gemini: {avg_time:.3f}s avg, {success_rate:.1f}% success")
             else:
                 print(f"     Gemini: No successful operations")
 
@@ -158,9 +158,7 @@ def print_benchmark_results(
                     / len([r for r in ollama_results if r.operation == operation])
                     * 100
                 )
-                print(
-                    f"     Ollama: {avg_time:.3f}s avg, {success_rate:.1f}% success"
-                )
+                print(f"     Ollama: {avg_time:.3f}s avg, {success_rate:.1f}% success")
             else:
                 print(f"     Ollama: No successful operations")
 

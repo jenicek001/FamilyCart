@@ -21,11 +21,10 @@ logger = logging.getLogger(__name__)
 
 class ItemCreationService:
     """Service for creating items with AI enhancement."""
-    
+
     @staticmethod
     async def process_item_with_ai(
-        item_name: str, 
-        session: AsyncSession
+        item_name: str, session: AsyncSession
     ) -> Tuple[Optional[Category], Optional[str], Dict, Optional[str]]:
         """
         Process item with AI to get category, standardized name, translations, and icon.
@@ -53,7 +52,9 @@ class ItemCreationService:
             # Wait for both with timeout (max 15 seconds total)
             try:
                 category_name, standardization_result = await asyncio.wait_for(
-                    asyncio.gather(category_task, translation_task, return_exceptions=True),
+                    asyncio.gather(
+                        category_task, translation_task, return_exceptions=True
+                    ),
                     timeout=15.0,
                 )
 
@@ -62,7 +63,10 @@ class ItemCreationService:
                     logger.error(f"Category suggestion failed: {category_name}")
                     category_name = None
                 elif category_name:
-                    from app.api.v1.helpers.shopping_list_helpers import get_or_create_category
+                    from app.api.v1.helpers.shopping_list_helpers import (
+                        get_or_create_category,
+                    )
+
                     category = await get_or_create_category(category_name, session)
 
                 # Handle translation result
@@ -89,7 +93,9 @@ class ItemCreationService:
                             timeout=10.0,
                         )
                     except asyncio.TimeoutError:
-                        logger.warning(f"Icon suggestion timed out for item '{item_name}'")
+                        logger.warning(
+                            f"Icon suggestion timed out for item '{item_name}'"
+                        )
                         icon_name = "shopping_cart"
                     except Exception as e:
                         logger.error(f"Icon suggestion failed: {e}")
@@ -110,7 +116,7 @@ class ItemCreationService:
         shopping_list: ShoppingList,
         item_in: ItemCreate,
         current_user: User,
-        session: AsyncSession
+        session: AsyncSession,
     ) -> Item:
         """Create a new item for a shopping list with AI enhancement."""
         # Extract values from item_in
@@ -124,18 +130,23 @@ class ItemCreationService:
         item_quantity_display_text = item_in.quantity_display_text
 
         # Process with AI
-        category, standardized_name, translations, icon_name = await ItemCreationService.process_item_with_ai(
-            item_name, session
+        category, standardized_name, translations, icon_name = (
+            await ItemCreationService.process_item_with_ai(item_name, session)
         )
 
         # Use original category name if provided and no AI suggestion
         if not category and item_category_name:
             from app.api.v1.helpers.shopping_list_helpers import get_or_create_category
+
             category = await get_or_create_category(item_category_name, session)
 
         # Create item with AI-enhanced data
         final_name = standardized_name if standardized_name else item_name
-        final_icon = item_icon_name if item_icon_name else (icon_name if icon_name else "shopping_cart")
+        final_icon = (
+            item_icon_name
+            if item_icon_name
+            else (icon_name if icon_name else "shopping_cart")
+        )
 
         item = Item(
             name=final_name,
@@ -181,7 +192,7 @@ class SharingService:
             )
         except Exception as e:
             logger.exception("Failed to send WebSocket list_shared notification")
-        
+
         # Email notification
         try:
             await send_list_invitation_email(
@@ -219,14 +230,15 @@ class SharingService:
             )
         except Exception as e:
             logger.exception(f"Failed to send list invitation email to {to_email}")
+
     """Service for sharing shopping lists."""
-    
+
     @staticmethod
     async def share_list_with_user(
         shopping_list: ShoppingList,
         user_email: str,
         current_user: User,
-        session: AsyncSession
+        session: AsyncSession,
     ) -> ShoppingList:
         """Share a shopping list with a user by email."""
         # Find the user to share with
@@ -244,7 +256,9 @@ class SharingService:
         if user_to_share_with not in shopping_list.shared_with:
             shopping_list.shared_with.append(user_to_share_with)
             await session.commit()
-            await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
+            await session.refresh(
+                shopping_list, attribute_names=["shared_with", "owner"]
+            )
 
         # Send notifications
         await SharingService._send_sharing_notifications(
@@ -255,9 +269,7 @@ class SharingService:
 
     @staticmethod
     async def _send_invitation_to_nonexistent_user(
-        shopping_list: ShoppingList,
-        user_email: str,
-        current_user: User
+        shopping_list: ShoppingList, user_email: str, current_user: User
     ):
         """Send invitation email to non-existent user."""
         list_data = {
@@ -280,6 +292,7 @@ class SharingService:
         except Exception:
             logger.exception(f"Failed to send invitation email to {user_email}")
             from fastapi import HTTPException, status
+
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to send invitation email. Please try again.",
@@ -287,9 +300,7 @@ class SharingService:
 
     @staticmethod
     async def _send_sharing_notifications(
-        shopping_list: ShoppingList,
-        user_email: str,
-        current_user: User
+        shopping_list: ShoppingList, user_email: str, current_user: User
     ):
         """Send WebSocket and email notifications for sharing."""
         list_data = {

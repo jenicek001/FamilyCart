@@ -1,6 +1,7 @@
 """
 Response builders for shopping list endpoints.
 """
+
 import logging
 from typing import List
 
@@ -9,8 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User
 from app.models.shopping_list import ShoppingList
 from app.schemas.item import ItemRead
-from app.schemas.user import UserRead
 from app.schemas.shopping_list import ShoppingListRead
+from app.schemas.user import UserRead
+
 from ..helpers import shopping_list_helpers as helpers
 
 logger = logging.getLogger(__name__)
@@ -24,7 +26,9 @@ class ResponseBuilder:
         shopping_list: ShoppingList, session: AsyncSession, current_user: User
     ) -> ShoppingListRead:
         """Build a shopping list response."""
-        return await helpers.build_shopping_list_response(shopping_list, session, current_user)
+        return await helpers.build_shopping_list_response(
+            shopping_list, session, current_user
+        )
 
     @staticmethod
     async def build_lists_response(

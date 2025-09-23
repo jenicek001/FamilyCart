@@ -9,8 +9,8 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import get_session, set_session_context
 from app.core.fastapi_users import current_user
 from app.models import User
-from app.models.item import Item
 from app.models.category import Category
+from app.models.item import Item
 from app.models.shopping_list import ShoppingList
 from app.schemas.item import ItemCreate, ItemRead
 from app.schemas.share import ShareRequest
@@ -25,13 +25,11 @@ from app.schemas.user import UserRead
 from ..helpers import shopping_list_helpers as helpers
 from ..services import shopping_list_services as services
 from .item_ai_service import ItemAIProcessor
-from .websocket_helpers import WebSocketNotifier
 from .response_builders import ResponseBuilder
+from .websocket_helpers import WebSocketNotifier
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
 
 
 @router.post("/", response_model=ShoppingListRead)
@@ -126,7 +124,7 @@ async def read_shopping_lists(
         lists = list(owned_lists) + list(shared_lists)
         # Use response builder for cleaner code
         return await ResponseBuilder.build_lists_response(lists, current_user)
-        
+
     except Exception as e:
         print(f"Error in read_shopping_lists: {e}")
         raise
@@ -142,11 +140,15 @@ async def read_shopping_list(
     Get a specific shopping list by ID.
     """
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
 
     # Use helper function to build proper Pydantic response
     # The helper will handle eager loading, sorting, and conversion to Pydantic models
-    return await helpers.build_shopping_list_response(shopping_list, session, current_user)
+    return await helpers.build_shopping_list_response(
+        shopping_list, session, current_user
+    )
 
 
 @router.put("/{list_id}", response_model=ShoppingListRead)
@@ -164,7 +166,9 @@ async def update_shopping_list(
     current_user_id = str(current_user.id)
 
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
 
     # Update list attributes
     update_data = list_in.dict(exclude_unset=True)
@@ -236,7 +240,9 @@ async def delete_shopping_list(
     user_id = str(current_user.id)
 
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
     await session.delete(shopping_list)
     await session.commit()
 
@@ -263,7 +269,9 @@ async def create_item_for_list(
     Uses AI to automatically categorize items and standardize names.
     """
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
     user_id = current_user.id
     # Capture all values immediately to avoid lazy loading issues during AI operations
     shopping_list_id = shopping_list.id
@@ -279,8 +287,10 @@ async def create_item_for_list(
     item_quantity_display_text = item_in.quantity_display_text
 
     # Use AI to process the item
-    category, standardized_name, translations, icon_name = await ItemAIProcessor.process_item_with_ai(
-        item_name, item_category_name, session
+    category, standardized_name, translations, icon_name = (
+        await ItemAIProcessor.process_item_with_ai(
+            item_name, item_category_name, session
+        )
     )
 
     # Create new item with AI-enhanced data
@@ -309,7 +319,10 @@ async def create_item_for_list(
 
     # Send real-time notification to list members
     from app.schemas.item import ItemRead
-    item_data = ItemRead.model_validate(db_item, from_attributes=True).model_dump(mode="json")
+
+    item_data = ItemRead.model_validate(db_item, from_attributes=True).model_dump(
+        mode="json"
+    )
     await WebSocketNotifier.notify_item_created(
         list_id=list_id, item_data=item_data, user_id=str(user_id)
     )
@@ -327,7 +340,9 @@ async def read_items_from_list(
     Get all items from a specific shopping list.
     """
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
     # Eagerly load category for all items
     result = await session.execute(
         select(Item)
@@ -358,7 +373,9 @@ async def share_shopping_list(
     current_user_email = current_user.email
 
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
 
     # Only owner can share
     if shopping_list.owner_id != current_user.id:
@@ -402,7 +419,9 @@ async def share_shopping_list(
             )
 
         # Return the shopping list without changes (user will be added when they register)
-        return await helpers.build_shopping_list_response(shopping_list, session, current_user)
+        return await helpers.build_shopping_list_response(
+            shopping_list, session, current_user
+        )
 
     # User exists - proceed with normal sharing
     # Check if already shared
@@ -440,7 +459,9 @@ async def share_shopping_list(
         inviter_email=current_user_email,
     )
 
-    return await helpers.build_shopping_list_response(shopping_list, session, current_user)
+    return await helpers.build_shopping_list_response(
+        shopping_list, session, current_user
+    )
 
 
 @router.delete("/{list_id}/share/{user_email}", response_model=ShoppingListRead)
@@ -459,7 +480,9 @@ async def remove_member_from_list(
     current_user_id = str(current_user.id)
 
     # Get shopping list with permission check
-    shopping_list = await helpers.get_shopping_list_by_id(list_id, session, current_user)
+    shopping_list = await helpers.get_shopping_list_by_id(
+        list_id, session, current_user
+    )
 
     # Only owner can remove members
     if shopping_list.owner_id != current_user.id:
@@ -494,6 +517,3 @@ async def remove_member_from_list(
     )
 
     return shopping_list
-
-
-

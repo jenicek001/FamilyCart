@@ -2,6 +2,7 @@
 AI-powered item processing service for shopping lists.
 Handles categorization, standardization, and icon suggestions.
 """
+
 import asyncio
 import logging
 from typing import Dict, Optional, Tuple
@@ -11,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.category import Category
 from app.services.ai_service import ai_service
+
 from ..helpers import shopping_list_helpers as helpers
 
 logger = logging.getLogger(__name__)
@@ -27,7 +29,7 @@ class ItemAIProcessor:
     ) -> Tuple[Optional[Category], Optional[str], Dict, Optional[str]]:
         """
         Process an item using AI to suggest category, standardize name, and suggest icon.
-        
+
         Returns:
             Tuple of (category, standardized_name, translations, icon_name)
         """
@@ -53,7 +55,9 @@ class ItemAIProcessor:
             # Wait for both with timeout (max 15 seconds total)
             try:
                 category_name, standardization_result = await asyncio.wait_for(
-                    asyncio.gather(category_task, translation_task, return_exceptions=True),
+                    asyncio.gather(
+                        category_task, translation_task, return_exceptions=True
+                    ),
                     timeout=15.0,
                 )
 
@@ -62,7 +66,9 @@ class ItemAIProcessor:
                     logger.error(f"Category suggestion failed: {category_name}")
                     category_name = None
                 elif category_name:
-                    category = await helpers.get_or_create_category(category_name, session)
+                    category = await helpers.get_or_create_category(
+                        category_name, session
+                    )
 
                 # Handle translation result
                 if isinstance(standardization_result, Exception):
@@ -88,7 +94,9 @@ class ItemAIProcessor:
                             timeout=10.0,
                         )
                     except asyncio.TimeoutError:
-                        logger.warning(f"Icon suggestion timed out for item '{item_name}'")
+                        logger.warning(
+                            f"Icon suggestion timed out for item '{item_name}'"
+                        )
                         icon_name = "shopping_cart"  # Default fallback
                     except Exception as e:
                         logger.error(f"Icon suggestion failed: {e}")
@@ -108,6 +116,8 @@ class ItemAIProcessor:
 
             # Fallback: use provided category if any
             if item_category_name:
-                category = await helpers.get_or_create_category(item_category_name, session)
+                category = await helpers.get_or_create_category(
+                    item_category_name, session
+                )
 
         return category, standardized_name, translations, icon_name
