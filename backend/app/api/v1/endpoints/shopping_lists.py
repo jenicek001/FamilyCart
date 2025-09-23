@@ -368,10 +368,6 @@ async def share_shopping_list(
     """
     Share a shopping list with another user by email.
     """
-    # Capture user data early to avoid async context issues
-    current_user_id = str(current_user.id)
-    current_user_email = current_user.email
-
     # Get shopping list with permission check
     shopping_list = await helpers.get_shopping_list_by_id(
         list_id, session, current_user
@@ -384,79 +380,9 @@ async def share_shopping_list(
             detail="Only owner can share the list",
         )
 
-    # Find the user to share with
-    result = await session.execute(select(User).where(User.email == share_data.email))
-    user_to_share_with = result.scalars().first()
-
-    if not user_to_share_with:
-        # User doesn't exist - send invitation email instead of error
-        logger.info(
-            f"Sending invitation email to non-existent user: {share_data.email}"
-        )
-        try:
-            # Prepare list data for notifications - manually create serializable data
-            list_data = {
-                "id": shopping_list.id,
-                "name": shopping_list.name,
-                "description": shopping_list.description,
-                "owner_id": str(shopping_list.owner_id),
-                "created_at": shopping_list.created_at.isoformat(),
-                "updated_at": shopping_list.updated_at.isoformat(),
-                "members": [],  # Empty for non-existent user
-            }
-
-            await services.SharingService.send_invitation_email(
-                to_email=share_data.email,
-                list_data=list_data,
-                inviter_email=current_user_email,
-            )
-            logger.info(f"Invitation email sent successfully to {share_data.email}")
-        except Exception:
-            logger.exception(f"Failed to send invitation email to {share_data.email}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to send invitation email. Please try again.",
-            )
-
-        # Return the shopping list without changes (user will be added when they register)
-        return await helpers.build_shopping_list_response(
-            shopping_list, session, current_user
-        )
-
-    # User exists - proceed with normal sharing
-    # Check if already shared
-    if user_to_share_with in shopping_list.shared_with:
-        return await helpers.build_shopping_list_response(
-            shopping_list, session, current_user
-        )  # Already shared, just return the list
-
-    # Add the user to shared_with
-    shopping_list.shared_with.append(user_to_share_with)
-    await session.commit()
-
-    # Refresh to get updated relationships
-    await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
-
-    # Update list data with new member - manually create serializable data
-    list_data = {
-        "id": shopping_list.id,
-        "name": shopping_list.name,
-        "description": shopping_list.description,
-        "owner_id": str(shopping_list.owner_id),
-        "created_at": shopping_list.created_at.isoformat(),
-        "updated_at": shopping_list.updated_at.isoformat(),
-        "members": [
-            {"email": u.email, "id": str(u.id)} for u in shopping_list.shared_with
-        ],
-    }
-
-    # Send notifications
-    await services.SharingService.notify_list_shared(
-        list_id=list_id,
-        list_data=list_data,
-        new_member_email=share_data.email,
-        current_user_id=current_user_id,
-        inviter_email=current_user_email,
+    # Use service to handle sharing logic
+    shopping_list = await services.SharingService.share_list_with_user(
+        shopping_list, share_data.email, current_user, session
     )
 
     return await helpers.build_shopping_list_response(
@@ -476,9 +402,6 @@ async def remove_member_from_list(
     Remove a member from a shared shopping list.
     Only the owner can remove members.
     """
-    # Capture user ID early to avoid async context issues
-    current_user_id = str(current_user.id)
-
     # Get shopping list with permission check
     shopping_list = await helpers.get_shopping_list_by_id(
         list_id, session, current_user
@@ -491,29 +414,9 @@ async def remove_member_from_list(
             detail="Only owner can remove members",
         )
 
-    # Find the user to remove
-    result = await session.execute(select(User).where(User.email == user_email))
-    user_to_remove = result.scalars().first()
-
-    if not user_to_remove:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with email {user_email} not found",
-        )
-
-    # Remove the user from shared_with if they're in the list
-    if user_to_remove in shopping_list.shared_with:
-        shopping_list.shared_with.remove(user_to_remove)
-        await session.commit()
-
-    # Refresh to get updated relationships
-    await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
-
-    # Send real-time notification
-    await services.SharingService.notify_member_removed(
-        list_id=list_id,
-        removed_user_id=str(user_to_remove.id),
-        current_user_id=current_user_id,
+    # Use service to handle member removal
+    shopping_list = await services.SharingService.remove_member_from_list(
+        shopping_list, user_email, current_user, session
     )
 
     return shopping_list

@@ -4,6 +4,7 @@ import asyncio
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -335,3 +336,38 @@ class SharingService:
             )
         except Exception:
             logger.exception("Failed to send invitation email")
+
+    @staticmethod
+    async def remove_member_from_list(
+        shopping_list: ShoppingList,
+        user_email: str,
+        current_user: User,
+        session: AsyncSession,
+    ) -> ShoppingList:
+        """Remove a member from a shared shopping list."""
+        # Find the user to remove
+        result = await session.execute(select(User).where(User.email == user_email))
+        user_to_remove = result.scalars().first()
+
+        if not user_to_remove:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with email {user_email} not found",
+            )
+
+        # Remove the user from shared_with if they're in the list
+        if user_to_remove in shopping_list.shared_with:
+            shopping_list.shared_with.remove(user_to_remove)
+            await session.commit()
+
+        # Refresh to get updated relationships
+        await session.refresh(shopping_list, attribute_names=["shared_with", "owner"])
+
+        # Send real-time notification
+        await SharingService.notify_member_removed(
+            list_id=shopping_list.id,
+            removed_user_id=str(user_to_remove.id),
+            current_user_id=str(current_user.id),
+        )
+
+        return shopping_list
