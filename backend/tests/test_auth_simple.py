@@ -1,7 +1,8 @@
-import requests
-import uuid
 import sys
 import time
+import uuid
+
+import requests
 
 # Configuration
 BASE_URL = "http://localhost:8000"

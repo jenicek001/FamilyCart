@@ -1,6 +1,7 @@
-from sqlalchemy import String, Boolean, Numeric
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
+
+from sqlalchemy import Boolean, Numeric, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.base import Base
 

@@ -2,18 +2,19 @@
 Tests for WebSocket real-time notifications functionality.
 """
 
-import pytest
 import asyncio
 import json
+from unittest.mock import AsyncMock, Mock, patch
+
+import jwt
+import pytest
 from fastapi.testclient import TestClient
 from fastapi.websockets import WebSocket
-from unittest.mock import Mock, AsyncMock, patch
-import jwt
 
-from app.services.websocket_service import websocket_service
 from app.api.v1.ws.notifications import ListConnectionManager, connection_manager
-from app.main import app
 from app.core.config import settings
+from app.main import app
+from app.services.websocket_service import websocket_service
 
 
 class TestWebSocketService:

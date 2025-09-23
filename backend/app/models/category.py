@@ -1,10 +1,11 @@
 import uuid
 from typing import TYPE_CHECKING, List
 
-from app.db.base import Base
-from sqlalchemy import String, Integer
+from sqlalchemy import Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.base import Base
 
 if TYPE_CHECKING:
     from .item import Item

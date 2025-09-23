@@ -2,8 +2,9 @@
 """
 Test AI categorization API directly
 """
-import requests
 import json
+
+import requests
 
 
 def test_ai_categorization():

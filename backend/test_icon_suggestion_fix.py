@@ -10,15 +10,15 @@ This script tests the icon suggestion functionality to ensure:
 """
 
 import asyncio
-import sys
-import os
 import logging
+import os
+import sys
 
 # Add the backend directory to the Python path
 sys.path.insert(0, os.path.abspath("."))
 
-from app.services.gemini_provider import GeminiProvider
 from app.core.config import settings
+from app.services.gemini_provider import GeminiProvider
 
 # Configure logging
 logging.basicConfig(

@@ -5,9 +5,10 @@ This simulates what happens when a user logs in through the frontend.
 """
 
 import asyncio
-import httpx
 import json
 import sys
+
+import httpx
 
 
 async def test_login_flow():

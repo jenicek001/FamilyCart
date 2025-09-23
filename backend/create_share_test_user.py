@@ -3,8 +3,9 @@
 Create a test user with a known password for testing
 """
 import asyncio
-import httpx
 import json
+
+import httpx
 
 
 async def create_test_user():

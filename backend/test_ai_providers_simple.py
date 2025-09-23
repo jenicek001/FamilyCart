@@ -7,9 +7,9 @@ they are working correctly and measure their basic performance.
 """
 
 import asyncio
-import time
-import sys
 import os
+import sys
+import time
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")

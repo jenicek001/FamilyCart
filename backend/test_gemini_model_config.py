@@ -2,8 +2,8 @@
 """
 Test script to verify the new Gemini 2.5 Flash Lite model configuration
 """
-import sys
 import os
+import sys
 
 # Add the app directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "app"))

@@ -3,19 +3,21 @@
 Direct test of the sharing serialization issue by calling the share function directly.
 """
 import asyncio
-import sys
 import os
+import sys
 
 # Add the backend directory to Python path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
-from app.db.session import get_session
-from app.models.user import User
-from app.models.shopping_list import ShoppingList
-from app.schemas.shopping_list import ShoppingListRead, ShareRequest
-from app.api.v1.endpoints.shopping_lists import share_shopping_list
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+
+from app.api.v1.endpoints.shopping_lists import share_shopping_list
+from app.db.session import get_session
+from app.models.shopping_list import ShoppingList
+from app.models.user import User
+from app.schemas.share import ShareRequest
+from app.schemas.shopping_list import ShoppingListRead
 
 
 async def test_share_serialization():

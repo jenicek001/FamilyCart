@@ -7,15 +7,15 @@ and verifying that the service automatically switches to Ollama.
 """
 
 import asyncio
-import sys
 import os
+import sys
 import time
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
-from app.services.fallback_ai_service import FallbackAIService
 from app.core.config import settings
+from app.services.fallback_ai_service import FallbackAIService
 
 
 async def test_fallback_functionality():

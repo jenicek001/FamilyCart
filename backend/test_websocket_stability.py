@@ -4,11 +4,12 @@ Quick test to verify WebSocket connection stability after fixing the reconnectio
 """
 
 import asyncio
-import websockets
 import json
 import time
-import jwt
 from datetime import datetime, timedelta
+
+import jwt
+import websockets
 
 # Test configuration (update these as needed)
 SECRET_KEY = "a_very_secret_key"  # Should match backend config

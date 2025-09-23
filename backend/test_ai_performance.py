@@ -4,10 +4,10 @@ Test the performance of adding new items (cache misses)
 This simulates the exact behavior when adding items via frontend
 """
 import asyncio
-import time
-import sys
 import random
 import string
+import sys
+import time
 
 # Add backend to path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")

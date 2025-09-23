@@ -1,7 +1,8 @@
 from typing import AsyncGenerator
 
-from app.core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from app.core.config import settings
 
 # This check is important to ensure that the database URI is set
 # before creating an engine.

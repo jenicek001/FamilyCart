@@ -4,19 +4,20 @@ This ensures that requests to "/api/v1/shopping-lists" (no trailing slash)
 work correctly without causing 307 redirects that might lose headers.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
 import logging
+from typing import List
 
-from app.models.user import User
-from app.core.fastapi_users import current_user
-from app.schemas.shopping_list import ShoppingListRead, ShoppingListCreate
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_session
 from app.api.v1.endpoints.shopping_lists import (
-    read_shopping_lists,
     create_shopping_list,
+    read_shopping_lists,
 )
+from app.core.fastapi_users import current_user
+from app.models.user import User
+from app.schemas.shopping_list import ShoppingListCreate, ShoppingListRead
 
 logger = logging.getLogger(__name__)
 

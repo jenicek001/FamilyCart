@@ -2,16 +2,10 @@
 """
 Debug script to test Czech language item categorization.
 """
-import os
-import sys
 import asyncio
 import logging
-from pathlib import Path
-
 import os
 import sys
-import asyncio
-import logging
 from pathlib import Path
 
 # Add the backend directory to sys.path so we can import our modules
@@ -52,6 +46,7 @@ sys.modules["app.crud.crud_category"] = type(
 )()
 
 import google.generativeai as genai
+
 from app.core.config import settings
 from app.services.ai_service import ai_service
 

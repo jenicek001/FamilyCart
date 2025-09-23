@@ -1,16 +1,18 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, Query, Depends
-from typing import Dict, List, Optional, Set
 import json
-import jwt
 import logging
-from datetime import datetime, UTC
+import uuid
+from datetime import UTC, datetime
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
+import jwt
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_session
 from app.core.config import settings
 from app.models import User
-from app.api.deps import get_session
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -29,13 +31,16 @@ class ListConnectionManager:
     """
     Enhanced WebSocket connection manager for shopping list real-time updates.
     Manages connections per shopping list (room-based) with JWT authentication.
+    Uses session IDs to enable same-user multi-device synchronization.
     """
 
     def __init__(self):
-        # Dictionary mapping list_id -> set of (websocket, user_id) tuples
+        # Dictionary mapping list_id -> set of (websocket, user_id, session_id) tuples
         self.list_connections: Dict[int, Set[tuple]] = {}
-        # Dictionary mapping websocket -> (user_id, list_id) for cleanup
+        # Dictionary mapping websocket -> (user_id, list_id, session_id) for cleanup
         self.websocket_registry: Dict[WebSocket, tuple] = {}
+        # Dictionary mapping session_id -> websocket for session-based exclusion
+        self.session_registry: Dict[str, WebSocket] = {}
 
     async def authenticate_user(
         self, token: str, session: AsyncSession
@@ -133,50 +138,77 @@ class ListConnectionManager:
         return result.scalars().first() is not None
 
     async def connect(self, websocket: WebSocket, user: User, list_id: int):
-        """Connect user to a specific shopping list room"""
+        """Connect user to a specific shopping list room with session tracking"""
         await websocket.accept()
+
+        # Generate unique session ID for this connection
+        session_id = str(uuid.uuid4())
 
         # Add to list connections
         if list_id not in self.list_connections:
             self.list_connections[list_id] = set()
 
-        connection_tuple = (websocket, user.id)
+        connection_tuple = (websocket, user.id, session_id)
         self.list_connections[list_id].add(connection_tuple)
 
         # Register websocket for cleanup
-        self.websocket_registry[websocket] = (user.id, list_id)
+        self.websocket_registry[websocket] = (user.id, list_id, session_id)
 
-        logger.info(f"User {user.nickname} connected to list {list_id}")
+        # Register session for session-based exclusion
+        self.session_registry[session_id] = websocket
 
-        # Send welcome message
+        logger.info(
+            f"User {user.nickname} connected to list {list_id} with session {session_id}"
+        )
+
+        # Send welcome message with session ID
         await self.send_to_websocket(
             websocket,
             {
                 "type": "connection_established",
                 "message": f"Connected to list {list_id}",
+                "session_id": session_id,
                 "timestamp": datetime.now(UTC).isoformat(),
             },
         )
 
     async def disconnect(self, websocket: WebSocket):
-        """Disconnect websocket and clean up"""
-        if websocket not in self.websocket_registry:
-            return
+        """Remove WebSocket connection from the manager"""
+        if websocket in self.websocket_registry:
+            registry_data = self.websocket_registry[websocket]
+            if len(registry_data) == 3:
+                user_id, list_id, session_id = registry_data
+            else:
+                # Handle legacy format if exists
+                user_id, list_id = registry_data
+                session_id = "unknown"
 
-        user_id, list_id = self.websocket_registry[websocket]
+            self.websocket_registry.pop(websocket)
 
-        # Remove from list connections
-        connection_tuple = (websocket, user_id)
-        if list_id in self.list_connections:
-            self.list_connections[list_id].discard(connection_tuple)
-            # Clean up empty list connection groups
-            if not self.list_connections[list_id]:
-                del self.list_connections[list_id]
+            # Remove from connections
+            if list_id in self.list_connections:
+                # Remove the tuple with this websocket
+                self.list_connections[list_id] = {
+                    conn
+                    for conn in self.list_connections[list_id]
+                    if conn[0] != websocket
+                }
 
-        # Remove from registry
-        del self.websocket_registry[websocket]
+                # Clean up empty sets
+                if not self.list_connections[list_id]:
+                    del self.list_connections[list_id]
 
-        logger.info(f"User {user_id} disconnected from list {list_id}")
+            # Remove from session registry (only if we have a valid session_id)
+            if session_id != "unknown" and session_id in self.session_registry:
+                del self.session_registry[session_id]
+
+            logger.info(
+                f"User {user_id} disconnected from list {list_id} (session {session_id})"
+            )
+        else:
+            logger.warning(
+                "Attempted to disconnect a websocket that was not in the registry"
+            )
 
     async def send_to_websocket(self, websocket: WebSocket, data: dict):
         """Send data to a specific websocket with proper UUID serialization"""
@@ -189,7 +221,12 @@ class ListConnectionManager:
             logger.debug(f"Failed data: {data}")
 
     async def broadcast_to_list(
-        self, list_id: int, data: dict, exclude_user_id: Optional[str] = None
+        self,
+        list_id: int,
+        data: dict,
+        exclude_user_id: Optional[str] = None,
+        exclude_websocket: Optional[WebSocket] = None,
+        exclude_session_id: Optional[str] = None,
     ):
         """Broadcast message to all users connected to a specific list"""
         if list_id not in self.list_connections:
@@ -197,15 +234,30 @@ class ListConnectionManager:
 
         disconnected_websockets = []
 
-        for websocket, user_id in list(self.list_connections[list_id]):
-            # Skip the user who triggered the update
-            if exclude_user_id and user_id == exclude_user_id:
+        for websocket, user_id, session_id in list(self.list_connections[list_id]):
+            # Skip the specific session that triggered the update (for same-user multi-device sync)
+            if exclude_session_id and session_id == exclude_session_id:
+                continue
+
+            # Skip the specific websocket connection that triggered the update
+            if exclude_websocket and websocket == exclude_websocket:
+                continue
+
+            # Legacy: Skip the user who triggered the update (deprecated - use exclude_session_id instead)
+            if (
+                exclude_user_id
+                and user_id == exclude_user_id
+                and exclude_session_id is None
+                and exclude_websocket is None
+            ):
                 continue
 
             try:
                 await self.send_to_websocket(websocket, data)
             except Exception as e:
-                logger.error(f"Error broadcasting to user {user_id}: {e}")
+                logger.error(
+                    f"Error broadcasting to user {user_id} (session {session_id}): {e}"
+                )
                 disconnected_websockets.append(websocket)
 
         # Clean up disconnected websockets
@@ -213,7 +265,14 @@ class ListConnectionManager:
             await self.disconnect(websocket)
 
     async def broadcast_item_change(
-        self, list_id: int, event_type: str, item_data: dict, user_id: str
+        self,
+        list_id: int,
+        event_type: str,
+        item_data: dict,
+        user_id: str,
+        exclude_websocket: Optional[WebSocket] = None,
+        exclude_session_id: Optional[str] = None,
+        exclude_user_id: Optional[str] = None,
     ):
         """Broadcast item changes to list members"""
         message = {
@@ -224,10 +283,23 @@ class ListConnectionManager:
             "timestamp": datetime.now(UTC).isoformat(),
             "user_id": user_id,
         }
-        await self.broadcast_to_list(list_id, message, exclude_user_id=user_id)
+        await self.broadcast_to_list(
+            list_id,
+            message,
+            exclude_websocket=exclude_websocket,
+            exclude_session_id=exclude_session_id,
+            exclude_user_id=exclude_user_id,
+        )
 
     async def broadcast_list_change(
-        self, list_id: int, event_type: str, list_data: dict, user_id: str
+        self,
+        list_id: int,
+        event_type: str,
+        list_data: dict,
+        user_id: str,
+        exclude_websocket: Optional[WebSocket] = None,
+        exclude_session_id: Optional[str] = None,
+        exclude_user_id: Optional[str] = None,
     ):
         """Broadcast list changes to list members"""
         message = {
@@ -238,7 +310,13 @@ class ListConnectionManager:
             "timestamp": datetime.now(UTC).isoformat(),
             "user_id": user_id,
         }
-        await self.broadcast_to_list(list_id, message, exclude_user_id=user_id)
+        await self.broadcast_to_list(
+            list_id,
+            message,
+            exclude_websocket=exclude_websocket,
+            exclude_session_id=exclude_session_id,
+            exclude_user_id=exclude_user_id,
+        )
 
 
 # Global connection manager instance
@@ -286,9 +364,12 @@ async def websocket_list_endpoint(
                 logger.warning(f"Invalid JSON from user {user.id}: {data}")
 
     except WebSocketDisconnect:
+        # Normal disconnection - no need to log as error
+        logger.info(f"User {user.id} disconnected from list {list_id}")
         await connection_manager.disconnect(websocket)
     except Exception as e:
         logger.error(f"WebSocket error for user {user.id}: {e}")
+        await connection_manager.disconnect(websocket)
         await connection_manager.disconnect(websocket)
 
 

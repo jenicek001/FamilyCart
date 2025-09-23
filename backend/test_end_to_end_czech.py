@@ -5,9 +5,10 @@ Tests the full flow: user registration -> login -> shopping list creation -> Cze
 """
 
 import asyncio
-import requests
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
+import requests
 
 # Configuration
 BASE_URL = "http://localhost:8000"

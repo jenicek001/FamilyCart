@@ -1,11 +1,12 @@
 import logging
-import pytest
 import uuid
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from unittest.mock import patch
 
-from app.models import ShoppingList, Item, Category
+import pytest
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Category, Item, ShoppingList
 
 
 @pytest.mark.asyncio

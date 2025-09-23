@@ -2,16 +2,20 @@
 Base configuration and fixtures for tests.
 """
 
-import pytest
 import asyncio
-from typing import Generator, AsyncGenerator
+from typing import AsyncGenerator, Generator
+
+import pytest
 from fastapi import FastAPI
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import get_session
 from app.core.config import settings
+from app.db.session import get_session
+from app.models.category import Category
+from app.models.shopping_list import ShoppingList
+from app.models.user import User
 
 # Create a test database engine
 # Replace the database name in the connection string
@@ -50,7 +54,8 @@ async def client(
 
     app.dependency_overrides[get_session] = get_test_db
 
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
 
     app.dependency_overrides.clear()
@@ -106,3 +111,38 @@ async def token_header(client: AsyncClient, test_user: dict) -> dict:
 
     data = response.json()
     return {"Authorization": f"Bearer {data['access_token']}"}
+
+
+# Helper functions for creating test objects
+def create_test_user(**kwargs) -> User:
+    """Create a test user with default values."""
+    defaults = {
+        "email": "test@example.com",
+        "hashed_password": "hashed_password",
+        "is_active": True,
+        "is_superuser": False,
+        "is_verified": True,
+        "nickname": "TestUser",
+    }
+    defaults.update(kwargs)
+    return User(**defaults)
+
+
+def create_test_category(**kwargs) -> Category:
+    """Create a test category with default values."""
+    defaults = {
+        "name": "Test Category",
+        "icon_name": "category-icon",
+    }
+    defaults.update(kwargs)
+    return Category(**defaults)
+
+
+def create_test_shopping_list(**kwargs) -> ShoppingList:
+    """Create a test shopping list with default values."""
+    defaults = {
+        "name": "Test Shopping List",
+        "is_completed": False,
+    }
+    defaults.update(kwargs)
+    return ShoppingList(**defaults)

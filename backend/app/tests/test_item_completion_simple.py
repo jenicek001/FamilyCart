@@ -2,12 +2,13 @@
 Simple test for item completion functionality - without complex fixture dependencies.
 """
 
-import pytest
 import uuid
+
+import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import ShoppingList, Item, Category
+from app.models import Category, Item, ShoppingList
 
 
 @pytest.mark.asyncio

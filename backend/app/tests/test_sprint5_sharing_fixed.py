@@ -1,15 +1,16 @@
+import asyncio
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, AsyncMock
-import asyncio
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_shopping_list
+from app.models.item import Item
 from app.models.shopping_list import ShoppingList
 from app.models.user import User
-from app.models.item import Item
 from app.schemas.share import ShareRequest
 from app.services.notification_service import send_list_invitation_email
 
@@ -170,14 +171,18 @@ class TestSharingEndpoints:
         await test_db.refresh(shopping_list)
 
         # Mock authentication and websocket/email services
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
-        ), patch(
-            "app.api.v1.endpoints.shopping_lists.websocket_service.notify_list_shared",
-            new_callable=AsyncMock,
-        ), patch(
-            "app.api.v1.endpoints.shopping_lists.send_list_invitation_email",
-            new_callable=AsyncMock,
+        with (
+            patch(
+                "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
+            ),
+            patch(
+                "app.api.v1.endpoints.shopping_lists.websocket_service.notify_list_shared",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "app.api.v1.endpoints.shopping_lists.send_list_invitation_email",
+                new_callable=AsyncMock,
+            ),
         ):
 
             response = await client.post(
@@ -348,23 +353,29 @@ class TestItemPermissions:
         await test_db.refresh(shopping_list)
 
         # Mock authentication and AI services
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
-        ), patch(
-            "app.api.v1.endpoints.shopping_lists.ai_service.suggest_category_async",
-            new_callable=AsyncMock,
-            return_value="Groceries",
-        ), patch(
-            "app.api.v1.endpoints.shopping_lists.ai_service.standardize_and_translate_item_name",
-            new_callable=AsyncMock,
-            return_value={"standardized_name": "Milk", "translations": {}},
-        ), patch(
-            "app.api.v1.endpoints.shopping_lists.ai_service.suggest_icon",
-            new_callable=AsyncMock,
-            return_value="milk",
-        ), patch(
-            "app.api.v1.endpoints.shopping_lists.websocket_service.notify_item_created",
-            new_callable=AsyncMock,
+        with (
+            patch(
+                "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
+            ),
+            patch(
+                "app.api.v1.endpoints.shopping_lists.ai_service.suggest_category_async",
+                new_callable=AsyncMock,
+                return_value="Groceries",
+            ),
+            patch(
+                "app.api.v1.endpoints.shopping_lists.ai_service.standardize_and_translate_item_name",
+                new_callable=AsyncMock,
+                return_value={"standardized_name": "Milk", "translations": {}},
+            ),
+            patch(
+                "app.api.v1.endpoints.shopping_lists.ai_service.suggest_icon",
+                new_callable=AsyncMock,
+                return_value="milk",
+            ),
+            patch(
+                "app.api.v1.endpoints.shopping_lists.websocket_service.notify_item_created",
+                new_callable=AsyncMock,
+            ),
         ):
 
             response = await client.post(

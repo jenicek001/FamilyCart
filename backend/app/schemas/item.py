@@ -1,7 +1,8 @@
 import uuid
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Union
 from datetime import datetime
+from typing import Optional, Union
+
+from pydantic import BaseModel, Field, field_validator
 
 
 # A simple schema for Category to be used in ItemRead

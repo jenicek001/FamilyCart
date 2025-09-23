@@ -3,10 +3,10 @@
 Direct Gemini API benchmark test using curl
 Tests different models and prompts to identify the fastest configuration
 """
-import subprocess
 import json
-import time
 import os
+import subprocess
+import time
 
 
 def test_gemini_api_direct():

@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-import apiClient from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 
@@ -40,7 +39,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUser = async () => {
     try {
-      const { data } = await apiClient.get('/api/v1/users/me');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token available');
+      }
+
+      const response = await fetch('/api/v1/users/me/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
       // Add full_name derived from first_name and last_name
       const userData = {
         ...data,
@@ -52,8 +69,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       console.error('Failed to fetch user', error);
       
-      // Handle token expiration specifically
-      if (error.response?.status === 401) {
+      // Handle token expiration specifically  
+      if (error.message?.includes('401') || error.message?.includes('status: 401')) {
         console.warn('User fetch failed with 401 - token likely expired');
         logout(); // This will clear token and redirect
       } else {

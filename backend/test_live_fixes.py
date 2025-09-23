@@ -7,9 +7,10 @@ This script will add items that trigger AI categorization and monitor for issues
 import asyncio
 import json
 import logging
-import requests
 import time
-from typing import Dict, Any
+from typing import Any, Dict
+
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

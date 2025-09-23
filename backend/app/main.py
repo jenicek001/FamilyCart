@@ -1,21 +1,23 @@
+import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from app.api.v1.endpoints import auth as auth_v1_router
-from app.api.v1.endpoints import users as users_v1_router
-from app.api.v1.endpoints import shopping_lists as sl_v1_router
-from app.api.v1.endpoints import (
-    shopping_lists_no_slash as sl_noslash_v1_router,
-)  # No trailing slash router
-from app.api.v1.endpoints import items as items_v1_router
-from app.api.v1.endpoints import ai as ai_v1_router  # Import the new AI router
-from app.api.v1.ws import notifications as ws_v1_router  # WebSocket router
-from app.core.config import settings
-from app.core.cache import cache_service
-from app.api.middleware import LoggingMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from app.api.auth_logging import AuthLoggingMiddleware
 from app.api.cors import setup_cors_middleware  # Import CORS setup
-from prometheus_fastapi_instrumentator import Instrumentator
-import logging
+from app.api.middleware import LoggingMiddleware
+from app.api.v1.endpoints import ai as ai_v1_router  # Import the new AI router
+from app.api.v1.endpoints import auth as auth_v1_router
+from app.api.v1.endpoints import items as items_v1_router
+from app.api.v1.endpoints import shopping_lists as sl_v1_router
+from app.api.v1.endpoints import (
+    shopping_lists_no_slash as sl_noslash_v1_router,  # No trailing slash router
+)
+from app.api.v1.endpoints import users as users_v1_router
+from app.api.v1.ws import notifications as ws_v1_router  # WebSocket router
+from app.core.cache import cache_service
+from app.core.config import settings
 
 # Configure detailed logging
 logging.basicConfig(level=logging.INFO)
@@ -32,8 +34,8 @@ async def lifespan(app: FastAPI):
     await cache_service.setup()
 
     # Initialize WebSocket service with connection manager
-    from app.services.websocket_service import websocket_service
     from app.api.v1.ws.notifications import connection_manager
+    from app.services.websocket_service import websocket_service
 
     websocket_service.set_connection_manager(connection_manager)
 
@@ -103,8 +105,8 @@ async def health_check():
     Health check endpoint for monitoring and load balancers.
     Returns 200 OK with service status information.
     """
-    from datetime import datetime
     import os
+    from datetime import datetime
 
     try:
         # Check cache service connection

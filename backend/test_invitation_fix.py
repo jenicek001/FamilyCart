@@ -3,8 +3,9 @@
 Test script to verify the invitation email functionality for non-existent users.
 """
 import asyncio
-import httpx
 import json
+
+import httpx
 
 # Test configuration
 BASE_URL = "http://localhost:8000"

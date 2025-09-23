@@ -2,10 +2,10 @@
 """
 Quick test for a single Czech item to verify the fix.
 """
-import os
-import sys
 import asyncio
 import logging
+import os
+import sys
 from pathlib import Path
 
 # Add the backend directory to sys.path

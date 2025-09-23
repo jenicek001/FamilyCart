@@ -3,21 +3,22 @@
 Test script to verify that the share endpoint works correctly with serialization fix.
 """
 import asyncio
-import sys
 import os
+import sys
 
 # Add the backend directory to Python path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
-from app.core.config import settings
-from app.db.session import get_session
-from app.models.user import User
-from app.models.shopping_list import ShoppingList
-from app.models.item import Item
-from app.schemas.shopping_list import ShoppingListRead
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+from app.core.config import settings
+from app.db.session import get_session
+from app.models.item import Item
+from app.models.shopping_list import ShoppingList
+from app.models.user import User
+from app.schemas.shopping_list import ShoppingListRead
 
 
 async def test_serialization():

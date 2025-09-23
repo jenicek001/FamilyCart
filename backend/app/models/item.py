@@ -1,15 +1,16 @@
-from sqlalchemy import String, ForeignKey, Boolean, Integer, Text, DateTime, Numeric
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, relationship, mapped_column
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.base import Base
 from ..utils.timezone import utc_now
-from .shopping_list import ShoppingList
-from .user import User
 from .category import Category
+from .shopping_list import ShoppingList
 from .unit import Unit
+from .user import User
 
 
 class Item(Base):

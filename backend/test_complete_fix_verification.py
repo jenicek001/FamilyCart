@@ -8,9 +8,10 @@ Tests:
 """
 
 import asyncio
-import aiohttp
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
+import aiohttp
 
 # Test configuration
 BASE_URL = "http://localhost:8000/api/v1"

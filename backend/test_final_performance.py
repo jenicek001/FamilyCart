@@ -4,9 +4,9 @@ Final performance test to verify the optimizations
 Tests the actual API endpoint like the frontend would
 """
 import asyncio
-import time
 import json
 import random
+import time
 
 
 async def test_real_api_performance():

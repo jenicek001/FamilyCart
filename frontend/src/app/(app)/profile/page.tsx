@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ShoppingList } from '@/types';
-import apiClient from '@/lib/api';
+import { useApiClient } from '@/hooks/use-api-client';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { Loader2, Save, UserCircle, Mail, LogOut, Trash2, User } from 'lucide-re
 
 export default function ProfilePage() {
   const { user, token, loading, logout, fetchUser } = useAuth();
+  const { apiClient } = useApiClient();
   const [ownedLists, setOwnedLists] = useState<ShoppingList[]>([]);
   const [sharedLists, setSharedLists] = useState<ShoppingList[]>([]);
   
@@ -46,9 +47,9 @@ export default function ProfilePage() {
       // For debugging
       console.log("Using auth token:", token);
       
-      const { data } = await apiClient.get<ShoppingList[]>('/api/v1/shopping-lists');
-      const owned = data.filter(list => list.owner_id === user.id);
-      const shared = data.filter(list => list.owner_id !== user.id);
+      const data = await apiClient('/api/v1/shopping-lists/', { method: 'GET' });
+      const owned = data.filter((list: ShoppingList) => list.owner_id === user.id);
+      const shared = data.filter((list: ShoppingList) => list.owner_id !== user.id);
       setOwnedLists(owned);
       setSharedLists(shared);
     } catch (error) {
@@ -95,7 +96,10 @@ export default function ProfilePage() {
     }
 
     try {
-      await apiClient.put('/api/v1/users/me', updatedData);
+      await apiClient('/api/v1/users/me/', {
+        method: 'PUT',
+        body: JSON.stringify(updatedData)
+      });
       toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
       if (fetchUser) {
         await fetchUser();
@@ -117,7 +121,7 @@ export default function ProfilePage() {
     if (!window.confirm("Are you sure you want to delete your account? This action is irreversible.")) return;
     
     try {
-      await apiClient.delete('/api/v1/users/me');
+      await apiClient('/api/v1/users/me/', { method: 'DELETE' });
       toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
       logout();
     } catch (error) {

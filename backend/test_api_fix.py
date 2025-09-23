@@ -3,8 +3,8 @@
 Test the quantity update fix with a mock API call
 """
 import asyncio
-import sys
 import os
+import sys
 
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 

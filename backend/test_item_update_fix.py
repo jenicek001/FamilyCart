@@ -3,16 +3,17 @@
 Test script to verify the item update functionality is working after the async session fix
 """
 import asyncio
-import sys
 import os
+import sys
 
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.session import AsyncSessionLocal
-from app.services.ai_service import AIService
 from app.models.category import Category
+from app.services.ai_service import AIService
 
 
 async def test_ai_service_async():

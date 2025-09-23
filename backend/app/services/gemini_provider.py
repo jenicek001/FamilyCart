@@ -5,17 +5,18 @@ This module implements the AIProvider interface using Google's Gemini model
 for AI-powered features in FamilyCart.
 """
 
-import logging
 import json
-from typing import Dict, Any, List
-import google.generativeai as genai
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+import logging
+from typing import Any, Dict, List
 
+import google.generativeai as genai
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
+from app.core.cache import cache_service
 from app.core.config import settings
 from app.models.category import Category
-from app.core.cache import cache_service
 from app.services.ai_provider import AIProvider
 
 # Configure logging

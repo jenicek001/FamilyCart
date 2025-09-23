@@ -3,6 +3,7 @@
 Debug script to check Redis configuration loading
 """
 import os
+
 from app.core.config import settings
 
 print("=== Debug Redis Configuration ===")

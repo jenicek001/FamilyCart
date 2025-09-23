@@ -4,15 +4,15 @@ Final validation test for the complete LLM optimization
 Tests both direct API and backend service performance
 """
 import asyncio
-import time
-import sys
 import random
+import sys
+import time
 
 # Add backend to path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
-from app.services.ai_service import ai_service
 from app.core.cache import cache_service
+from app.services.ai_service import ai_service
 
 
 async def test_optimized_performance():

@@ -6,11 +6,12 @@ This script tests the fallback functionality by making API calls and simulating
 rate limit scenarios to verify automatic switching to Ollama.
 """
 
-import requests
 import json
-import time
-import sys
 import os
+import sys
+import time
+
+import requests
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")

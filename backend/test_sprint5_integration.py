@@ -5,15 +5,16 @@ Tests the actual API endpoints for sharing functionality.
 """
 
 import asyncio
-import httpx
 import json
+
+import httpx
 
 
 async def test_sprint5_sharing_integration():
     """Test Sprint 5 sharing functionality with real API calls."""
 
-    import time
     import random
+    import time
 
     # Generate unique identifiers to avoid conflicts with existing users
     timestamp = int(time.time())

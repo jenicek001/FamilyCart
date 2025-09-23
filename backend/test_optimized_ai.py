@@ -4,16 +4,17 @@ Test optimized AI service with gemini-1.5-flash
 This should dramatically improve performance from 5-10s to <1s
 """
 import asyncio
-import time
-import sys
 import random
+import sys
+import time
 
 # Add backend to path
 sys.path.insert(0, "/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
 import google.generativeai as genai
-from app.core.config import settings
+
 from app.core.cache import cache_service
+from app.core.config import settings
 
 
 class OptimizedAIService:

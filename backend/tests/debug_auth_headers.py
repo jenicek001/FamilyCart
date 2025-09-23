@@ -1,6 +1,7 @@
-import requests
-import uuid
 import json
+import uuid
+
+import requests
 
 # Configuration
 BASE_URL = "http://localhost:8000"

@@ -18,17 +18,27 @@ Requirements:
     - Test items list for consistent benchmarking
 """
 
+import argparse
 import asyncio
 import json
-import time
-import statistics
-import argparse
-from typing import List, Dict, Any, Tuple
-from dataclasses import dataclass, asdict
 import os
+import statistics
 import sys
-import httpx
+import time
+from dataclasses import asdict
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
+
+import httpx
+
+from benchmark_config import (
+    DEFAULT_CONFIG,
+    TEST_ITEMS,
+    TEST_PROMPTS,
+    BenchmarkResult,
+    ProviderStats,
+    print_benchmark_results,
+)
 
 # Add the backend app directory to Python path
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
@@ -39,34 +49,6 @@ from app.services.gemini_provider import GeminiProvider
 from app.services.ollama_provider import OllamaProvider
 
 
-@dataclass
-class BenchmarkResult:
-    """Container for benchmark results of a single operation."""
-
-    provider: str
-    operation: str
-    item_name: str
-    response_time: float  # in seconds
-    success: bool
-    response: str
-    error: str = ""
-
-
-@dataclass
-class ProviderStats:
-    """Statistics for a provider across all operations."""
-
-    provider: str
-    total_operations: int
-    successful_operations: int
-    failed_operations: int
-    avg_response_time: float
-    min_response_time: float
-    max_response_time: float
-    median_response_time: float
-    success_rate: float
-
-
 class AIProviderBenchmark:
     """Benchmark runner for AI providers."""
 
@@ -75,24 +57,8 @@ class AIProviderBenchmark:
         self.timeout = timeout
         self.results: List[BenchmarkResult] = []
 
-        # Test items covering different categories
-        self.test_items = [
-            "organic apples",
-            "whole milk",
-            "chicken breast",
-            "sourdough bread",
-            "frozen pizza",
-            "olive oil",
-            "orange juice",
-            "shampoo",
-            "paper towels",
-            "greek yogurt",
-            "salmon fillet",
-            "avocados",
-            "ice cream",
-            "pasta sauce",
-            "toilet paper",
-        ]
+        # Use test items from config
+        self.test_items = TEST_ITEMS
 
         # Initialize providers
         self.gemini_provider = None
@@ -241,7 +207,7 @@ class AIProviderBenchmark:
         """Benchmark general text generation."""
         start_time = time.time()
         try:
-            prompt = f"Describe the shopping item '{item_name}' in one sentence."
+            prompt = TEST_PROMPTS["text_generation"].format(item_name=item_name)
             result = await provider.generate_text(prompt)
             end_time = time.time()
 
@@ -350,128 +316,21 @@ class AIProviderBenchmark:
         ollama_results: List[BenchmarkResult],
     ):
         """Print comprehensive benchmark results."""
-        print("\n" + "=" * 80)
-        print("🎯 AI PROVIDER BENCHMARK RESULTS")
-        print("=" * 80)
+        gemini_stats = (
+            self.calculate_stats(gemini_results, "Gemini") if gemini_results else None
+        )
+        ollama_stats = (
+            self.calculate_stats(ollama_results, "Ollama") if ollama_results else None
+        )
 
-        # Calculate stats for each provider
-        if gemini_results:
-            gemini_stats = self.calculate_stats(gemini_results, "Gemini")
-            print(f"\n📊 GEMINI STATISTICS:")
-            print(f"   Model: {settings.GEMINI_MODEL_NAME}")
-            print(f"   Total Operations: {gemini_stats.total_operations}")
-            print(f"   Success Rate: {gemini_stats.success_rate:.1f}%")
-            print(f"   Avg Response Time: {gemini_stats.avg_response_time:.3f}s")
-            print(f"   Min Response Time: {gemini_stats.min_response_time:.3f}s")
-            print(f"   Max Response Time: {gemini_stats.max_response_time:.3f}s")
-            print(f"   Median Response Time: {gemini_stats.median_response_time:.3f}s")
-
-        if ollama_results:
-            ollama_stats = self.calculate_stats(ollama_results, "Ollama")
-            print(f"\n📊 OLLAMA STATISTICS:")
-            print(f"   Model: {settings.OLLAMA_MODEL_NAME}")
-            print(f"   Server: {settings.OLLAMA_BASE_URL}")
-            print(f"   Total Operations: {ollama_stats.total_operations}")
-            print(f"   Success Rate: {ollama_stats.success_rate:.1f}%")
-            print(f"   Avg Response Time: {ollama_stats.avg_response_time:.3f}s")
-            print(f"   Min Response Time: {ollama_stats.min_response_time:.3f}s")
-            print(f"   Max Response Time: {ollama_stats.max_response_time:.3f}s")
-            print(f"   Median Response Time: {ollama_stats.median_response_time:.3f}s")
-
-        # Comparison
-        if gemini_results and ollama_results:
-            print(f"\n⚡ PERFORMANCE COMPARISON:")
-            if (
-                gemini_stats.avg_response_time > 0
-                and ollama_stats.avg_response_time > 0
-            ):
-                speed_ratio = (
-                    gemini_stats.avg_response_time / ollama_stats.avg_response_time
-                )
-                if speed_ratio > 1:
-                    print(f"   Ollama is {speed_ratio:.1f}x faster than Gemini")
-                else:
-                    print(f"   Gemini is {1/speed_ratio:.1f}x faster than Ollama")
-
-            print(f"   Gemini Success Rate: {gemini_stats.success_rate:.1f}%")
-            print(f"   Ollama Success Rate: {ollama_stats.success_rate:.1f}%")
-
-        # Operation breakdown
-        print(f"\n📋 OPERATION BREAKDOWN:")
-        all_results = (gemini_results or []) + (ollama_results or [])
-        operations = set(r.operation for r in all_results)
-
-        for operation in sorted(operations):
-            print(f"\n   {operation.upper()}:")
-
-            if gemini_results:
-                gemini_op = [
-                    r for r in gemini_results if r.operation == operation and r.success
-                ]
-                if gemini_op:
-                    avg_time = statistics.mean([r.response_time for r in gemini_op])
-                    success_rate = (
-                        len(gemini_op)
-                        / len([r for r in gemini_results if r.operation == operation])
-                        * 100
-                    )
-                    print(
-                        f"     Gemini: {avg_time:.3f}s avg, {success_rate:.1f}% success"
-                    )
-                else:
-                    print(f"     Gemini: No successful operations")
-
-            if ollama_results:
-                ollama_op = [
-                    r for r in ollama_results if r.operation == operation and r.success
-                ]
-                if ollama_op:
-                    avg_time = statistics.mean([r.response_time for r in ollama_op])
-                    success_rate = (
-                        len(ollama_op)
-                        / len([r for r in ollama_results if r.operation == operation])
-                        * 100
-                    )
-                    print(
-                        f"     Ollama: {avg_time:.3f}s avg, {success_rate:.1f}% success"
-                    )
-                else:
-                    print(f"     Ollama: No successful operations")
-
-        # Sample responses
-        print(f"\n📝 SAMPLE RESPONSES:")
-        sample_item = self.test_items[0]  # "organic apples"
-
-        for operation in ["categorization", "icon_suggestion", "text_generation"]:
-            print(f"\n   {operation.upper()} for '{sample_item}':")
-
-            if gemini_results:
-                gemini_sample = next(
-                    (
-                        r
-                        for r in gemini_results
-                        if r.operation == operation
-                        and r.item_name == sample_item
-                        and r.success
-                    ),
-                    None,
-                )
-                if gemini_sample:
-                    print(f"     Gemini: {gemini_sample.response[:100]}...")
-
-            if ollama_results:
-                ollama_sample = next(
-                    (
-                        r
-                        for r in ollama_results
-                        if r.operation == operation
-                        and r.item_name == sample_item
-                        and r.success
-                    ),
-                    None,
-                )
-                if ollama_sample:
-                    print(f"     Ollama: {ollama_sample.response[:100]}...")
+        print_benchmark_results(
+            gemini_results,
+            ollama_results,
+            gemini_stats,
+            ollama_stats,
+            self.test_items,
+            settings,
+        )
 
     def save_detailed_results(
         self,

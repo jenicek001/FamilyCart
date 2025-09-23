@@ -1,7 +1,8 @@
-import requests
 import json
-from urllib.parse import urljoin
 import sys
+from urllib.parse import urljoin
+
+import requests
 
 
 def print_header(text):

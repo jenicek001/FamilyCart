@@ -3,8 +3,9 @@
 Simple test to check AI categorization issue
 """
 import asyncio
-import google.generativeai as genai
 import os
+
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load environment variables

@@ -4,8 +4,9 @@ Debug Sprint 5 Share Endpoint
 """
 
 import asyncio
-import httpx
 import json
+
+import httpx
 
 
 async def debug_share_endpoint():

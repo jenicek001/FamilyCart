@@ -3,8 +3,9 @@
 Test the item permission fix for shared shopping lists.
 Verify that shared users can now update, view, and delete items.
 """
-import requests
 import json
+
+import requests
 
 
 def test_shared_user_item_permissions():

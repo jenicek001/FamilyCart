@@ -5,9 +5,10 @@ Tests the exact prompts used in our backend to identify performance bottlenecks
 """
 
 import json
-import time
-import requests
 import os
+import time
+
+import requests
 
 # Configuration
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")

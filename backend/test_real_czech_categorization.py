@@ -9,9 +9,9 @@ from pathlib import Path
 # Add the backend directory to sys.path
 sys.path.insert(0, str(Path(__file__).parent / "app"))
 
-from app.services.ai_service import ai_service
-from app.crud.crud_category import category as crud_category
 from app.api.deps import get_session
+from app.crud.crud_category import category as crud_category
+from app.services.ai_service import ai_service
 
 
 async def test_new_czech_item_categorization():

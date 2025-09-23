@@ -3,16 +3,17 @@ Integration test for real-time WebSocket functionality.
 Tests the complete flow from API calls to WebSocket notifications.
 """
 
-import pytest
 import asyncio
 import json
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, AsyncMock, patch
 from httpx import AsyncClient
 
+from app.api.v1.ws.notifications import connection_manager
 from app.main import app
 from app.services.websocket_service import websocket_service
-from app.api.v1.ws.notifications import connection_manager
 
 
 class TestRealtimeIntegration:

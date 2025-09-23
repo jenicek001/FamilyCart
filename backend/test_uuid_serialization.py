@@ -3,15 +3,16 @@
 Test script to verify UUID serialization fixes.
 """
 
-import sys
-import os
 import json
+import os
+import sys
 
 sys.path.append("/home/honzik/GitHub/FamilyCart/FamilyCart/backend")
 
 try:
     import uuid
     from datetime import datetime
+
     from app.schemas.item import ItemRead, UserBasic
 
     print("🔧 Testing UUID Serialization Fix")

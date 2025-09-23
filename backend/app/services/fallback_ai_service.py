@@ -5,16 +5,17 @@ This module provides a fallback AI service that automatically switches to Ollama
 when Gemini rate limits are reached, ensuring continuous AI functionality.
 """
 
-import logging
 import asyncio
-from typing import Dict, Any, List, Optional
+import logging
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cache import cache_service
 from app.core.config import settings
 from app.services.ai_factory import get_ai_provider
 from app.services.gemini_provider import GeminiProvider
 from app.services.ollama_provider import OllamaProvider
-from app.core.cache import cache_service
 
 # Configure logging
 logger = logging.getLogger(__name__)

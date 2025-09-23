@@ -10,10 +10,11 @@ This script:
 
 import asyncio
 import json
-import websockets
-import requests
 import os
-from typing import Dict, Any
+from typing import Any, Dict
+
+import requests
+import websockets
 
 # Configuration
 API_BASE_URL = "http://localhost:8000"

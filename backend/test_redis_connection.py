@@ -3,6 +3,7 @@
 Test Redis connection with the exact same setup as the backend
 """
 import asyncio
+
 from app.core.config import settings
 
 
