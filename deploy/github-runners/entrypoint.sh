@@ -147,13 +147,21 @@ shutdown_runner() {
 
 # Health check function
 health_check() {
+    # Check if runner process is running
     if pgrep -f "Runner.Listener" > /dev/null; then
         log "Health check: Runner is healthy"
         return 0
-    else
-        error "Health check: Runner is not running"
-        return 1
     fi
+    
+    # If runner isn't running, check if it's still starting up
+    if pgrep -f "entrypoint.sh" > /dev/null; then
+        log "Health check: Runner is starting up"
+        return 0
+    fi
+    
+    # Runner is not running and not starting up
+    warn "Health check: Runner is not running"
+    return 1
 }
 
 # Display system information
