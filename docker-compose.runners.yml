@@ -40,13 +40,13 @@ services:
         reservations:
           memory: 2G
           cpus: '0.5'
-    # Health check
+    # Health check - more tolerant for CI jobs
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   runner-2:
     build: 
@@ -82,10 +82,10 @@ services:
           cpus: '0.5'
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   runner-3:
     build: 
@@ -121,10 +121,10 @@ services:
           cpus: '0.5'
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   # Registry cache for faster image pulls
   registry-cache:

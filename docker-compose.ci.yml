@@ -2,16 +2,14 @@
 # This file provides PostgreSQL and Redis services for CI/CD pipelines
 # when GitHub Actions service containers are not available on self-hosted runners
 
-version: '3.8'
-
 services:
   postgres-ci:
     image: postgres:15
     container_name: postgres-ci-familycart
     environment:
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
-      POSTGRES_DB: test_familycart
+      POSTGRES_USER: ${CI_POSTGRES_USER:-test_user}
+      POSTGRES_PASSWORD: ${CI_POSTGRES_PASSWORD:-test_password}
+      POSTGRES_DB: ${CI_POSTGRES_DB:-test_familycart}
       POSTGRES_HOST_AUTH_METHOD: trust
       # Performance optimizations for testing
       POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"

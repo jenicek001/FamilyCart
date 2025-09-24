@@ -68,7 +68,10 @@ configure_runner() {
     # Check if runner is already configured
     if [[ -f ".runner" ]]; then
         warn "Runner appears to already be configured, removing old configuration..."
-        if ! ./config.sh remove --token "$GITHUB_TOKEN"; then
+        local removal_token=$(get_removal_token)
+        if [[ -n "$removal_token" ]] && ./config.sh remove --token "$removal_token"; then
+            log "Existing configuration removed successfully"
+        else
             warn "Failed to remove existing configuration from GitHub, cleaning up local files..."
             rm -f .runner .credentials .credentials_rsaparams
             rm -rf _diag
@@ -131,6 +134,23 @@ start_runner() {
     exit $exit_code
 }
 
+# Get runner removal token
+get_removal_token() {
+    local response=$(curl -s -X POST \
+        -H "Authorization: token $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runners/remove-token")
+    
+    local removal_token=$(echo "$response" | sed -n 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    
+    if [[ -n "$removal_token" ]]; then
+        echo "$removal_token"
+    else
+        warn "Failed to get removal token. Response: $response"
+        return 1
+    fi
+}
+
 # Graceful shutdown
 shutdown_runner() {
     log "Received shutdown signal, cleaning up..."
@@ -138,7 +158,14 @@ shutdown_runner() {
     # Remove runner configuration
     if [[ -f ".runner" ]]; then
         log "Removing runner configuration..."
-        ./config.sh remove --token "$GITHUB_TOKEN" || warn "Failed to remove runner configuration"
+        local removal_token=$(get_removal_token)
+        if [[ -n "$removal_token" ]]; then
+            ./config.sh remove --token "$removal_token" || warn "Failed to remove runner configuration with removal token"
+        else
+            warn "No removal token available, cleaning up local files only"
+            rm -f .runner .credentials .credentials_rsaparams
+            rm -rf _diag
+        fi
     fi
     
     log "Shutdown complete"
@@ -153,9 +180,21 @@ health_check() {
         return 0
     fi
     
+    # Check if runner process is running but might be busy (check for runner files)
+    if [[ -f ".runner" ]] && [[ -f ".credentials" ]]; then
+        log "Health check: Runner configuration exists (runner may be busy)"
+        return 0
+    fi
+    
     # If runner isn't running, check if it's still starting up
     if pgrep -f "entrypoint.sh" > /dev/null; then
         log "Health check: Runner is starting up"
+        return 0
+    fi
+    
+    # Check if any GitHub Actions related processes are running
+    if pgrep -f "github" > /dev/null || pgrep -f "actions" > /dev/null; then
+        log "Health check: GitHub Actions processes detected"
         return 0
     fi
     

@@ -261,12 +261,12 @@ jobs:
         env:
           # Test database configuration - PostgreSQL for production parity
           POSTGRES_SERVER: localhost
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_familycart
+          POSTGRES_USER: ${{ secrets.CI_POSTGRES_USER || 'test_user' }}
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD || 'test_password' }}
+          POSTGRES_DB: ${{ secrets.CI_POSTGRES_DB || 'test_familycart' }}
           POSTGRES_PORT: 5432
           # App configuration for tests
-          SECRET_KEY: test-secret-key-for-ci
+          SECRET_KEY: ${{ secrets.CI_SECRET_KEY || 'test-secret-key-for-ci-default' }}
           ALGORITHM: "HS256"
           ACCESS_TOKEN_EXPIRE_MINUTES: "30"
           REDIS_URI: "redis://localhost:6379"
