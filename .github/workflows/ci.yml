@@ -43,14 +43,50 @@ jobs:
           echo "📊 Initial system resources:"
           free -h | grep -E '(Mem|Swap)'
           df -h / | tail -1
+          echo "Available memory: $(free -m | awk '/^Mem:/{print $7}')"
+          echo "Available disk: $(df -h / | awk 'NR==2{print $4}')"
+          
           echo "🔧 Docker system info:"
           docker system df || true
-          echo "🧹 Cleaning up Docker resources..."
-          docker system prune -f --volumes || true
+          
+          echo "🧹 Aggressive Docker cleanup to prevent resource exhaustion..."
+          # Stop any running containers that might consume resources
+          docker ps -q | xargs -r docker stop || true
+          docker container prune -f || true
+          docker image prune -af || true 
+          docker volume prune -f || true
+          docker network prune -f || true
+          docker system prune -af --volumes || true
+          
+          echo "🛡️ Setting resource limits in environment"
+          # Limit Docker memory usage to prevent OOM kills
+          echo "DOCKER_MEMORY_LIMIT=2g" >> $GITHUB_ENV
+          echo "COMPOSE_PARALLEL_LIMIT=1" >> $GITHUB_ENV
 
       - name: Start database services with Docker Compose
         run: |
           echo "🐳 Starting PostgreSQL and Redis services for testing..."
+          
+          # Function to check if system has enough resources
+          check_resources() {
+            local available_mem=$(free -m | awk '/^Mem:/{print $7}')
+            local available_disk_pct=$(df / | awk 'NR==2{gsub("%",""); print $5}')
+            
+            echo "Available memory: ${available_mem}MB, Used disk: ${available_disk_pct}%"
+            
+            if [ "$available_mem" -lt 500 ]; then
+              echo "❌ CRITICAL: Less than 500MB RAM available. Stopping to prevent runner crash."
+              exit 1
+            fi
+            
+            if [ "$available_disk_pct" -gt 90 ]; then
+              echo "❌ CRITICAL: Disk usage over 90%. Stopping to prevent runner crash."
+              exit 1
+            fi
+          }
+          
+          # Check resources before starting
+          check_resources
           
           # Check if Docker is accessible - use sudo for containerized runners
           if command -v sudo docker &> /dev/null; then
@@ -64,13 +100,29 @@ jobs:
             exit 1
           fi
           
-          # Start database services
-          echo "� Starting test database services with Docker Compose..."
-          $COMPOSE_CMD -f docker-compose.ci.yml down --remove-orphans || true
-          $COMPOSE_CMD -f docker-compose.ci.yml up -d
+          # Start database services with aggressive resource management
+          echo "📦 Starting test database services with Docker Compose..."
+          timeout 60 $COMPOSE_CMD -f docker-compose.ci.yml down --remove-orphans || true
+          timeout 120 $COMPOSE_CMD -f docker-compose.ci.yml up -d
           
-          echo "⏳ Waiting for services to be ready..."
-          sleep 30
+          echo "⏳ Waiting for services with resource monitoring..."
+          
+          # Monitor resources while waiting for services
+          for i in {1..30}; do
+            sleep 1
+            
+            # Check resources every 5 seconds
+            if [ $((i % 5)) -eq 0 ]; then
+              check_resources
+            fi
+            
+            # Early exit if services are ready
+            if timeout 3 $DOCKER_CMD exec postgres-ci-familycart pg_isready -U test_user -d test_familycart 2>/dev/null && \
+               timeout 3 $DOCKER_CMD exec redis-ci-familycart redis-cli ping 2>/dev/null | grep -q PONG; then
+              echo "✅ Services ready in ${i} seconds"
+              break
+            fi
+          done
           
           # Check service status
           echo "📊 Database services status:"

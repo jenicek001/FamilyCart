@@ -15,18 +15,27 @@ services:
       POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
     ports:
       - "5432:5432"
+    # CRITICAL: Resource limits to prevent runner crashes
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "test_user", "-d", "test_familycart"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 5  # Reduced retries to fail faster
+      start_period: 15s  # Reduced startup time
     volumes:
       # Use tmpfs for faster test performance (data doesn't persist)
       - type: tmpfs
         target: /var/lib/postgresql/data
         tmpfs:
-          size: 1G
+          size: 256M  # Reduced from 1G to prevent memory exhaustion
     # Optimized PostgreSQL configuration for CI testing
     command: >
       postgres
@@ -50,16 +59,25 @@ services:
     container_name: redis-ci-familycart
     ports:
       - "6379:6379"
+    # CRITICAL: Resource limits to prevent runner crashes  
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
-    # Redis optimizations for testing
+      retries: 3  # Reduced retries
+      start_period: 5s  # Reduced startup time
+    # Redis optimizations for testing - reduced memory limits
     command: >
       redis-server
-      --maxmemory 256mb
+      --maxmemory 64mb
       --maxmemory-policy allkeys-lru
       --save ""
       --appendonly no
@@ -68,7 +86,7 @@ services:
       - type: tmpfs
         target: /data
         tmpfs:
-          size: 256M
+          size: 64M  # Reduced memory usage
     networks:
       - ci-network
     restart: unless-stopped
