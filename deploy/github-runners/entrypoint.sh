@@ -68,7 +68,11 @@ configure_runner() {
     # Check if runner is already configured
     if [[ -f ".runner" ]]; then
         warn "Runner appears to already be configured, removing old configuration..."
-        ./config.sh remove --token "$GITHUB_TOKEN" || warn "Failed to remove existing configuration"
+        if ! ./config.sh remove --token "$GITHUB_TOKEN"; then
+            warn "Failed to remove existing configuration from GitHub, cleaning up local files..."
+            rm -f .runner .credentials .credentials_rsaparams
+            rm -rf _diag
+        fi
     fi
     
     # Get fresh registration token
