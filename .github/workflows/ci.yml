@@ -49,14 +49,16 @@ jobs:
           echo "🔧 Docker system info:"
           docker system df || true
           
-          echo "🧹 Aggressive Docker cleanup to prevent resource exhaustion..."
-          # Stop any running containers that might consume resources
-          docker ps -q | xargs -r docker stop || true
+          echo "🧹 Safe Docker cleanup to prevent resource exhaustion..."
+          # Stop containers that might consume resources, but EXCLUDE runner containers
+          docker ps --filter "name!=familycart-runner" --filter "name!=runner" -q | xargs -r docker stop || true
           docker container prune -f || true
-          docker image prune -af || true 
-          docker volume prune -f || true
+          # Safer image cleanup - only remove unused images older than 24h
+          docker image prune -af --filter "until=24h" || true 
+          # Skip volume pruning to avoid removing active volumes
           docker network prune -f || true
-          docker system prune -af --volumes || true
+          # More conservative system prune without --volumes flag
+          docker system prune -f || true
           
           echo "🛡️ Setting resource limits in environment"
           # Limit Docker memory usage to prevent OOM kills
@@ -692,8 +694,8 @@ jobs:
           fi
           
           # Additional resource cleanup to prevent runner crashes
-          echo "🧹 Additional Docker cleanup..."
-          timeout 30 docker system prune -f --volumes || true
+          echo "🧹 Safe additional Docker cleanup..."
+          timeout 30 docker system prune -f || true
           
           echo "📊 Final system resources:"
           free -h | grep -E '(Mem|Swap)' || true

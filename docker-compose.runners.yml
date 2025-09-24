@@ -27,7 +27,8 @@ services:
       - build-cache:/tmp/build-cache
       # Host tools and caches
       - /usr/bin/docker:/usr/bin/docker:ro
-      - ~/.docker:/home/runner/.docker:ro
+      # Docker config - needs write access for authentication
+      - ~/.docker:/home/runner/.docker:rw
     networks:
       - runners-network
     restart: unless-stopped
@@ -68,7 +69,8 @@ services:
       - runner2-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      - ~/.docker:/home/runner/.docker:ro
+      # Docker config - needs write access for authentication
+      - ~/.docker:/home/runner/.docker:rw
     networks:
       - runners-network
     restart: unless-stopped
@@ -107,7 +109,8 @@ services:
       - runner3-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      - ~/.docker:/home/runner/.docker:ro
+      # Docker config - needs write access for authentication
+      - ~/.docker:/home/runner/.docker:rw
     networks:
       - runners-network
     restart: unless-stopped
@@ -143,7 +146,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
           cpus: '1.0'
 
   # Monitoring for runners

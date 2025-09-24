@@ -3,17 +3,20 @@ FROM ubuntu:24.04
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Set runner version and architecture
-ARG RUNNER_VERSION=2.317.0
+# Set runner version and architecture - Use latest stable version per GitHub docs
+ARG RUNNER_VERSION=2.328.0
 ARG RUNNER_ARCH=x64
 ARG DOCKER_GID=999
 
-# Labels
+# Labels following GitHub's container recommendations
 LABEL org.opencontainers.image.title="FamilyCart GitHub Runner"
-LABEL org.opencontainers.image.description="Self-hosted GitHub Actions runner for FamilyCart"
+LABEL org.opencontainers.image.description="Self-hosted GitHub Actions runner for FamilyCart based on GitHub official guidelines"
 LABEL org.opencontainers.image.version="${RUNNER_VERSION}"
+LABEL org.opencontainers.image.source="https://github.com/actions/runner"
+LABEL org.opencontainers.image.documentation="https://docs.github.com/en/actions/hosting-your-own-runners"
 
-# Install base dependencies
+# Install essential dependencies required by GitHub Actions runner
+# Based on official GitHub docs: https://github.com/actions/runner/blob/main/docs/start/envlinux.md
 RUN apt-get update \
     && apt-get install -y \
         curl \
@@ -38,6 +41,10 @@ RUN apt-get update \
         libicu-dev \
         libsqlite3-dev \
         libxml2-dev \
+        bc \
+        liblttng-ust1 \
+        libkrb5-3 \
+        libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker CLI and Docker Compose
@@ -106,24 +113,31 @@ RUN wget https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linu
     && mv k6-v0.47.0-linux-amd64/k6 /usr/local/bin/ \
     && rm -rf k6-v0.47.0-linux-amd64*
 
-# Create runner user
+# Create runner user following GitHub's official recommendations
 RUN useradd -m -s /bin/bash runner \
     && usermod -aG sudo runner \
     && echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Fix docker group GID to match host and add runner to docker group
-RUN groupmod -g ${DOCKER_GID} docker \
+# Handle case where GID already exists
+RUN (groupmod -g ${DOCKER_GID} docker || true) \
     && usermod -aG docker runner
 
-# Set up runner directory
+# Set up runner directory and download using GitHub's official method
 WORKDIR /home/runner
 
-# Download and extract GitHub Actions runner
-RUN curl -L "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" \
-    | tar xz \
+# Create actions-runner folder as per GitHub's installation guide
+RUN mkdir actions-runner && cd actions-runner
+
+# Download and extract GitHub Actions runner following official docs
+# Source: https://github.com/actions/runner/blob/main/releaseNote.md
+RUN curl -O -L "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" \
+    && tar xzf "./actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" \
+    && rm "./actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz" \
     && chown -R runner:runner /home/runner
 
-# Install runner dependencies
+# Install .NET Core dependencies using GitHub's official script
+# This handles missing dependencies automatically per GitHub docs
 RUN ./bin/installdependencies.sh
 
 # Create work directory with proper permissions
@@ -137,8 +151,9 @@ RUN chmod +x /entrypoint.sh
 
 USER runner
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD pgrep -f "Runner.Listener" || exit 1
+# Health check - improved based on GitHub's runner authentication flow
+# Check for both Runner.Listener process and configuration files
+HEALTHCHECK --interval=60s --timeout=30s --start-period=120s --retries=5 \
+  CMD /entrypoint.sh health
 
 ENTRYPOINT ["/entrypoint.sh"]
