@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [develop, feature/*, hotfix/*, release/*]
+    branches: [develop, feature/*, hotfix/*, bugfix/*, chore/*, docs/*, release/*]
 
 # Grant necessary permissions for GitHub Actions to access PR data
 permissions:
@@ -21,6 +21,7 @@ env:
 jobs:
   validate-branch-name:
     runs-on: self-hosted
+    timeout-minutes: 10
     steps:
       - name: Validate branch name
         if: github.event_name == 'pull_request'
@@ -36,6 +37,7 @@ jobs:
 
   code-quality:
     runs-on: self-hosted
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -151,6 +153,7 @@ jobs:
 
   security-scan:
     runs-on: self-hosted
+    timeout-minutes: 15
     needs: code-quality
     steps:
       - name: Checkout code
@@ -188,6 +191,7 @@ jobs:
 
   architecture-compliance:
     runs-on: self-hosted
+    timeout-minutes: 10
     needs: code-quality
     steps:
       - name: Checkout code
@@ -224,6 +228,7 @@ jobs:
 
   pr-size-check:
     runs-on: self-hosted
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     steps:
       - name: Check PR size
@@ -265,6 +270,7 @@ jobs:
 
   status-check:
     runs-on: self-hosted
+    timeout-minutes: 5
     needs: [validate-branch-name, code-quality, security-scan, architecture-compliance, pr-size-check]
     if: always()
     steps:
