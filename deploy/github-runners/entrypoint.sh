@@ -68,7 +68,7 @@ configure_runner() {
     # Check if runner is already configured
     if [[ -f ".runner" ]]; then
         warn "Runner appears to already be configured, removing old configuration..."
-        ./config.sh remove --unattended || warn "Failed to remove existing configuration"
+        ./config.sh remove --token "$GITHUB_TOKEN" || warn "Failed to remove existing configuration"
     fi
     
     # Get fresh registration token
@@ -134,7 +134,7 @@ shutdown_runner() {
     # Remove runner configuration
     if [[ -f ".runner" ]]; then
         log "Removing runner configuration..."
-        ./config.sh remove --unattended || warn "Failed to remove runner configuration"
+        ./config.sh remove --token "$GITHUB_TOKEN" || warn "Failed to remove runner configuration"
     fi
     
     log "Shutdown complete"
