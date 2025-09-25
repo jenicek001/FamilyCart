@@ -430,6 +430,191 @@ FamilyCart uses a modern, Stitch-inspired design system built with Tailwind CSS 
 
 For implementation details, see the `/frontend/src/components/ui/` directory and `tailwind.config.ts`.
 
+## CI/CD Infrastructure & Support Services
+
+This project includes a comprehensive CI/CD infrastructure with self-hosted GitHub Actions runners and persistent database services for testing.
+
+### 🏗️ Architecture Overview
+
+The CI/CD infrastructure is designed with separation of concerns:
+
+- **Persistent CI Infrastructure**: PostgreSQL and Redis containers that run continuously
+- **Self-Hosted GitHub Runners**: Scalable runner containers that execute CI/CD workflows  
+- **Management Script**: Easy orchestration and monitoring tools
+
+```
+┌─────────────────────────────────────┐
+│ familycart-runners network          │
+│ ├── familycart-runner-1            │
+│ ├── familycart-runner-2 (optional) │
+│ └── familycart-runner-3 (optional) │
+└─────────────────────────────────────┘
+          │
+          │ (connected to both networks)
+          │
+┌─────────────────────────────────────┐
+│ familycart-ci-infrastructure network│
+│ ├── postgres-ci-familycart         │
+│ ├── redis-ci-familycart           │
+│ ├── adminer-ci-familycart (admin) │
+│ └── redis-commander (admin)       │
+└─────────────────────────────────────┘
+```
+
+### 🚀 Quick Start Commands
+
+#### Start Everything (Recommended)
+```bash
+# Start both infrastructure and runners
+./scripts/ci-management.sh start
+```
+
+#### Infrastructure Only
+```bash
+# Start persistent databases for CI testing
+./scripts/ci-management.sh start-infra
+```
+
+#### Runners Management
+```bash
+# Start GitHub runners
+./scripts/ci-management.sh start-runners
+
+# Scale to multiple runners for parallel builds
+./scripts/ci-management.sh scale-runners 3
+
+# Restart runners (without affecting databases)
+./scripts/ci-management.sh restart-runners
+```
+
+#### Monitoring & Status
+```bash
+# Check status of all services
+./scripts/ci-management.sh status
+
+# View infrastructure logs
+./scripts/ci-management.sh logs-infra postgres
+./scripts/ci-management.sh logs-infra redis
+
+# View runner logs  
+./scripts/ci-management.sh logs-runners runner-1
+```
+
+### 🛠️ Manual Management (Advanced)
+
+If you prefer to manage services manually using Docker Compose directly:
+
+#### CI Infrastructure
+```bash
+# Start persistent CI databases
+docker compose -f docker-compose.ci-infrastructure.yml up -d
+
+# Stop infrastructure (data persists in volumes)
+docker compose -f docker-compose.ci-infrastructure.yml down
+
+# View infrastructure status
+docker compose -f docker-compose.ci-infrastructure.yml ps
+```
+
+#### GitHub Runners
+```bash
+# Start a single runner
+docker compose -f docker-compose.runners.yml up -d runner-1
+
+# Start multiple runners
+docker compose -f docker-compose.runners.yml up -d runner-1 runner-2 runner-3
+
+# Stop all runners
+docker compose -f docker-compose.runners.yml down
+```
+
+### 📋 Service Configuration
+
+#### CI Infrastructure Services
+- **PostgreSQL**: `localhost:5432` - Test database for CI workflows
+  - Database: `test_familycart`
+  - Username: `test_user` 
+  - Password: `test_password`
+- **Redis**: `localhost:6379` - Cache and session store for CI
+- **Adminer**: `localhost:8080` - Database administration (with `--profile admin-tools`)
+- **Redis Commander**: `localhost:8081` - Redis administration (with `--profile admin-tools`)
+
+#### GitHub Runners
+- **Resources**: 8GB RAM, 2 CPU cores per runner (configurable)
+- **Tools**: Pre-installed with Python 3.12, Poetry, Node.js 20, Docker
+- **Networks**: Connected to both runner and infrastructure networks
+- **Scaling**: Independent scaling without affecting infrastructure
+
+### 🔧 Environment Setup
+
+Before starting CI services, ensure you have the required environment variables:
+
+```bash
+# Required for GitHub runners
+export GITHUB_TOKEN=your_github_token_here
+
+# Optional: Customize resource limits
+export RUNNER_MEMORY_LIMIT=8g
+export RUNNER_CPU_LIMIT=2.0
+```
+
+### 🧪 Testing & Validation
+
+#### Database Connectivity Test
+```bash
+# Test PostgreSQL connection
+docker exec postgres-ci-familycart psql -U test_user -d test_familycart -c "SELECT version();"
+
+# Test Redis connection  
+docker exec redis-ci-familycart redis-cli ping
+```
+
+#### Runner Health Check
+```bash
+# Check if runners are registered and healthy
+./scripts/ci-management.sh status
+
+# Test runner-to-database connectivity
+docker exec familycart-runner-1 timeout 3 bash -c 'echo > /dev/tcp/postgres-ci-familycart/5432'
+```
+
+### 🎯 Benefits
+
+- **Persistent Databases**: No startup overhead for CI runs, stable connections
+- **Independent Scaling**: Scale runners without affecting database stability  
+- **Resource Efficiency**: Shared infrastructure across multiple CI runs
+- **Easy Management**: Single script handles complex multi-service orchestration
+- **Proper Isolation**: Network separation between different service concerns
+
+### 🚨 Troubleshooting
+
+#### Common Issues
+```bash
+# If runners can't connect to databases
+docker network ls | grep familycart  # Check networks exist
+./scripts/ci-management.sh restart-runners  # Restart with new network config
+
+# If infrastructure services fail to start
+docker system prune -f  # Clean up resources
+./scripts/ci-management.sh start-infra  # Restart infrastructure
+
+# If runners show as unhealthy
+./scripts/ci-management.sh logs-runners runner-1  # Check runner logs
+```
+
+#### Reset Everything
+```bash
+# Complete reset (WARNING: loses all CI data)
+./scripts/ci-management.sh stop
+docker system prune -af --volumes
+./scripts/ci-management.sh start
+```
+
+For more details, see:
+- [CI Infrastructure Complete Documentation](./CI_INFRASTRUCTURE_COMPLETE.md)
+- [CI Management Script](./scripts/ci-management.sh)
+- [Docker Compose Files](./docker-compose.*.yml)
+
 ## API Documentation
 
 - Swagger UI: `http://localhost:8000/docs`
