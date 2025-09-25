@@ -434,6 +434,23 @@ For implementation details, see the `/frontend/src/components/ui/` directory and
 
 This project includes a comprehensive CI/CD infrastructure with self-hosted GitHub Actions runners and persistent database services for testing.
 
+### 🔐 Security Configuration (Important!)
+
+**Before using in production**, generate secure credentials for the CI infrastructure databases:
+
+```bash
+# Generate secure passwords and setup instructions
+./scripts/generate-ci-credentials.sh
+```
+
+This script will:
+- Generate secure passwords for PostgreSQL and Redis
+- Create a `.env.ci` file with the credentials
+- Provide GitHub Secrets setup instructions
+- Update CI infrastructure to use authentication
+
+The default configuration uses hardcoded passwords for development convenience, but **must be secured for production use**.
+
 ### 🏗️ Architecture Overview
 
 The CI/CD infrastructure is designed with separation of concerns:
@@ -500,32 +517,51 @@ The CI/CD infrastructure is designed with separation of concerns:
 ./scripts/ci-management.sh logs-runners runner-1
 ```
 
-### 🛠️ Manual Management (Advanced)
+### 🛠️ Service Management Details
 
-If you prefer to manage services manually using Docker Compose directly:
+#### CI Infrastructure Management
 
-#### CI Infrastructure
+**🔐 Security Setup (Required for Production):**
 ```bash
-# Start persistent CI databases
-docker compose -f docker-compose.ci-infrastructure.yml up -d
+# Generate secure credentials for CI infrastructure
+./scripts/generate-ci-credentials.sh
 
-# Stop infrastructure (data persists in volumes)
-docker compose -f docker-compose.ci-infrastructure.yml down
-
-# View infrastructure status
-docker compose -f docker-compose.ci-infrastructure.yml ps
+# Follow the on-screen instructions to add GitHub repository secrets
 ```
 
-#### GitHub Runners
+**Using the CI Management Script (Recommended):**
 ```bash
-# Start a single runner
-docker compose -f docker-compose.runners.yml up -d runner-1
+# Start CI infrastructure (auto-detects secure credentials)
+./scripts/ci-management.sh start-infrastructure
 
-# Start multiple runners
-docker compose -f docker-compose.runners.yml up -d runner-1 runner-2 runner-3
+# Stop CI infrastructure
+./scripts/ci-management.sh stop-infrastructure
+
+# Check status of all CI services
+./scripts/ci-management.sh status
+
+# View logs from infrastructure services
+./scripts/ci-management.sh logs-infrastructure
+
+# Complete restart with fresh credentials
+./scripts/ci-management.sh restart-infrastructure
+```
+
+#### GitHub Runners Management
+
+**Using the CI Management Script (Recommended):**
+```bash
+# Start runners (specify count: 1-5)
+./scripts/ci-management.sh start-runners 3
 
 # Stop all runners
-docker compose -f docker-compose.runners.yml down
+./scripts/ci-management.sh stop-runners
+
+# Scale runners up or down
+./scripts/ci-management.sh scale-runners 5
+
+# View runner status
+./scripts/ci-management.sh status
 ```
 
 ### 📋 Service Configuration

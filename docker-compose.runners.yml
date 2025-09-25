@@ -27,8 +27,7 @@ services:
       - build-cache:/tmp/build-cache
       # Host tools and caches
       - /usr/bin/docker:/usr/bin/docker:ro
-      # Docker config volume for authentication
-      - runner1-docker-config:/home/runner/.docker
+
     networks:
       - runners-network
       - ci-infrastructure
@@ -70,8 +69,7 @@ services:
       - runner2-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      # Docker config volume for authentication  
-      - runner2-docker-config:/home/runner/.docker
+
     networks:
       - runners-network
       - ci-infrastructure
@@ -111,8 +109,7 @@ services:
       - runner3-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      # Docker config volume for authentication  
-      - runner3-docker-config:/home/runner/.docker
+
     networks:
       - runners-network
       - ci-infrastructure
@@ -203,18 +200,18 @@ networks:
 
 volumes:
   runner1-work:
+    external: true
     name: familycart-runner-1-work
   runner2-work:
+    external: true
     name: familycart-runner-2-work
   runner3-work:
+    external: true
     name: familycart-runner-3-work
-  runner1-docker-config:
-    name: familycart-runner-1-docker-config
-  runner2-docker-config:
-    name: familycart-runner-2-docker-config
-  runner3-docker-config:
-    name: familycart-runner-3-docker-config
+
   build-cache:
+    external: true
     name: familycart-build-cache
   registry-cache:
+    external: true
     name: familycart-registry-cache

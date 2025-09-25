@@ -80,6 +80,9 @@ yarn.lock # If using Yarn and package.json is authoritative
 backend/.env
 frontend/.env
 
+# CI Infrastructure credentials (NEVER commit!)
+.env.ci
+
 # VS Code
 .vscode/
 
