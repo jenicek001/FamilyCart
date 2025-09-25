@@ -91,6 +91,18 @@ configure_runner() {
         chown -R runner:runner "$RUNNER_WORK_DIRECTORY"
     fi
     
+    # Fix Docker config directory permissions
+    if [[ -d "/home/runner/.docker" ]]; then
+        if [[ $(id -u) -eq 0 ]]; then
+            # Fix ownership if running as root
+            chown -R runner:runner /home/runner/.docker
+        fi
+        chmod -R 755 /home/runner/.docker
+        if [[ -f "/home/runner/.docker/config.json" ]]; then
+            chmod 644 /home/runner/.docker/config.json
+        fi
+    fi
+    
     # Check if runner is already configured
     if [[ -f ".runner" ]]; then
         warn "Runner appears to already be configured, removing old configuration..."

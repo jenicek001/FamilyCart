@@ -27,10 +27,11 @@ services:
       - build-cache:/tmp/build-cache
       # Host tools and caches
       - /usr/bin/docker:/usr/bin/docker:ro
-      # Docker config - needs write access for authentication
-      - ~/.docker:/home/runner/.docker:rw
+      # Docker config volume for authentication
+      - runner1-docker-config:/home/runner/.docker
     networks:
       - runners-network
+      - ci-infrastructure
     restart: unless-stopped
     # Resource limits to prevent one runner from consuming all resources
     deploy:
@@ -69,10 +70,11 @@ services:
       - runner2-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      # Docker config - needs write access for authentication
-      - ~/.docker:/home/runner/.docker:rw
+      # Docker config volume for authentication  
+      - runner2-docker-config:/home/runner/.docker
     networks:
       - runners-network
+      - ci-infrastructure
     restart: unless-stopped
     deploy:
       resources:
@@ -109,10 +111,11 @@ services:
       - runner3-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      # Docker config - needs write access for authentication
-      - ~/.docker:/home/runner/.docker:rw
+      # Docker config volume for authentication  
+      - runner3-docker-config:/home/runner/.docker
     networks:
       - runners-network
+      - ci-infrastructure
     restart: unless-stopped
     deploy:
       resources:
@@ -192,12 +195,11 @@ services:
 
 networks:
   runners-network:
-    driver: bridge
+    external: true
     name: familycart-runners
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.21.0.0/16
+  ci-infrastructure:
+    external: true
+    name: familycart-ci-infrastructure
 
 volumes:
   runner1-work:
@@ -206,6 +208,12 @@ volumes:
     name: familycart-runner-2-work
   runner3-work:
     name: familycart-runner-3-work
+  runner1-docker-config:
+    name: familycart-runner-1-docker-config
+  runner2-docker-config:
+    name: familycart-runner-2-docker-config
+  runner3-docker-config:
+    name: familycart-runner-3-docker-config
   build-cache:
     name: familycart-build-cache
   registry-cache:

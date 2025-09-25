@@ -1,0 +1,117 @@
+# CI/CD Infrastructure Services
+# Persistent PostgreSQL and Redis instances for GitHub Actions CI
+# These services run independently of runner containers
+#
+# Usage:
+#   Start: docker compose -f docker-compose.ci-infrastructure.yml up -d
+#   Stop:  docker compose -f docker-compose.ci-infrastructure.yml down
+
+services:
+  postgres-ci:
+    image: postgres:16-alpine
+    container_name: postgres-ci-familycart
+    environment:
+      POSTGRES_DB: test_familycart
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres-ci-data:/var/lib/postgresql/data
+      - ./backend/scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - ci-infrastructure
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_familycart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
+  redis-ci:
+    image: redis:7-alpine
+    container_name: redis-ci-familycart
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-ci-data:/data
+    networks:
+      - ci-infrastructure
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
+        reservations:
+          memory: 128M
+          cpus: '0.05'
+    # Optional Redis configuration
+    command: redis-server --maxmemory 200mb --maxmemory-policy allkeys-lru
+
+  # Database administration tool (optional, for debugging)
+  adminer:
+    image: adminer:4-standalone
+    container_name: adminer-ci-familycart
+    ports:
+      - "8080:8080"
+    networks:
+      - ci-infrastructure
+    restart: unless-stopped
+    profiles:
+      - admin-tools
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+
+  # Redis admin tool (optional, for debugging)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander-ci-familycart
+    environment:
+      - REDIS_HOSTS=local:redis-ci:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - ci-infrastructure
+    restart: unless-stopped
+    profiles:
+      - admin-tools
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+
+networks:
+  ci-infrastructure:
+    name: familycart-ci-infrastructure
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
+
+volumes:
+  postgres-ci-data:
+    name: familycart-postgres-ci-data
+  redis-ci-data:
+    name: familycart-redis-ci-data
