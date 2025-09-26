@@ -45,6 +45,8 @@ RUN apt-get update \
         liblttng-ust1 \
         libkrb5-3 \
         libssl3 \
+        postgresql-client \
+        redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker CLI and Docker Compose
