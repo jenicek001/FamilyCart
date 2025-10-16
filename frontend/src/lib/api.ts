@@ -6,7 +6,6 @@ const ensureTrailingSlash = (url: string): string => {
   const pathsNeedingSlash = [
     '/api/v1/shopping-lists',
     '/api/v1/items',
-    '/api/v1/users/me',
     // Add other API paths that need trailing slashes
   ];
   
@@ -54,9 +53,6 @@ apiClient.interceptors.request.use(
       // Handle the specific problem URLs directly to ensure they always have trailing slashes
       if (config.url === '/api/v1/shopping-lists') {
         config.url = '/api/v1/shopping-lists/';
-        console.log(`FORCED trailing slash: ${originalUrl} → ${config.url}`);
-      } else if (config.url === '/api/v1/users/me') {
-        config.url = '/api/v1/users/me/';
         console.log(`FORCED trailing slash: ${originalUrl} → ${config.url}`);
       } else if (config.url === '/api/v1/items') {
         config.url = '/api/v1/items/';

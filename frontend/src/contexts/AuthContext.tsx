@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('No token available');
       }
 
-      const response = await fetch('/api/v1/users/me/', {
+      const response = await fetch('/api/v1/users/me', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -112,7 +112,10 @@ services:
           cpus: '0.5'
 
   uat-frontend:
-    image: ghcr.io/jenicek001/familycart-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: familycart-frontend:uat-local
     container_name: familycart-uat-frontend
     environment:
       - NODE_ENV=production
