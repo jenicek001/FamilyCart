@@ -169,12 +169,13 @@ export function useWebSocket({
       if (process.env.NEXT_PUBLIC_API_URL) {
         // Use the configured API URL, removing the protocol
         host = process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, '');
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local development: use localhost with backend port
+        host = `${window.location.hostname}:${API_CONFIG.DEFAULT_PORT}`;
       } else {
-        // Auto-detect: use current window host with backend port
-        // This works for both localhost and network access
-        const currentHost = window.location.hostname;
-        const apiPort = currentHost === 'localhost' ? API_CONFIG.DEFAULT_PORT.toString() : API_CONFIG.DEFAULT_PORT.toString(); // Same port for all environments
-        host = `${currentHost}:${apiPort}`;
+        // Production: use the current window host without adding port
+        // The reverse proxy (nginx) handles routing on standard ports
+        host = window.location.host;
       }
       
       const wsUrl = `${protocol}//${host}/api/v1/ws/lists/${listId}?token=${encodeURIComponent(token)}`;
