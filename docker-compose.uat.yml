@@ -119,8 +119,8 @@ services:
     container_name: familycart-uat-frontend
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://uat.familycart.local/api
-      - NEXT_PUBLIC_WEBSOCKET_URL=wss://uat.familycart.local/ws
+      - NEXT_PUBLIC_API_URL=https://uat.familycart.app
+      - NEXT_PUBLIC_WEBSOCKET_URL=wss://uat.familycart.app/ws
       - NEXT_PUBLIC_ENVIRONMENT=uat
       - NEXT_PUBLIC_APP_VERSION=${UAT_APP_VERSION:-latest}
       # Feature flags for UAT testing
