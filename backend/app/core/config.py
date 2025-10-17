@@ -57,7 +57,7 @@ class Settings(BaseSettings):
 
     # AI APIs
     OPENAI_API_KEY: Optional[str] = None
-    GOOGLE_API_KEY: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
     GEMINI_MODEL_NAME: str = (
         "gemini-2.5-flash-lite-preview-06-17"  # Cost-efficient model with low latency, supports text/images/video/audio
     )
