@@ -201,7 +201,7 @@ export default function EnhancedDashboard() {
       console.log('[EnhancedDashboard] � Setting ignore next create flag BEFORE API call');
       ignoreNextCreate();
       
-      const data = await apiClient(`/api/v1/shopping-lists/${selectedList.id}/items/`, {
+      const data = await apiClient(`/api/v1/shopping-lists/${selectedList.id}/items`, {
         method: 'POST',
         body: JSON.stringify(item)
       });

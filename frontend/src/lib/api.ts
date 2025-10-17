@@ -38,25 +38,19 @@ const ensureTrailingSlash = (url: string): string => {
   return url;
 };
 
-// Create an axios instance with base URL
-// In production (served by nginx), use the current origin
-// In development, Next.js rewrites handle the proxying
-const getBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    // Client-side: use current origin (works with nginx proxy)
-    return window.location.origin;
-  }
-  // Server-side: return empty string (will use relative URLs)
-  return '';
-};
+// Create an axios instance without a base URL
+// We'll set it dynamically in the interceptor to handle SSR correctly
+const apiClient = axios.create();
 
-const apiClient = axios.create({
-  baseURL: getBaseURL(),
-});
-
-// Add a request interceptor to add trailing slashes to URLs that need them
+// Add a request interceptor to set the baseURL dynamically and add trailing slashes
 apiClient.interceptors.request.use(
   (config) => {
+    // Set baseURL dynamically on each request (fixes SSR issue where window.location doesn't exist during module init)
+    if (typeof window !== 'undefined' && !config.baseURL) {
+      config.baseURL = window.location.origin;
+      console.log(`Set baseURL dynamically: ${config.baseURL}`);
+    }
+    
     if (config.url) {
       const originalUrl = config.url;
       

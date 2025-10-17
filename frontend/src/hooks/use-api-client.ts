@@ -18,20 +18,17 @@ export function useApiClient() {
     // Use provided session ID or fall back to context session ID
     const activeSessionId = sessionId || contextSessionId;
 
-    // Convert relative URLs to absolute URLs to bypass Next.js proxy
+    // Convert relative URLs to absolute URLs
     let fullUrl = url;
     if (url.startsWith('/api/')) {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      
-      // Server-side: always use environment variable or fallback
-      // Client-side: use relative URLs and let Next.js proxy handle it
       if (typeof window === 'undefined') {
-        // Server-side rendering: use absolute URLs
-        const fallbackUrl = API_CONFIG.FALLBACK_URL;
-        fullUrl = `${baseUrl || fallbackUrl}${url}`;
+        // Server-side rendering: use environment variable or fallback
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || API_CONFIG.FALLBACK_URL;
+        fullUrl = `${baseUrl}${url}`;
       } else {
-        // Client-side: use relative URLs and let Next.js proxy handle it
-        fullUrl = url;
+        // Client-side: construct full URL using current page's origin (preserves HTTPS)
+        // This ensures we always use the same protocol as the page
+        fullUrl = `${window.location.origin}${url}`;
       }
     }
 
@@ -53,6 +50,9 @@ export function useApiClient() {
     if (!headers.has('Content-Type') && (fetchOptions.method === 'POST' || fetchOptions.method === 'PUT' || fetchOptions.method === 'PATCH')) {
       headers.set('Content-Type', 'application/json');
     }
+
+    console.log(`API Client: About to fetch with URL: ${fullUrl}, method: ${fetchOptions.method}`);
+    console.log(`API Client: Request headers:`, Object.fromEntries(headers.entries()));
 
     const response = await fetch(fullUrl, {
       ...fetchOptions,
