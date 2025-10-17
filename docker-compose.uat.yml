@@ -119,6 +119,7 @@ services:
     container_name: familycart-uat-frontend
     environment:
       - NODE_ENV=production
+      - API_URL=https://uat.familycart.app
       - NEXT_PUBLIC_API_URL=https://uat.familycart.app
       - NEXT_PUBLIC_WEBSOCKET_URL=wss://uat.familycart.app/ws
       - NEXT_PUBLIC_ENVIRONMENT=uat

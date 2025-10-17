@@ -38,10 +38,20 @@ const ensureTrailingSlash = (url: string): string => {
   return url;
 };
 
-// Create an axios instance - using relative URLs since Next.js proxy handles routing to backend
+// Create an axios instance with base URL
+// In production (served by nginx), use the current origin
+// In development, Next.js rewrites handle the proxying
+const getBaseURL = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: use current origin (works with nginx proxy)
+    return window.location.origin;
+  }
+  // Server-side: return empty string (will use relative URLs)
+  return '';
+};
+
 const apiClient = axios.create({
-  // Using relative paths that get proxied by Next.js rewrites configuration
-  // The rewrites in next.config.ts route /api/* to the backend URL from NEXT_PUBLIC_API_URL
+  baseURL: getBaseURL(),
 });
 
 // Add a request interceptor to add trailing slashes to URLs that need them
