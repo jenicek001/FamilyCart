@@ -7,6 +7,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
+from pydantic import ValidationError
 
 from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
@@ -74,11 +75,11 @@ def test_item_update_validation():
     item_update = ItemUpdate(is_completed=None)
     assert item_update.is_completed is None
 
-    # Test invalid types should raise validation error
-    with pytest.raises(ValueError):
+    # Test invalid types should raise validation error (Pydantic v2 raises ValidationError)
+    with pytest.raises(ValidationError):
         ItemUpdate(is_completed="not_a_boolean")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         ItemUpdate(is_completed=1)  # int instead of bool
 
 
@@ -102,7 +103,7 @@ def test_multiple_field_update_with_completion():
     assert update_dict["is_completed"] is True
     assert update_dict["name"] == "Updated Name"
     assert update_dict["quantity"] == "2"
-    assert update_dict["description"] == "Updated description"
+    assert update_dict["comment"] == "Updated comment"
 
 
 if __name__ == "__main__":

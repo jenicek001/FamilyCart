@@ -22,9 +22,13 @@ from app.models.user import User
 test_db_uri = settings.SQLALCHEMY_DATABASE_URI_ASYNC
 if test_db_uri.endswith("/familycart"):
     test_db_uri = test_db_uri[: -len("/familycart")] + "/familycart_test"
-test_engine = create_async_engine(test_db_uri)
+test_engine = create_async_engine(test_db_uri, echo=False, poolclass=None)
 TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=test_engine, class_=AsyncSession
+    autocommit=False,
+    autoflush=False,
+    bind=test_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,  # Prevent "another operation in progress" errors
 )
 
 

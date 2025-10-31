@@ -57,7 +57,7 @@ class TestAIProviderFactory:
         """Test that factory returns Ollama provider when configured."""
         mock_settings.AI_PROVIDER = "ollama"
         mock_settings.OLLAMA_BASE_URL = "http://localhost:11434"
-        mock_settings.OLLAMA_MODEL_NAME = "llama3.2"
+        mock_settings.OLLAMA_MODEL_NAME = "gemma3:4b"
 
         with patch("app.services.ai_factory.OllamaProvider") as mock_ollama:
             mock_instance = Mock()
@@ -194,7 +194,7 @@ class TestAIProviderIntegration:
     def test_ollama_provider_initialization(self, mock_ollama, mock_settings):
         """Test Ollama provider initializes correctly."""
         mock_settings.OLLAMA_BASE_URL = "http://localhost:11434"
-        mock_settings.OLLAMA_MODEL_NAME = "llama3.2"
+        mock_settings.OLLAMA_MODEL_NAME = "gemma3:4b"
 
         mock_client = Mock()
         mock_ollama.AsyncClient.return_value = mock_client
@@ -202,7 +202,7 @@ class TestAIProviderIntegration:
         provider = OllamaProvider()
 
         assert provider.provider_name == "ollama"
-        assert provider.model_name == "llama3.2"
+        assert provider.model_name == "gemma3:4b"
         mock_ollama.AsyncClient.assert_called_once_with(host="http://localhost:11434")
 
     @patch("app.core.config.settings")
@@ -231,7 +231,7 @@ class TestAIProviderIntegration:
     async def test_ollama_generate_text(self, mock_ollama, mock_settings):
         """Test Ollama provider text generation."""
         mock_settings.OLLAMA_BASE_URL = "http://localhost:11434"
-        mock_settings.OLLAMA_MODEL_NAME = "llama3.2"
+        mock_settings.OLLAMA_MODEL_NAME = "gemma3:4b"
 
         # Setup mocks
         mock_client = AsyncMock()
@@ -243,7 +243,7 @@ class TestAIProviderIntegration:
 
         assert result == "Generated text"
         mock_client.generate.assert_called_once_with(
-            model="llama3.2", prompt="Test prompt", options={"temperature": 0.7}
+            model="gemma3:4b", prompt="Test prompt", options={"temperature": 0.7}
         )
 
     @patch("app.services.ai_factory.get_ai_provider")
