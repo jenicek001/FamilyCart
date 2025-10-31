@@ -25,10 +25,11 @@ class TestSharingPermissions:
         # Create test user and shopping list
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add(owner)
         await test_db.commit()
         await test_db.refresh(owner)
@@ -52,16 +53,18 @@ class TestSharingPermissions:
         # Create owner and member users
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, member])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -90,16 +93,18 @@ class TestSharingPermissions:
         # Create users
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         outsider = User(
             email=f"outsider-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, outsider])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -126,10 +131,11 @@ class TestSharingPermissions:
 
         user = User(
             email=f"user-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
@@ -150,16 +156,18 @@ class TestSharingEndpoints:
         # Create owner and target user
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         target_user = User(
             email=f"target-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, target_user])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -205,22 +213,25 @@ class TestSharingEndpoints:
         # Create owner, member, and target users
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         target_user = User(
             email=f"target-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, member, target_user])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -252,10 +263,11 @@ class TestSharingEndpoints:
         # Create owner
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add(owner)
         await test_db.commit()
         await test_db.refresh(owner)
@@ -285,16 +297,18 @@ class TestSharingEndpoints:
         # Create owner and target user
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         target_user = User(
             email=f"target-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, target_user])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -331,16 +345,18 @@ class TestItemPermissions:
         # Create owner and member
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, member])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -403,16 +419,18 @@ class TestItemPermissions:
         # Create owner, member, and item
         owner = User(
             email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
+            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-        )
+        ,
+            nickname="TestUser")
         test_db.add_all([owner, member])
         await test_db.commit()
         await test_db.refresh(owner)
