@@ -155,14 +155,18 @@ class TestSharingEndpoints:
         """Test successful list sharing."""
         # Create owner via registration
         owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
-        await client.post(
+        reg_response = await client.post(
             "/api/v1/auth/register",
             json={"email": owner_email, "password": "testpass123", "nickname": "Owner"},
         )
+        assert reg_response.status_code in [
+            200,
+            201,
+        ], f"Owner registration failed: {reg_response.status_code} - {reg_response.text}"
 
         # Create target user via registration
         target_email = f"target-{uuid.uuid4().hex[:8]}@test.com"
-        await client.post(
+        reg_response2 = await client.post(
             "/api/v1/auth/register",
             json={
                 "email": target_email,
@@ -170,12 +174,19 @@ class TestSharingEndpoints:
                 "nickname": "Target",
             },
         )
+        assert reg_response2.status_code in [
+            200,
+            201,
+        ], f"Target registration failed: {reg_response2.status_code} - {reg_response2.text}"
 
         # Login as owner
         login_response = await client.post(
             "/api/v1/auth/jwt/login",
             data={"username": owner_email, "password": "testpass123"},
         )
+        assert (
+            login_response.status_code == 200
+        ), f"Login failed: {login_response.status_code} - {login_response.text}"
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
@@ -185,6 +196,10 @@ class TestSharingEndpoints:
             json={"name": "Test List", "description": "Test"},
             headers=headers,
         )
+        assert list_response.status_code in [
+            200,
+            201,
+        ], f"List creation failed: {list_response.status_code} - {list_response.text}"
         shopping_list_id = list_response.json()["id"]
 
         # Share the list
