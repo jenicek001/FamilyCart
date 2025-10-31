@@ -28,7 +28,8 @@ class TestSharingPermissions:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add(owner)
         await test_db.commit()
         await test_db.refresh(owner)
@@ -55,13 +56,15 @@ class TestSharingPermissions:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, member])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -93,13 +96,15 @@ class TestSharingPermissions:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         outsider = User(
             email=f"outsider-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, outsider])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -129,7 +134,8 @@ class TestSharingPermissions:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
@@ -153,13 +159,15 @@ class TestSharingEndpoints:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         target_user = User(
             email=f"target-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, target_user])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -208,19 +216,22 @@ class TestSharingEndpoints:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         target_user = User(
             email=f"target-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, member, target_user])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -255,7 +266,8 @@ class TestSharingEndpoints:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add(owner)
         await test_db.commit()
         await test_db.refresh(owner)
@@ -288,13 +300,15 @@ class TestSharingEndpoints:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         target_user = User(
             email=f"target-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, target_user])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -334,13 +348,15 @@ class TestItemPermissions:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, member])
         await test_db.commit()
         await test_db.refresh(owner)
@@ -406,13 +422,15 @@ class TestItemPermissions:
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         member = User(
             email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
             is_active=True,
             is_verified=True,
-            nickname="TestUser")
+            nickname="TestUser",
+        )
         test_db.add_all([owner, member])
         await test_db.commit()
         await test_db.refresh(owner)
