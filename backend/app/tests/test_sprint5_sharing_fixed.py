@@ -375,11 +375,6 @@ class TestItemPermissions:
                 "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
             ),
             patch(
-                "app.api.v1.endpoints.shopping_lists.ai_service.suggest_category_async",
-                new_callable=AsyncMock,
-                return_value="Groceries",
-        with (
-            patch(
                 "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.standardize_item_name",
                 new_callable=AsyncMock,
                 return_value={"standardized_name": "Milk", "translations": {}},
