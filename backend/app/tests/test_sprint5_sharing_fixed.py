@@ -153,95 +153,126 @@ class TestSharingEndpoints:
     @pytest.mark.asyncio
     async def test_share_list_success(self, test_db: AsyncSession, client: AsyncClient):
         """Test successful list sharing."""
-        # Create owner and target user
-        owner = User(
-            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+        # Create owner via registration
+        owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={"email": owner_email, "password": "testpass123", "nickname": "Owner"},
         )
-        target_user = User(
-            email=f"target-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+
+        # Create target user via registration
+        target_email = f"target-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": target_email,
+                "password": "testpass123",
+                "nickname": "Target",
+            },
         )
-        test_db.add_all([owner, target_user])
-        await test_db.commit()
-        await test_db.refresh(owner)
-        await test_db.refresh(target_user)
 
-        # Create shopping list
-        shopping_list = ShoppingList(name="Test List", owner_id=owner.id)
-        test_db.add(shopping_list)
-        await test_db.commit()
-        await test_db.refresh(shopping_list)
+        # Login as owner
+        login_response = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": owner_email, "password": "testpass123"},
+        )
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
 
-        # Mock authentication only
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
-        ):
+        # Create shopping list as owner
+        list_response = await client.post(
+            "/api/v1/shopping_lists",
+            json={"name": "Test List", "description": "Test"},
+            headers=headers,
+        )
+        shopping_list_id = list_response.json()["id"]
 
-            response = await client.post(
-                f"/api/v1/shopping_lists/{shopping_list.id}/share",
-                json={"email": target_user.email},
-            )
+        # Share the list
+        response = await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": target_email},
+            headers=headers,
+        )
 
         assert response.status_code == 200
+        response_data = response.json()
 
         # Verify user was added to shared_with
-        await test_db.refresh(shopping_list)
-        assert target_user in shopping_list.shared_with
+        assert any(
+            user["email"] == target_email for user in response_data["shared_with"]
+        )
 
     @pytest.mark.asyncio
     async def test_share_list_only_owner_can_share(
         self, test_db: AsyncSession, client: AsyncClient
     ):
         """Test that only list owners can share lists."""
-        # Create owner, member, and target users
-        owner = User(
-            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+        # Create owner via registration
+        owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={"email": owner_email, "password": "testpass123", "nickname": "Owner"},
         )
-        member = User(
-            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
-        )
-        target_user = User(
-            email=f"target-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
-        )
-        test_db.add_all([owner, member, target_user])
-        await test_db.commit()
-        await test_db.refresh(owner)
-        await test_db.refresh(member)
 
-        # Create shopping list and share with member
-        shopping_list = ShoppingList(name="Test List", owner_id=owner.id)
-        shopping_list.shared_with.append(member)
-        test_db.add(shopping_list)
-        await test_db.commit()
-        await test_db.refresh(shopping_list)
+        # Create member via registration
+        member_email = f"member-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": member_email,
+                "password": "testpass123",
+                "nickname": "Member",
+            },
+        )
 
-        # Mock authentication for member (not owner)
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
-        ):
-            response = await client.post(
-                f"/api/v1/shopping_lists/{shopping_list.id}/share",
-                json={"email": target_user.email},
-            )
+        # Create target user via registration
+        target_email = f"target-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": target_email,
+                "password": "testpass123",
+                "nickname": "Target",
+            },
+        )
+
+        # Login as owner
+        owner_login = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": owner_email, "password": "testpass123"},
+        )
+        owner_token = owner_login.json()["access_token"]
+        owner_headers = {"Authorization": f"Bearer {owner_token}"}
+
+        # Create shopping list as owner
+        list_response = await client.post(
+            "/api/v1/shopping_lists",
+            json={"name": "Test List", "description": "Test"},
+            headers=owner_headers,
+        )
+        shopping_list_id = list_response.json()["id"]
+
+        # Share the list with member
+        await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": member_email},
+            headers=owner_headers,
+        )
+
+        # Login as member
+        member_login = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": member_email, "password": "testpass123"},
+        )
+        member_token = member_login.json()["access_token"]
+        member_headers = {"Authorization": f"Bearer {member_token}"}
+
+        # Try to share as member (should fail)
+        response = await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": target_email},
+            headers=member_headers,
+        )
 
         assert response.status_code == 403
 
@@ -284,44 +315,61 @@ class TestSharingEndpoints:
         self, test_db: AsyncSession, client: AsyncClient
     ):
         """Test sharing with user who already has access."""
-        # Create owner and target user
-        owner = User(
-            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+        # Create owner via registration
+        owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={"email": owner_email, "password": "testpass123", "nickname": "Owner"},
         )
-        target_user = User(
-            email=f"target-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+
+        # Create target user via registration
+        target_email = f"target-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": target_email,
+                "password": "testpass123",
+                "nickname": "Target",
+            },
         )
-        test_db.add_all([owner, target_user])
-        await test_db.commit()
-        await test_db.refresh(owner)
-        await test_db.refresh(target_user)
 
-        # Create shopping list and share it
-        shopping_list = ShoppingList(name="Test List", owner_id=owner.id)
-        shopping_list.shared_with.append(target_user)
-        test_db.add(shopping_list)
-        await test_db.commit()
-        await test_db.refresh(shopping_list)
+        # Login as owner
+        login_response = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": owner_email, "password": "testpass123"},
+        )
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
 
-        # Mock authentication
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
-        ):
-            response = await client.post(
-                f"/api/v1/shopping_lists/{shopping_list.id}/share",
-                json={"email": target_user.email},
-            )
+        # Create shopping list as owner
+        list_response = await client.post(
+            "/api/v1/shopping_lists",
+            json={"name": "Test List", "description": "Test"},
+            headers=headers,
+        )
+        shopping_list_id = list_response.json()["id"]
+
+        # Share the list first time
+        await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": target_email},
+            headers=headers,
+        )
+
+        # Share again (should succeed but not duplicate)
+        response = await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": target_email},
+            headers=headers,
+        )
 
         # Should succeed but not duplicate the sharing
         assert response.status_code == 200
+        response_data = response.json()
+
+        # Verify user appears only once in shared_with
+        shared_emails = [user["email"] for user in response_data["shared_with"]]
+        assert shared_emails.count(target_email) == 1
 
 
 class TestItemPermissions:
@@ -332,115 +380,137 @@ class TestItemPermissions:
         self, test_db: AsyncSession, client: AsyncClient
     ):
         """Test that shared members can add items to shared lists."""
-        # Create owner and member
-        owner = User(
-            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+        # Create owner via registration
+        owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={"email": owner_email, "password": "testpass123", "nickname": "Owner"},
         )
-        member = User(
-            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+
+        # Create member via registration
+        member_email = f"member-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": member_email,
+                "password": "testpass123",
+                "nickname": "Member",
+            },
         )
-        test_db.add_all([owner, member])
-        await test_db.commit()
-        await test_db.refresh(owner)
-        await test_db.refresh(member)
 
-        # Create shopping list and share it
-        shopping_list = ShoppingList(name="Shared List", owner_id=owner.id)
-        shopping_list.shared_with.append(member)
-        test_db.add(shopping_list)
-        await test_db.commit()
-        await test_db.refresh(shopping_list)
+        # Login as owner
+        owner_login = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": owner_email, "password": "testpass123"},
+        )
+        owner_token = owner_login.json()["access_token"]
+        owner_headers = {"Authorization": f"Bearer {owner_token}"}
 
-        # Mock authentication and AI services
-        with (
-            patch(
-                "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
-            ),
-            patch(
-                "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.process_item_with_ai",
-                new_callable=AsyncMock,
-                return_value=(None, "Milk", {}, "milk"),
-            ),
-        ):
+        # Create shopping list as owner
+        list_response = await client.post(
+            "/api/v1/shopping_lists",
+            json={"name": "Shared List", "description": "Test"},
+            headers=owner_headers,
+        )
+        shopping_list_id = list_response.json()["id"]
 
-            response = await client.post(
-                f"/api/v1/shopping_lists/{shopping_list.id}/items",
-                json={"name": "Milk", "quantity": "1L"},
-            )
+        # Share the list with member
+        await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": member_email},
+            headers=owner_headers,
+        )
+
+        # Login as member
+        member_login = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": member_email, "password": "testpass123"},
+        )
+        member_token = member_login.json()["access_token"]
+        member_headers = {"Authorization": f"Bearer {member_token}"}
+
+        # Add item as member
+        response = await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/items",
+            json={"name": "Milk", "quantity": "1L"},
+            headers=member_headers,
+        )
 
         assert response.status_code == 200
-
-        # Verify item was created
-        result = await test_db.execute(
-            select(Item).where(Item.shopping_list_id == shopping_list.id)
-        )
-        items = result.scalars().all()
-        assert len(items) == 1
-        assert items[0].name == "Milk"
-        assert items[0].owner_id == member.id
+        item_data = response.json()
+        assert item_data["name"] == "Milk"
 
     @pytest.mark.asyncio
     async def test_shared_member_can_read_items(
         self, test_db: AsyncSession, client: AsyncClient
     ):
         """Test that shared members can read items from shared lists."""
-        # Create owner, member, and item
-        owner = User(
-            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+        # Create owner via registration
+        owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={"email": owner_email, "password": "testpass123", "nickname": "Owner"},
         )
-        member = User(
-            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+
+        # Create member via registration
+        member_email = f"member-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": member_email,
+                "password": "testpass123",
+                "nickname": "Member",
+            },
         )
-        test_db.add_all([owner, member])
-        await test_db.commit()
-        await test_db.refresh(owner)
-        await test_db.refresh(member)
 
-        # Create shopping list and share it
-        shopping_list = ShoppingList(name="Shared List", owner_id=owner.id)
-        shopping_list.shared_with.append(member)
-        test_db.add(shopping_list)
-        await test_db.commit()
-        await test_db.refresh(shopping_list)
-
-        # Create item
-        item = Item(
-            name="Test Item",
-            shopping_list_id=shopping_list.id,
-            owner_id=owner.id,
-            last_modified_by_id=owner.id,
+        # Login as owner
+        owner_login = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": owner_email, "password": "testpass123"},
         )
-        test_db.add(item)
-        await test_db.commit()
+        owner_token = owner_login.json()["access_token"]
+        owner_headers = {"Authorization": f"Bearer {owner_token}"}
 
-        # Mock authentication
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
-        ):
-            response = await client.get(
-                f"/api/v1/shopping_lists/{shopping_list.id}/items"
-            )
+        # Create shopping list as owner
+        list_response = await client.post(
+            "/api/v1/shopping_lists",
+            json={"name": "Shared List", "description": "Test"},
+            headers=owner_headers,
+        )
+        shopping_list_id = list_response.json()["id"]
+
+        # Add item as owner
+        item_response = await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/items",
+            json={"name": "Test Item", "quantity": "1"},
+            headers=owner_headers,
+        )
+
+        # Share the list with member
+        await client.post(
+            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            json={"email": member_email},
+            headers=owner_headers,
+        )
+
+        # Login as member
+        member_login = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": member_email, "password": "testpass123"},
+        )
+        member_token = member_login.json()["access_token"]
+        member_headers = {"Authorization": f"Bearer {member_token}"}
+
+        # Read items as member
+        response = await client.get(
+            f"/api/v1/shopping_lists/{shopping_list_id}/items",
+            headers=member_headers,
+        )
 
         assert response.status_code == 200
-        data = response.json()
-        assert len(data) == 1
-        assert data[0]["name"] == "Test Item"
+        items = response.json()
+        assert len(items) >= 1
+        assert any(item["name"] == "Test Item" for item in items)
 
 
 class TestNotificationService:

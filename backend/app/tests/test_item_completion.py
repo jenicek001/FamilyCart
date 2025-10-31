@@ -171,24 +171,19 @@ async def test_update_item_completion_wrong_owner(
     """Test updating item completion by user who doesn't own the list."""
     import uuid
 
-    # Create another user with unique email
+    # Create another user via registration endpoint
     unique_email = f"other-{uuid.uuid4().hex[:8]}@example.com"
-    other_user = User(
-        email=unique_email,
-        hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-        is_active=True,
-        is_superuser=False,
-        is_verified=True,
-        nickname="Other User",
-    )
-    test_db.add(other_user)
-    await test_db.commit()
-    await test_db.refresh(other_user)
+    register_data = {
+        "email": unique_email,
+        "password": "testpassword123",
+        "nickname": "Other User",
+    }
+    await client.post("/api/v1/auth/register", json=register_data)
 
-    # Create token for other user
+    # Login as the other user
     other_token_response = await client.post(
         "/api/v1/auth/jwt/login",
-        data={"username": other_user.email, "password": "password"},
+        data={"username": unique_email, "password": "testpassword123"},
     )
     other_token_data = other_token_response.json()
     other_headers = {"Authorization": f"Bearer {other_token_data['access_token']}"}
