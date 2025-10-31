@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -23,7 +24,7 @@ class TestSharingPermissions:
         """Test that list owner can access their list via get_shopping_list dependency."""
         # Create test user and shopping list
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -50,13 +51,13 @@ class TestSharingPermissions:
         """Test that shared members can access shared lists."""
         # Create owner and member users
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         member = User(
-            email="member@test.com",
+            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -90,13 +91,13 @@ class TestSharingPermissions:
 
         # Create users
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         outsider = User(
-            email="outsider@test.com",
+            email=f"outsider-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -126,7 +127,7 @@ class TestSharingPermissions:
         from fastapi import HTTPException
 
         user = User(
-            email="user@test.com",
+            email=f"user-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -154,13 +155,13 @@ class TestSharingEndpoints:
         """Test successful list sharing."""
         # Create owner and target user
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         target_user = User(
-            email="target@test.com",
+            email=f"target-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -209,19 +210,19 @@ class TestSharingEndpoints:
         """Test that only list owners can share lists."""
         # Create owner, member, and target users
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         member = User(
-            email="member@test.com",
+            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         target_user = User(
-            email="target@test.com",
+            email=f"target-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -256,7 +257,7 @@ class TestSharingEndpoints:
         """Test sharing with nonexistent user email."""
         # Create owner
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -289,13 +290,13 @@ class TestSharingEndpoints:
         """Test sharing with user who already has access."""
         # Create owner and target user
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         target_user = User(
-            email="target@test.com",
+            email=f"target-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -335,13 +336,13 @@ class TestItemPermissions:
         """Test that shared members can add items to shared lists."""
         # Create owner and member
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         member = User(
-            email="member@test.com",
+            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
@@ -407,13 +408,13 @@ class TestItemPermissions:
         """Test that shared members can read items from shared lists."""
         # Create owner, member, and item
         owner = User(
-            email="owner@test.com",
+            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
         )
         member = User(
-            email="member@test.com",
+            email=f"member-{uuid.uuid4().hex[:8]}@test.com",
             hashed_password="hashed",
             is_active=True,
             is_verified=True,
