@@ -53,8 +53,10 @@ async def client(
 ) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client for the FastAPI application."""
 
-    def get_test_db():
-        return test_db
+    async def get_test_db():
+        """Create a new session for each request to avoid concurrent access issues."""
+        async with TestingSessionLocal() as session:
+            yield session
 
     app.dependency_overrides[get_session] = get_test_db
 
