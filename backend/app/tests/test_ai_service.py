@@ -26,9 +26,7 @@ def ai_service_mocker():
     The new AI service delegates to fallback_ai_service, so we mock that instead.
     """
     with (
-        patch(
-            "app.services.ai_service.fallback_ai_service"
-        ) as mock_fallback_service,
+        patch("app.services.ai_service.fallback_ai_service") as mock_fallback_service,
     ):
         # Configure default mock behaviors
         mock_fallback_service.suggest_category = AsyncMock(return_value="Fruits")
@@ -37,7 +35,7 @@ def ai_service_mocker():
         mock_fallback_service.standardize_and_translate_item_name = AsyncMock(
             return_value={
                 "standardized_name": "Apple",
-                "translations": {"cs": "Jablko", "de": "Apfel"}
+                "translations": {"cs": "Jablko", "de": "Apfel"},
             }
         )
         mock_fallback_service.generate_text = AsyncMock(return_value="Generated text")
@@ -74,7 +72,7 @@ async def test_suggest_category_new_item(
     Test suggest_category delegates to fallback_ai_service.
     """
     item_name = "Baguette"
-    
+
     # The mock is already configured to return "Fruits"
     suggested_category = await ai_service.suggest_category(item_name, mock_db_session)
 
@@ -110,7 +108,7 @@ async def test_suggest_icon_new_item(ai_service: AIService):
     """
     item_name = "Blueberry"
     category_name = "Fruits"
-    
+
     # Reconfigure for this specific test
     ai_service.mocks["fallback_service"].suggest_icon.return_value = "leaf"
 
@@ -129,7 +127,7 @@ async def test_suggest_icon_cached_item(ai_service: AIService):
     """
     item_name = "Strawberry"
     category_name = "Fruits"
-    
+
     # Reconfigure mock
     ai_service.mocks["fallback_service"].suggest_icon.return_value = "park"
 
@@ -147,14 +145,14 @@ async def test_standardize_and_translate_item_name_new_item(ai_service: AIServic
     Test standardize_and_translate_item_name delegates to fallback service.
     """
     item_name = "huevos"
-    
+
     # The mock is already configured with a default return value
     result = await ai_service.standardize_and_translate_item_name(item_name)
 
     # Assertions
-    ai_service.mocks["fallback_service"].standardize_and_translate_item_name.assert_called_once_with(
-        item_name
-    )
+    ai_service.mocks[
+        "fallback_service"
+    ].standardize_and_translate_item_name.assert_called_once_with(item_name)
     assert "standardized_name" in result
     assert "translations" in result
 
@@ -164,18 +162,20 @@ async def test_standardize_and_translate_item_name_cached_item(ai_service: AISer
     Test standardize_and_translate_item_name for a cached item (handled by fallback service).
     """
     item_name = "pomme"
-    
+
     # Reconfigure mock for cached scenario
     cached_data = {
         "standardized_name": "Apple",
         "translations": {"fr": "Pomme", "es": "Manzana"},
     }
-    ai_service.mocks["fallback_service"].standardize_and_translate_item_name.return_value = cached_data
+    ai_service.mocks[
+        "fallback_service"
+    ].standardize_and_translate_item_name.return_value = cached_data
 
     result = await ai_service.standardize_and_translate_item_name(item_name)
 
     # Assertions
-    ai_service.mocks["fallback_service"].standardize_and_translate_item_name.assert_called_once_with(
-        item_name
-    )
+    ai_service.mocks[
+        "fallback_service"
+    ].standardize_and_translate_item_name.assert_called_once_with(item_name)
     assert result == cached_data
