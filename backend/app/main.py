@@ -76,12 +76,12 @@ class ProxyHeadersMiddleware(BaseHTTPMiddleware):
         forwarded_proto = request.headers.get("x-forwarded-proto")
         if forwarded_proto:
             request.scope["scheme"] = forwarded_proto
-        
+
         # Trust X-Forwarded-Host header from proxy
         forwarded_host = request.headers.get("x-forwarded-host")
         if forwarded_host:
             request.scope["server"] = (forwarded_host, None)
-        
+
         response = await call_next(request)
         return response
 

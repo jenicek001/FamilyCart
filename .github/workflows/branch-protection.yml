@@ -27,6 +27,16 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           branch_name="${{ github.head_ref }}"
+          actor="${{ github.actor }}"
+          
+          # Skip validation for Dependabot PRs - they use their own naming convention
+          if [[ "$actor" == "dependabot[bot]" ]]; then
+            echo "✅ Dependabot PR detected - skipping branch name validation"
+            echo "Branch: $branch_name"
+            exit 0
+          fi
+          
+          # Validate branch naming convention for human contributors
           if [[ ! "$branch_name" =~ ^(feature|hotfix|bugfix|chore|docs|release)/.+ ]]; then
             echo "❌ Invalid branch name: $branch_name"
             echo "Branch name must follow the pattern: feature/, hotfix/, bugfix/, chore/, docs/, or release/"
