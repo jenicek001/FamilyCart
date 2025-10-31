@@ -85,7 +85,7 @@ async def test_update_item_completion_status(
     assert response_data["name"] == test_item.name
 
     # Verify in database - expire and refresh to get fresh state
-    await test_db.expire(test_item)
+    test_db.expire(test_item)
     await test_db.refresh(test_item)
     assert test_item.is_completed is True
 
@@ -115,7 +115,7 @@ async def test_update_item_completion_back_to_false(
     assert response_data["id"] == test_item.id
 
     # Verify in database - expire and refresh to get fresh state
-    await test_db.expire(test_item)
+    test_db.expire(test_item)
     await test_db.refresh(test_item)
     assert test_item.is_completed is False
 

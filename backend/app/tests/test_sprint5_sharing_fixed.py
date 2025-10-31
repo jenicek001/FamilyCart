@@ -179,19 +179,9 @@ class TestSharingEndpoints:
         await test_db.commit()
         await test_db.refresh(shopping_list)
 
-        # Mock authentication and websocket/email services
-        with (
-            patch(
-                "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
-            ),
-            patch(
-                "app.api.v1.endpoints.shopping_lists.WebSocketNotifier.notify_list_shared",
-                new_callable=AsyncMock,
-            ),
-            patch(
-                "app.api.v1.endpoints.shopping_lists.send_list_invitation_email",
-                new_callable=AsyncMock,
-            ),
+        # Mock authentication only
+        with patch(
+            "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
         ):
 
             response = await client.post(
@@ -375,18 +365,9 @@ class TestItemPermissions:
                 "app.api.v1.endpoints.shopping_lists.current_user", return_value=member
             ),
             patch(
-                "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.standardize_item_name",
+                "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.process_item_with_ai",
                 new_callable=AsyncMock,
-                return_value={"standardized_name": "Milk", "translations": {}},
-            ),
-            patch(
-                "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.suggest_icon",
-                new_callable=AsyncMock,
-                return_value="milk",
-            ),
-            patch(
-                "app.api.v1.endpoints.shopping_lists.WebSocketNotifier.notify_item_created",
-                new_callable=AsyncMock,
+                return_value=(None, "Milk", {}, "milk"),
             ),
         ):
 
