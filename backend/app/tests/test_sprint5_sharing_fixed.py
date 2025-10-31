@@ -192,7 +192,7 @@ class TestSharingEndpoints:
 
         # Create shopping list as owner
         list_response = await client.post(
-            "/api/v1/shopping_lists",
+            "/api/v1/shopping-lists",
             json={"name": "Test List", "description": "Test"},
             headers=headers,
         )
@@ -204,7 +204,7 @@ class TestSharingEndpoints:
 
         # Share the list
         response = await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": target_email},
             headers=headers,
         )
@@ -261,7 +261,7 @@ class TestSharingEndpoints:
 
         # Create shopping list as owner
         list_response = await client.post(
-            "/api/v1/shopping_lists",
+            "/api/v1/shopping-lists",
             json={"name": "Test List", "description": "Test"},
             headers=owner_headers,
         )
@@ -269,7 +269,7 @@ class TestSharingEndpoints:
 
         # Share the list with member
         await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": member_email},
             headers=owner_headers,
         )
@@ -284,7 +284,7 @@ class TestSharingEndpoints:
 
         # Try to share as member (should fail)
         response = await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": target_email},
             headers=member_headers,
         )
@@ -296,32 +296,39 @@ class TestSharingEndpoints:
         self, test_db: AsyncSession, client: AsyncClient
     ):
         """Test sharing with nonexistent user email."""
-        # Create owner
-        owner = User(
-            email=f"owner-{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
-            is_active=True,
-            is_verified=True,
-            nickname="TestUser",
+        # Create owner via registration
+        owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": owner_email,
+                "password": "Password123!",
+                "nickname": "TestOwner",
+            },
         )
-        test_db.add(owner)
-        await test_db.commit()
-        await test_db.refresh(owner)
+
+        # Login as owner
+        login_response = await client.post(
+            "/api/v1/auth/jwt/login",
+            data={"username": owner_email, "password": "Password123!"},
+        )
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
 
         # Create shopping list
-        shopping_list = ShoppingList(name="Test List", owner_id=owner.id)
-        test_db.add(shopping_list)
-        await test_db.commit()
-        await test_db.refresh(shopping_list)
+        list_response = await client.post(
+            "/api/v1/shopping-lists",
+            json={"name": "Test List", "description": "Test"},
+            headers=headers,
+        )
+        shopping_list_id = list_response.json()["id"]
 
-        # Mock authentication
-        with patch(
-            "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
-        ):
-            response = await client.post(
-                f"/api/v1/shopping_lists/{shopping_list.id}/share",
-                json={"email": "nonexistent@test.com"},
-            )
+        # Try to share with nonexistent user
+        response = await client.post(
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
+            json={"email": "nonexistent@test.com"},
+            headers=headers,
+        )
 
         assert response.status_code == 404
 
@@ -358,7 +365,7 @@ class TestSharingEndpoints:
 
         # Create shopping list as owner
         list_response = await client.post(
-            "/api/v1/shopping_lists",
+            "/api/v1/shopping-lists",
             json={"name": "Test List", "description": "Test"},
             headers=headers,
         )
@@ -366,14 +373,14 @@ class TestSharingEndpoints:
 
         # Share the list first time
         await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": target_email},
             headers=headers,
         )
 
         # Share again (should succeed but not duplicate)
         response = await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": target_email},
             headers=headers,
         )
@@ -423,7 +430,7 @@ class TestItemPermissions:
 
         # Create shopping list as owner
         list_response = await client.post(
-            "/api/v1/shopping_lists",
+            "/api/v1/shopping-lists",
             json={"name": "Shared List", "description": "Test"},
             headers=owner_headers,
         )
@@ -431,7 +438,7 @@ class TestItemPermissions:
 
         # Share the list with member
         await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": member_email},
             headers=owner_headers,
         )
@@ -446,7 +453,7 @@ class TestItemPermissions:
 
         # Add item as member
         response = await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/items",
+            f"/api/v1/shopping-lists/{shopping_list_id}/items",
             json={"name": "Milk", "quantity": "1L"},
             headers=member_headers,
         )
@@ -488,7 +495,7 @@ class TestItemPermissions:
 
         # Create shopping list as owner
         list_response = await client.post(
-            "/api/v1/shopping_lists",
+            "/api/v1/shopping-lists",
             json={"name": "Shared List", "description": "Test"},
             headers=owner_headers,
         )
@@ -496,14 +503,14 @@ class TestItemPermissions:
 
         # Add item as owner
         item_response = await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/items",
+            f"/api/v1/shopping-lists/{shopping_list_id}/items",
             json={"name": "Test Item", "quantity": "1"},
             headers=owner_headers,
         )
 
         # Share the list with member
         await client.post(
-            f"/api/v1/shopping_lists/{shopping_list_id}/share",
+            f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": member_email},
             headers=owner_headers,
         )
@@ -518,7 +525,7 @@ class TestItemPermissions:
 
         # Read items as member
         response = await client.get(
-            f"/api/v1/shopping_lists/{shopping_list_id}/items",
+            f"/api/v1/shopping-lists/{shopping_list_id}/items",
             headers=member_headers,
         )
 
