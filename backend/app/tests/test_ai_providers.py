@@ -76,7 +76,9 @@ class TestAIProviderFactory:
 
     @patch("app.core.config.settings")
     @patch("app.services.gemini_provider.settings")
-    def test_unsupported_provider_raises_error(self, mock_gemini_settings, mock_settings):
+    def test_unsupported_provider_raises_error(
+        self, mock_gemini_settings, mock_settings
+    ):
         """Test that unsupported provider raises ValueError."""
         mock_settings.AI_PROVIDER = "unsupported"
         # Mock GEMINI_API_KEY to prevent validation error
