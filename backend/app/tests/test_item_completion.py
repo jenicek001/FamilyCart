@@ -84,10 +84,10 @@ async def test_update_item_completion_status(
     assert response_data["id"] == test_item.id
     assert response_data["name"] == test_item.name
 
-    # Verify in database
-    result = await test_db.execute(select(Item).where(Item.id == test_item.id))
-    updated_item = result.scalars().first()
-    assert updated_item.is_completed is True
+    # Verify in database - expire and refresh to get fresh state
+    await test_db.expire(test_item)
+    await test_db.refresh(test_item)
+    assert test_item.is_completed is True
 
 
 @pytest.mark.asyncio
@@ -99,6 +99,7 @@ async def test_update_item_completion_back_to_false(
     test_item.is_completed = True
     test_db.add(test_item)
     await test_db.commit()
+    await test_db.refresh(test_item)
 
     # Test marking item as not completed
     response = await client.put(
@@ -113,10 +114,10 @@ async def test_update_item_completion_back_to_false(
     assert response_data["is_completed"] is False
     assert response_data["id"] == test_item.id
 
-    # Verify in database
-    result = await test_db.execute(select(Item).where(Item.id == test_item.id))
-    updated_item = result.scalars().first()
-    assert updated_item.is_completed is False
+    # Verify in database - expire and refresh to get fresh state
+    await test_db.expire(test_item)
+    await test_db.refresh(test_item)
+    assert test_item.is_completed is False
 
 
 @pytest.mark.asyncio
@@ -168,10 +169,13 @@ async def test_update_item_completion_wrong_owner(
     client: AsyncClient, test_item: Item, test_db: AsyncSession
 ):
     """Test updating item completion by user who doesn't own the list."""
-    # Create another user
+    import uuid
+
+    # Create another user with unique email
+    unique_email = f"other-{uuid.uuid4().hex[:8]}@example.com"
     other_user = User(
-        email="other@example.com",
-        hashed_password="hashed_password",
+        email=unique_email,
+        hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYctHWLSbaC",
         is_active=True,
         is_superuser=False,
         is_verified=True,

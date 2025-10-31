@@ -185,7 +185,7 @@ class TestSharingEndpoints:
                 "app.api.v1.endpoints.shopping_lists.current_user", return_value=owner
             ),
             patch(
-                "app.api.v1.endpoints.shopping_lists.websocket_service.notify_list_shared",
+                "app.api.v1.endpoints.shopping_lists.WebSocketNotifier.notify_list_shared",
                 new_callable=AsyncMock,
             ),
             patch(
@@ -378,19 +378,19 @@ class TestItemPermissions:
                 "app.api.v1.endpoints.shopping_lists.ai_service.suggest_category_async",
                 new_callable=AsyncMock,
                 return_value="Groceries",
-            ),
+        with (
             patch(
-                "app.api.v1.endpoints.shopping_lists.ai_service.standardize_and_translate_item_name",
+                "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.standardize_item_name",
                 new_callable=AsyncMock,
                 return_value={"standardized_name": "Milk", "translations": {}},
             ),
             patch(
-                "app.api.v1.endpoints.shopping_lists.ai_service.suggest_icon",
+                "app.api.v1.endpoints.shopping_lists.ItemAIProcessor.suggest_icon",
                 new_callable=AsyncMock,
                 return_value="milk",
             ),
             patch(
-                "app.api.v1.endpoints.shopping_lists.websocket_service.notify_item_created",
+                "app.api.v1.endpoints.shopping_lists.WebSocketNotifier.notify_item_created",
                 new_callable=AsyncMock,
             ),
         ):
