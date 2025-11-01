@@ -2,6 +2,8 @@
 Tests for shopping list endpoints.
 """
 
+import uuid
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,8 +26,8 @@ async def test_shopping_list(test_db: AsyncSession, test_user: dict):
     await test_db.commit()
     await test_db.refresh(shopping_list)
 
-    # Create a category
-    category = Category(name="Test Category")
+    # Create a category with unique name to avoid constraint violations
+    category = Category(name=f"Test Category {uuid.uuid4().hex[:8]}")
     test_db.add(category)
     await test_db.commit()
     await test_db.refresh(category)
