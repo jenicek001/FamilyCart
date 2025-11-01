@@ -155,5 +155,3 @@ class TestItemPermissions:
         items = response.json()
         assert len(items) >= 1
         assert any(item["name"] == "Test Item" for item in items)
-
-

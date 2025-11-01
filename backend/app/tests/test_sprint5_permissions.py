@@ -145,5 +145,3 @@ class TestSharingPermissions:
             await get_shopping_list(list_id=99999, session=test_db, current_user=user)
 
         assert exc_info.value.status_code == 404
-
-

@@ -263,5 +263,3 @@ class TestSharingEndpoints:
         # Verify user appears only once in members
         shared_emails = [user["email"] for user in response_data["members"]]
         assert shared_emails.count(target_email) == 1
-
-
