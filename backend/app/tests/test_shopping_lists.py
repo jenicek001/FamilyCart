@@ -39,6 +39,7 @@ async def test_shopping_list(test_db: AsyncSession, test_user: dict):
         comment="First test item",
         shopping_list_id=shopping_list.id,
         owner_id=test_user["id"],
+        last_modified_by_id=test_user["id"],
         category_id=category.id,
     )
 
@@ -48,6 +49,7 @@ async def test_shopping_list(test_db: AsyncSession, test_user: dict):
         comment="Second test item",
         shopping_list_id=shopping_list.id,
         owner_id=test_user["id"],
+        last_modified_by_id=test_user["id"],
         category_id=category.id,
     )
 
