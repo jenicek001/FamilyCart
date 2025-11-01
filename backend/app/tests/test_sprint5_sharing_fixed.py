@@ -72,7 +72,7 @@ class TestSharingPermissions:
 
         # Create shopping list and share it
         shopping_list = ShoppingList(name="Shared List", owner_id=owner.id)
-        shopping_list.members.append(member)
+        shopping_list.shared_with.append(member)
         test_db.add(shopping_list)
         await test_db.commit()
         await test_db.refresh(shopping_list)
