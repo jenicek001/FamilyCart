@@ -6,7 +6,6 @@ const ensureTrailingSlash = (url: string): string => {
   const pathsNeedingSlash = [
     '/api/v1/shopping-lists',
     '/api/v1/items',
-    '/api/v1/users/me',
     // Add other API paths that need trailing slashes
   ];
   
@@ -39,24 +38,25 @@ const ensureTrailingSlash = (url: string): string => {
   return url;
 };
 
-// Create an axios instance - using relative URLs since Next.js proxy handles routing to backend
-const apiClient = axios.create({
-  // Using relative paths that get proxied by Next.js rewrites configuration
-  // The rewrites in next.config.ts route /api/* to the backend URL from NEXT_PUBLIC_API_URL
-});
+// Create an axios instance without a base URL
+// We'll set it dynamically in the interceptor to handle SSR correctly
+const apiClient = axios.create();
 
-// Add a request interceptor to add trailing slashes to URLs that need them
+// Add a request interceptor to set the baseURL dynamically and add trailing slashes
 apiClient.interceptors.request.use(
   (config) => {
+    // Set baseURL dynamically on each request (fixes SSR issue where window.location doesn't exist during module init)
+    if (typeof window !== 'undefined' && !config.baseURL) {
+      config.baseURL = window.location.origin;
+      console.log(`Set baseURL dynamically: ${config.baseURL}`);
+    }
+    
     if (config.url) {
       const originalUrl = config.url;
       
       // Handle the specific problem URLs directly to ensure they always have trailing slashes
       if (config.url === '/api/v1/shopping-lists') {
         config.url = '/api/v1/shopping-lists/';
-        console.log(`FORCED trailing slash: ${originalUrl} → ${config.url}`);
-      } else if (config.url === '/api/v1/users/me') {
-        config.url = '/api/v1/users/me/';
         console.log(`FORCED trailing slash: ${originalUrl} → ${config.url}`);
       } else if (config.url === '/api/v1/items') {
         config.url = '/api/v1/items/';

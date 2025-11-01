@@ -1,13 +1,14 @@
-version: '3.9'
-
 # GitHub Self-Hosted Runners for FamilyCart
 # This compose file sets up multiple runners for parallel builds
 
 services:
   runner-1:
     build: 
-      context: ./github-runners
+      context: ./deploy/github-runners
       dockerfile: Dockerfile
+      args:
+        # Pass host docker group ID to ensure proper permissions
+        DOCKER_GID: 984
     container_name: familycart-runner-1
     environment:
       - GITHUB_OWNER=jenicek001
@@ -26,9 +27,10 @@ services:
       - build-cache:/tmp/build-cache
       # Host tools and caches
       - /usr/bin/docker:/usr/bin/docker:ro
-      - ~/.docker:/home/runner/.docker:ro
+
     networks:
       - runners-network
+      - ci-infrastructure
     restart: unless-stopped
     # Resource limits to prevent one runner from consuming all resources
     deploy:
@@ -39,18 +41,20 @@ services:
         reservations:
           memory: 2G
           cpus: '0.5'
-    # Health check
+    # Health check - more tolerant for CI jobs
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   runner-2:
     build: 
-      context: ./github-runners
+      context: ./deploy/github-runners
       dockerfile: Dockerfile
+      args:
+        DOCKER_GID: 984
     container_name: familycart-runner-2
     environment:
       - GITHUB_OWNER=jenicek001
@@ -65,9 +69,10 @@ services:
       - runner2-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      - ~/.docker:/home/runner/.docker:ro
+
     networks:
       - runners-network
+      - ci-infrastructure
     restart: unless-stopped
     deploy:
       resources:
@@ -79,15 +84,17 @@ services:
           cpus: '0.5'
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   runner-3:
     build: 
-      context: ./github-runners
+      context: ./deploy/github-runners
       dockerfile: Dockerfile
+      args:
+        DOCKER_GID: 984
     container_name: familycart-runner-3
     environment:
       - GITHUB_OWNER=jenicek001
@@ -102,9 +109,10 @@ services:
       - runner3-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
-      - ~/.docker:/home/runner/.docker:ro
+
     networks:
       - runners-network
+      - ci-infrastructure
     restart: unless-stopped
     deploy:
       resources:
@@ -116,10 +124,10 @@ services:
           cpus: '0.5'
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   # Registry cache for faster image pulls
   registry-cache:
@@ -138,7 +146,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
           cpus: '1.0'
 
   # Monitoring for runners
@@ -184,21 +192,26 @@ services:
 
 networks:
   runners-network:
-    driver: bridge
+    external: true
     name: familycart-runners
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.21.0.0/16
+  ci-infrastructure:
+    external: true
+    name: familycart-ci-infrastructure
 
 volumes:
   runner1-work:
+    external: true
     name: familycart-runner-1-work
   runner2-work:
+    external: true
     name: familycart-runner-2-work
   runner3-work:
+    external: true
     name: familycart-runner-3-work
+
   build-cache:
+    external: true
     name: familycart-build-cache
   registry-cache:
+    external: true
     name: familycart-registry-cache

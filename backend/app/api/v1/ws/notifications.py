@@ -2,7 +2,7 @@ import json
 import logging
 import uuid
 from datetime import UTC, datetime
-from typing import Dict, List, Optional, Set
+from typing import Dict, Optional, Set
 from uuid import UUID
 
 import jwt

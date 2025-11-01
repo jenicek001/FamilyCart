@@ -82,6 +82,13 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
+    // In production with nginx proxy, rewrites are not needed
+    // Nginx handles proxying /api requests to the backend
+    if (process.env.NODE_ENV === 'production' && process.env.USE_NGINX_PROXY === 'true') {
+      console.log('Production mode with nginx proxy - rewrites disabled');
+      return [];
+    }
+    
     let apiUrl;
     
     if (process.env.NODE_ENV === 'production') {

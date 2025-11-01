@@ -22,35 +22,30 @@ def mock_db_session():
 @pytest.fixture
 def ai_service_mocker():
     """
-    This fixture automatically patches all external dependencies for ai_service
-    for every test in this module.
+    This fixture automatically patches the fallback_ai_service for ai_service tests.
+    The new AI service delegates to fallback_ai_service, so we mock that instead.
     """
     with (
-        patch(
-            "google.generativeai.GenerativeModel", new_callable=MagicMock
-        ) as mock_genai_model,
-        patch(
-            "app.services.ai_service.cache_service", spec=CacheService
-        ) as mock_cache_service,
-        patch(
-            "app.services.ai_service.crud_category", spec=CRUDCategory
-        ) as mock_crud_category,
+        patch("app.services.ai_service.fallback_ai_service") as mock_fallback_service,
     ):
-
         # Configure default mock behaviors
-        mock_genai_model.return_value.generate_content_async = AsyncMock()
-        mock_cache_service.get = AsyncMock(return_value=None)
-        mock_cache_service.set = AsyncMock()
-        mock_crud_category.get_multi.return_value = [
-            Category(id=1, name="Fruits", icon_name="apple"),
-            Category(id=2, name="Bakery", icon_name="bread-slice"),
-        ]
+        mock_fallback_service.suggest_category = AsyncMock(return_value="Fruits")
+        mock_fallback_service.suggest_category_async = AsyncMock(return_value="Fruits")
+        mock_fallback_service.suggest_icon = AsyncMock(return_value="apple")
+        mock_fallback_service.standardize_and_translate_item_name = AsyncMock(
+            return_value={
+                "standardized_name": "Apple",
+                "translations": {"cs": "Jablko", "de": "Apfel"},
+            }
+        )
+        mock_fallback_service.generate_text = AsyncMock(return_value="Generated text")
+        mock_fallback_service.get_provider_info = MagicMock(
+            return_value={"primary": "gemini", "fallback_available": True}
+        )
 
-        # Yield a dictionary of mocks for tests to use for configuration
+        # Yield the mock for tests to configure
         yield {
-            "model": mock_genai_model.return_value,
-            "cache": mock_cache_service,
-            "crud_category": mock_crud_category,
+            "fallback_service": mock_fallback_service,
         }
 
 
@@ -74,154 +69,113 @@ async def test_suggest_category_new_item(
     ai_service: AIService, mock_db_session: MagicMock
 ):
     """
-    Test suggest_category for an item not in cache.
-    It should call the AI model and cache the result.
+    Test suggest_category delegates to fallback_ai_service.
     """
     item_name = "Baguette"
-    cache_key = f"category_suggestion:{item_name.lower().strip()}"
-    ai_service.mocks["cache"].get.return_value = None
 
-    # Mock the AI's response
-    ai_response_text = "Bakery"
-    mock_response = MagicMock()
-    mock_response.text = ai_response_text
-    ai_service.mocks["model"].generate_content_async.return_value = mock_response
-
+    # The mock is already configured to return "Fruits"
     suggested_category = await ai_service.suggest_category(item_name, mock_db_session)
 
-    # Assertions
-    ai_service.mocks["crud_category"].get_multi.assert_called_once_with(
-        mock_db_session, limit=1000
+    # Assertions - verify it called the fallback service
+    ai_service.mocks["fallback_service"].suggest_category.assert_called_once_with(
+        item_name, mock_db_session
     )
-    ai_service.mocks["model"].generate_content_async.assert_called_once()
-    ai_service.mocks["cache"].get.assert_called_once_with(cache_key)
-    ai_service.mocks["cache"].set.assert_called_once_with(
-        cache_key, "Bakery", expire=3600 * 24 * 180
-    )
-    assert suggested_category == "Bakery"
+    assert suggested_category == "Fruits"
 
 
 async def test_suggest_category_cached_item(
     ai_service: AIService, mock_db_session: MagicMock
 ):
     """
-    Test suggest_category for an item that is already in the cache.
-    It should return the cached value without calling the AI model.
+    Test suggest_category for a cached item (handled by fallback service).
     """
     item_name = "Croissant"
-    cached_category = "Bakery"
-    cache_key = f"category_suggestion:{item_name.lower().strip()}"
-    ai_service.mocks["cache"].get.return_value = cached_category
+    # Reconfigure the mock to return a different value
+    ai_service.mocks["fallback_service"].suggest_category.return_value = "Bakery"
 
     suggested_category = await ai_service.suggest_category(item_name, mock_db_session)
 
     # Assertions
-    ai_service.mocks["cache"].get.assert_called_once_with(cache_key)
-    ai_service.mocks["model"].generate_content_async.assert_not_called()
-    ai_service.mocks["cache"].set.assert_not_called()
-    assert suggested_category == cached_category
+    ai_service.mocks["fallback_service"].suggest_category.assert_called_once_with(
+        item_name, mock_db_session
+    )
+    assert suggested_category == "Bakery"
 
 
 async def test_suggest_icon_new_item(ai_service: AIService):
     """
-    Test suggest_icon for a new item not in cache.
-    It should call the AI model and cache the result.
+    Test suggest_icon delegates to fallback_ai_service.
     """
     item_name = "Blueberry"
     category_name = "Fruits"
-    cache_key = (
-        f"icon_suggestion:{item_name.lower().strip()}:{category_name.lower().strip()}"
-    )
-    ai_service.mocks["cache"].get.return_value = None
 
-    # Mock the AI's response
-    ai_response_text = "leaf"  # The model should return just the icon name
-    mock_response = MagicMock()
-    mock_response.text = ai_response_text
-    ai_service.mocks["model"].generate_content_async.return_value = mock_response
+    # Reconfigure for this specific test
+    ai_service.mocks["fallback_service"].suggest_icon.return_value = "leaf"
 
     suggested_icon = await ai_service.suggest_icon(item_name, category_name)
 
     # Assertions
-    ai_service.mocks["model"].generate_content_async.assert_called_once()
-    ai_service.mocks["cache"].get.assert_called_once_with(cache_key)
-    ai_service.mocks["cache"].set.assert_called_once_with(
-        cache_key, "leaf", expire=3600 * 24 * 180
+    ai_service.mocks["fallback_service"].suggest_icon.assert_called_once_with(
+        item_name, category_name
     )
     assert suggested_icon == "leaf"
 
 
 async def test_suggest_icon_cached_item(ai_service: AIService):
     """
-    Test suggest_icon for an item that is already in the cache.
-    It should return the cached value without calling the AI model.
+    Test suggest_icon for a cached item (handled by fallback service).
     """
     item_name = "Strawberry"
     category_name = "Fruits"
-    cached_icon = "park"  # Using a valid icon from the list
-    cache_key = (
-        f"icon_suggestion:{item_name.lower().strip()}:{category_name.lower().strip()}"
-    )
-    ai_service.mocks["cache"].get.return_value = cached_icon
+
+    # Reconfigure mock
+    ai_service.mocks["fallback_service"].suggest_icon.return_value = "park"
 
     suggested_icon = await ai_service.suggest_icon(item_name, category_name)
 
     # Assertions
-    ai_service.mocks["cache"].get.assert_called_once_with(cache_key)
-    ai_service.mocks["model"].generate_content_async.assert_not_called()
-    ai_service.mocks["cache"].set.assert_not_called()
-    assert suggested_icon == cached_icon
+    ai_service.mocks["fallback_service"].suggest_icon.assert_called_once_with(
+        item_name, category_name
+    )
+    assert suggested_icon == "park"
 
 
 async def test_standardize_and_translate_item_name_new_item(ai_service: AIService):
     """
-    Test standardize_and_translate_item_name for a new item.
-    It should call the AI model, parse the response, and cache the result.
+    Test standardize_and_translate_item_name delegates to fallback service.
     """
     item_name = "huevos"
-    cache_key = f"standardized_name:{item_name.lower().strip()}"
-    ai_service.mocks["cache"].get.return_value = None
 
-    # Mock the AI's response
-    response_data = {
-        "standardized_name": "Eggs",
-        "translations": {"es": "Huevos", "fr": "Oeufs", "de": "Eier"},
-    }
-    # The model now returns a clean JSON string, so we mock that
-    ai_response_text = json.dumps(response_data)
-    mock_response = MagicMock()
-    mock_response.text = ai_response_text
-    ai_service.mocks["model"].generate_content_async.return_value = mock_response
-
+    # The mock is already configured with a default return value
     result = await ai_service.standardize_and_translate_item_name(item_name)
 
     # Assertions
-    ai_service.mocks["model"].generate_content_async.assert_called_once()
-    ai_service.mocks["cache"].get.assert_called_once_with(cache_key)
-    ai_service.mocks["cache"].set.assert_called_once_with(
-        cache_key, json.dumps(response_data), expire=3600 * 24 * 180
-    )
-    assert result == response_data
+    ai_service.mocks[
+        "fallback_service"
+    ].standardize_and_translate_item_name.assert_called_once_with(item_name)
+    assert "standardized_name" in result
+    assert "translations" in result
 
 
 async def test_standardize_and_translate_item_name_cached_item(ai_service: AIService):
     """
-    Test standardize_and_translate_item_name for a cached item.
-    It should return the parsed cached value without calling the AI model.
+    Test standardize_and_translate_item_name for a cached item (handled by fallback service).
     """
-    item_name = "leche"
+    item_name = "pomme"
+
+    # Reconfigure mock for cached scenario
     cached_data = {
-        "standardized_name": "Milk",
-        "translations": {"es": "Leche", "fr": "Lait", "de": "Milch"},
+        "standardized_name": "Apple",
+        "translations": {"fr": "Pomme", "es": "Manzana"},
     }
-    cached_json_string = json.dumps(cached_data)
-    cache_key = f"standardized_name:{item_name.lower().strip()}"
-    ai_service.mocks["cache"].get.return_value = cached_json_string
+    ai_service.mocks[
+        "fallback_service"
+    ].standardize_and_translate_item_name.return_value = cached_data
 
     result = await ai_service.standardize_and_translate_item_name(item_name)
 
     # Assertions
-    ai_service.mocks["cache"].get.assert_called_once_with(cache_key)
-    ai_service.mocks["model"].generate_content_async.assert_not_called()
-    ai_service.mocks["cache"].set.assert_not_called()
+    ai_service.mocks[
+        "fallback_service"
+    ].standardize_and_translate_item_name.assert_called_once_with(item_name)
     assert result == cached_data

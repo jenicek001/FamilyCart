@@ -1,24 +1,11 @@
 """
 Unit tests for AI Provider Factory and Providers
 
-Tests the AI provider pattern         mock_settings.AI_PROVIDER = "gemini"
-        mock_settings.GOOGLE_API_KEY = "test-key"
-        mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
-        
-        with patch('app.services.ai_factory.GeminiProvider') as mock_gemini:
-            mock_instance = Mock()
-            mock_instance.provider_name = "gemini"
-            mock_instance.model_name = "gemini-2.5-flash-lite-preview-06-17"
-            mock_gemini.return_value = mock_instance
-            
-            info = AIProviderFactory.get_provider_info()
-            
-            assert info == {
-                "provider": "gemini",
-                "model_name": "gemini-2.5-flash-lite-preview-06-17",including factory,
+Tests the AI provider pattern including factory,
 provider selection, and basic functionality of both Gemini and Ollama providers.
 """
 
+import os
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -29,6 +16,15 @@ from app.services.gemini_provider import GeminiProvider
 from app.services.ollama_provider import OllamaProvider
 
 
+@pytest.fixture(autouse=True)
+def mock_gemini_api_key(monkeypatch):
+    """Auto-mock GEMINI_API_KEY for all tests in this module."""
+    monkeypatch.setenv("GEMINI_API_KEY", "test-api-key-for-testing")
+    # Also mock it on the settings object
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "test-api-key-for-testing")
+    yield
+
+
 class TestAIProviderFactory:
     """Tests for the AI Provider Factory."""
 
@@ -37,11 +33,14 @@ class TestAIProviderFactory:
         AIProviderFactory.reset_provider()
 
     @patch("app.core.config.settings")
-    def test_get_gemini_provider(self, mock_settings):
+    @patch("app.services.gemini_provider.settings")
+    def test_get_gemini_provider(self, mock_gemini_settings, mock_settings):
         """Test that factory returns Gemini provider when configured."""
         mock_settings.AI_PROVIDER = "gemini"
         mock_settings.GOOGLE_API_KEY = "test-key"
         mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
+        # Mock GEMINI_API_KEY to prevent validation error
+        mock_gemini_settings.GEMINI_API_KEY = "test-key"
 
         with patch("app.services.ai_factory.GeminiProvider") as mock_gemini:
             mock_instance = Mock()
@@ -52,12 +51,12 @@ class TestAIProviderFactory:
             assert provider == mock_instance
             mock_gemini.assert_called_once()
 
-    @patch("app.core.config.settings")
+    @patch("app.services.ai_factory.settings")
     def test_get_ollama_provider(self, mock_settings):
         """Test that factory returns Ollama provider when configured."""
         mock_settings.AI_PROVIDER = "ollama"
         mock_settings.OLLAMA_BASE_URL = "http://localhost:11434"
-        mock_settings.OLLAMA_MODEL_NAME = "llama3.2"
+        mock_settings.OLLAMA_MODEL_NAME = "gemma3:4b"
 
         with patch("app.services.ai_factory.OllamaProvider") as mock_ollama:
             mock_instance = Mock()
@@ -68,7 +67,7 @@ class TestAIProviderFactory:
             assert provider == mock_instance
             mock_ollama.assert_called_once()
 
-    @patch("app.core.config.settings")
+    @patch("app.services.ai_factory.settings")
     def test_unsupported_provider_raises_error(self, mock_settings):
         """Test that unsupported provider raises ValueError."""
         mock_settings.AI_PROVIDER = "unsupported"
@@ -79,11 +78,14 @@ class TestAIProviderFactory:
         assert "Unsupported AI provider: unsupported" in str(exc_info.value)
 
     @patch("app.core.config.settings")
-    def test_provider_singleton_behavior(self, mock_settings):
+    @patch("app.services.gemini_provider.settings")
+    def test_provider_singleton_behavior(self, mock_gemini_settings, mock_settings):
         """Test that factory returns the same instance on multiple calls."""
         mock_settings.AI_PROVIDER = "gemini"
         mock_settings.GOOGLE_API_KEY = "test-key"
         mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
+        # Mock GEMINI_API_KEY to prevent validation error
+        mock_gemini_settings.GEMINI_API_KEY = "test-key"
 
         with patch("app.services.ai_factory.GeminiProvider") as mock_gemini:
             mock_instance = Mock()
@@ -95,7 +97,7 @@ class TestAIProviderFactory:
             assert provider1 is provider2
             mock_gemini.assert_called_once()  # Should only be called once
 
-    @patch("app.core.config.settings")
+    @patch("app.services.ai_factory.settings")
     def test_provider_info_success(self, mock_settings):
         """Test getting provider info when provider is available."""
         mock_settings.AI_PROVIDER = "gemini"
@@ -117,11 +119,13 @@ class TestAIProviderFactory:
             }
             assert info == expected
 
-    @patch("app.core.config.settings")
-    def test_provider_info_error(self, mock_settings):
+    @patch("app.services.ai_factory.settings")
+    @patch("app.services.gemini_provider.settings")
+    def test_provider_info_error(self, mock_gemini_settings, mock_settings):
         """Test getting provider info when provider fails to initialize."""
         mock_settings.AI_PROVIDER = "gemini"
-        mock_settings.GOOGLE_API_KEY = None  # This will cause an error
+        # Mock GEMINI_API_KEY as None to cause an error
+        mock_gemini_settings.GEMINI_API_KEY = None
 
         info = AIProviderFactory.get_provider_info()
 
@@ -130,27 +134,21 @@ class TestAIProviderFactory:
         assert info["model_name"] == "unknown"
         assert "error" in info
 
-    def test_reset_provider(self):
-        """Test that reset_provider clears the singleton instance."""
-        with patch("app.core.config.settings") as mock_settings:
-            mock_settings.AI_PROVIDER = "gemini"
-            mock_settings.GOOGLE_API_KEY = "test-key"
-            mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
+    @patch("app.services.ai_factory.settings")
+    def test_reset_provider(self, mock_settings):
+        """Test provider reset functionality."""
+        mock_settings.AI_PROVIDER = "ollama"
+        mock_settings.OLLAMA_MODEL = "test-model"
 
-            with patch("app.services.ai_factory.GeminiProvider") as mock_gemini:
-                mock_instance = Mock()
-                mock_gemini.return_value = mock_instance
+        # Get initial provider
+        provider1 = AIProviderFactory.get_provider()
+        assert provider1 is not None
 
-                # Get provider to create instance
-                provider1 = AIProviderFactory.get_provider()
-
-                # Reset and get again
-                AIProviderFactory.reset_provider()
-                provider2 = AIProviderFactory.get_provider()
-
-                # Should be different instances
-                assert provider1 is not provider2
-                assert mock_gemini.call_count == 2
+        # Reset and get new provider
+        AIProviderFactory.reset_provider()
+        provider2 = AIProviderFactory.get_provider()
+        assert provider2 is not None
+        assert provider1 is not provider2
 
 
 class TestAIProviderIntegration:
@@ -160,11 +158,11 @@ class TestAIProviderIntegration:
         """Reset factory state before each test."""
         AIProviderFactory.reset_provider()
 
-    @patch("app.core.config.settings")
+    @patch("app.services.gemini_provider.settings")
     @patch("app.services.gemini_provider.genai")
     def test_gemini_provider_initialization(self, mock_genai, mock_settings):
         """Test Gemini provider initializes correctly."""
-        mock_settings.GOOGLE_API_KEY = "test-key"
+        mock_settings.GEMINI_API_KEY = "test-key"
         mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
 
         mock_model = Mock()
@@ -179,22 +177,22 @@ class TestAIProviderIntegration:
             "gemini-2.5-flash-lite-preview-06-17"
         )
 
-    @patch("app.core.config.settings")
+    @patch("app.services.gemini_provider.settings")
     def test_gemini_provider_missing_api_key(self, mock_settings):
         """Test Gemini provider raises error when API key is missing."""
-        mock_settings.GOOGLE_API_KEY = None
+        mock_settings.GEMINI_API_KEY = None
 
         with pytest.raises(ValueError) as exc_info:
             GeminiProvider()
 
-        assert "GOOGLE_API_KEY is not set" in str(exc_info.value)
+        assert "GEMINI_API_KEY is not set" in str(exc_info.value)
 
     @patch("app.core.config.settings")
     @patch("app.services.ollama_provider.ollama")
     def test_ollama_provider_initialization(self, mock_ollama, mock_settings):
         """Test Ollama provider initializes correctly."""
         mock_settings.OLLAMA_BASE_URL = "http://localhost:11434"
-        mock_settings.OLLAMA_MODEL_NAME = "llama3.2"
+        mock_settings.OLLAMA_MODEL_NAME = "gemma3:4b"
 
         mock_client = Mock()
         mock_ollama.AsyncClient.return_value = mock_client
@@ -202,15 +200,15 @@ class TestAIProviderIntegration:
         provider = OllamaProvider()
 
         assert provider.provider_name == "ollama"
-        assert provider.model_name == "llama3.2"
+        assert provider.model_name == "gemma3:4b"
         mock_ollama.AsyncClient.assert_called_once_with(host="http://localhost:11434")
 
-    @patch("app.core.config.settings")
+    @patch("app.services.gemini_provider.settings")
     @patch("app.services.gemini_provider.genai")
     @patch("app.services.gemini_provider.cache_service")
     async def test_gemini_generate_text(self, mock_cache, mock_genai, mock_settings):
         """Test Gemini provider text generation."""
-        mock_settings.GOOGLE_API_KEY = "test-key"
+        mock_settings.GEMINI_API_KEY = "test-key"
         mock_settings.GEMINI_MODEL_NAME = "gemini-2.5-flash-lite-preview-06-17"
 
         # Setup mocks
@@ -231,7 +229,7 @@ class TestAIProviderIntegration:
     async def test_ollama_generate_text(self, mock_ollama, mock_settings):
         """Test Ollama provider text generation."""
         mock_settings.OLLAMA_BASE_URL = "http://localhost:11434"
-        mock_settings.OLLAMA_MODEL_NAME = "llama3.2"
+        mock_settings.OLLAMA_MODEL_NAME = "gemma3:4b"
 
         # Setup mocks
         mock_client = AsyncMock()
@@ -243,19 +241,19 @@ class TestAIProviderIntegration:
 
         assert result == "Generated text"
         mock_client.generate.assert_called_once_with(
-            model="llama3.2", prompt="Test prompt", options={"temperature": 0.7}
+            model="gemma3:4b", prompt="Test prompt", options={"temperature": 0.7}
         )
 
-    @patch("app.services.ai_factory.get_ai_provider")
-    async def test_get_ai_provider_function(self, mock_get_provider):
+    @patch("app.services.ai_factory.AIProviderFactory.get_provider")
+    def test_get_ai_provider_function(self, mock_factory_get_provider):
         """Test the standalone get_ai_provider function."""
         mock_provider = Mock()
-        mock_get_provider.return_value = mock_provider
+        mock_factory_get_provider.return_value = mock_provider
 
         provider = get_ai_provider()
 
         assert provider == mock_provider
-        mock_get_provider.assert_called_once()
+        mock_factory_get_provider.assert_called_once()
 
 
 if __name__ == "__main__":

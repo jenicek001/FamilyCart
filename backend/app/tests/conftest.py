@@ -17,14 +17,21 @@ from app.models.category import Category
 from app.models.shopping_list import ShoppingList
 from app.models.user import User
 
-# Create a test database engine
+# Create a test database engine with NullPool to avoid connection reuse issues
 # Replace the database name in the connection string
 test_db_uri = settings.SQLALCHEMY_DATABASE_URI_ASYNC
 if test_db_uri.endswith("/familycart"):
     test_db_uri = test_db_uri[: -len("/familycart")] + "/familycart_test"
-test_engine = create_async_engine(test_db_uri)
+
+from sqlalchemy.pool import NullPool
+
+test_engine = create_async_engine(test_db_uri, echo=False, poolclass=NullPool)
 TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=test_engine, class_=AsyncSession
+    autocommit=False,
+    autoflush=False,
+    bind=test_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,  # Prevent "another operation in progress" errors
 )
 
 
@@ -49,8 +56,10 @@ async def client(
 ) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client for the FastAPI application."""
 
-    def get_test_db():
-        return test_db
+    async def get_test_db():
+        """Create a new session for each request to avoid concurrent access issues."""
+        async with TestingSessionLocal() as session:
+            yield session
 
     app.dependency_overrides[get_session] = get_test_db
 

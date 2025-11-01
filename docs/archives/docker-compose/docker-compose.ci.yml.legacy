@@ -1,0 +1,123 @@
+# Docker Compose file for CI/CD testing services
+# This file provides PostgreSQL and Redis services for CI/CD pipelines
+# when GitHub Actions service containers are not available on self-hosted runners
+
+services:
+  postgres-ci:
+    image: postgres:15
+    container_name: postgres-ci-familycart
+    environment:
+      POSTGRES_USER: ${CI_POSTGRES_USER:-test_user}
+      POSTGRES_PASSWORD: ${CI_POSTGRES_PASSWORD:-test_password}
+      POSTGRES_DB: ${CI_POSTGRES_DB:-test_familycart}
+      POSTGRES_HOST_AUTH_METHOD: trust
+      # Performance optimizations for testing
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
+    ports:
+      - "5432:5432"
+    # CRITICAL: Resource limits to prevent runner crashes
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "test_user", "-d", "test_familycart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  # Reduced retries to fail faster
+      start_period: 15s  # Reduced startup time
+    volumes:
+      # Use tmpfs for faster test performance (data doesn't persist)
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+        tmpfs:
+          size: 256M  # Reduced from 1G to prevent memory exhaustion
+    # Optimized PostgreSQL configuration for CI testing
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c max_connections=100
+      -c wal_level=minimal
+      -c checkpoint_timeout=30min
+      -c max_wal_size=2GB
+      -c checkpoint_completion_target=0.9
+      -c effective_cache_size=512MB
+      -c fsync=off
+      -c synchronous_commit=off
+      -c full_page_writes=off
+      -c random_page_cost=1.0
+    networks:
+      - ci-network
+    restart: unless-stopped
+
+  redis-ci:
+    image: redis:7-alpine
+    container_name: redis-ci-familycart
+    ports:
+      - "6379:6379"
+    # CRITICAL: Resource limits to prevent runner crashes  
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+        reservations:
+          memory: 32M
+          cpus: '0.05'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3  # Reduced retries
+      start_period: 5s  # Reduced startup time
+    # Redis optimizations for testing - reduced memory limits
+    command: >
+      redis-server
+      --maxmemory 64mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    volumes:
+      # Use tmpfs for faster test performance
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 64M  # Reduced memory usage
+    networks:
+      - ci-network
+    restart: unless-stopped
+
+networks:
+  ci-network:
+    driver: bridge
+    name: familycart-ci-network
+
+# Optional: Add a test runner service for debugging
+# This can be used to run tests inside the same Docker network
+# Uncomment if needed for debugging networking issues
+#
+# test-runner:
+#   image: python:3.12-slim
+#   container_name: test-runner-ci
+#   depends_on:
+#     postgres-ci:
+#       condition: service_healthy
+#     redis-ci:
+#       condition: service_healthy
+#   environment:
+#     POSTGRES_SERVER: postgres-ci
+#     POSTGRES_USER: test_user
+#     POSTGRES_PASSWORD: test_password
+#     POSTGRES_DB: test_familycart
+#     POSTGRES_PORT: 5432
+#     REDIS_URI: redis://redis-ci:6379
+#   volumes:
+#     - .:/app
+#   working_dir: /app
+#   networks:
+#     - ci-network
+#   command: tail -f /dev/null  # Keep container running for debugging

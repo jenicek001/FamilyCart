@@ -14,7 +14,17 @@ RUN npm install
 # Copy the rest of your app's source code from your host to your image filesystem.
 COPY . .
 
-# 5. Build the Next.js Application
+# 5. Build Arguments for Next.js configuration
+ARG USE_NGINX_PROXY=false
+ARG API_URL=""
+ARG NEXT_PUBLIC_API_URL=""
+
+# Export as environment variables for the build
+ENV USE_NGINX_PROXY=$USE_NGINX_PROXY
+ENV API_URL=$API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+# 6. Build the Next.js Application
 # This will create an optimized production build in the .next folder.
 RUN npm run build
 

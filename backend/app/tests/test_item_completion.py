@@ -84,10 +84,10 @@ async def test_update_item_completion_status(
     assert response_data["id"] == test_item.id
     assert response_data["name"] == test_item.name
 
-    # Verify in database
-    result = await test_db.execute(select(Item).where(Item.id == test_item.id))
-    updated_item = result.scalars().first()
-    assert updated_item.is_completed is True
+    # Verify in database - expire and refresh to get fresh state
+    test_db.expire(test_item)
+    await test_db.refresh(test_item)
+    assert test_item.is_completed is True
 
 
 @pytest.mark.asyncio
@@ -99,6 +99,7 @@ async def test_update_item_completion_back_to_false(
     test_item.is_completed = True
     test_db.add(test_item)
     await test_db.commit()
+    await test_db.refresh(test_item)
 
     # Test marking item as not completed
     response = await client.put(
@@ -113,10 +114,10 @@ async def test_update_item_completion_back_to_false(
     assert response_data["is_completed"] is False
     assert response_data["id"] == test_item.id
 
-    # Verify in database
-    result = await test_db.execute(select(Item).where(Item.id == test_item.id))
-    updated_item = result.scalars().first()
-    assert updated_item.is_completed is False
+    # Verify in database - expire and refresh to get fresh state
+    test_db.expire(test_item)
+    await test_db.refresh(test_item)
+    assert test_item.is_completed is False
 
 
 @pytest.mark.asyncio
@@ -168,23 +169,21 @@ async def test_update_item_completion_wrong_owner(
     client: AsyncClient, test_item: Item, test_db: AsyncSession
 ):
     """Test updating item completion by user who doesn't own the list."""
-    # Create another user
-    other_user = User(
-        email="other@example.com",
-        hashed_password="hashed_password",
-        is_active=True,
-        is_superuser=False,
-        is_verified=True,
-        nickname="Other User",
-    )
-    test_db.add(other_user)
-    await test_db.commit()
-    await test_db.refresh(other_user)
+    import uuid
 
-    # Create token for other user
+    # Create another user via registration endpoint
+    unique_email = f"other-{uuid.uuid4().hex[:8]}@example.com"
+    register_data = {
+        "email": unique_email,
+        "password": "testpassword123",
+        "nickname": "Other User",
+    }
+    await client.post("/api/v1/auth/register", json=register_data)
+
+    # Login as the other user
     other_token_response = await client.post(
         "/api/v1/auth/jwt/login",
-        data={"username": other_user.email, "password": "password"},
+        data={"username": unique_email, "password": "testpassword123"},
     )
     other_token_data = other_token_response.json()
     other_headers = {"Authorization": f"Bearer {other_token_data['access_token']}"}

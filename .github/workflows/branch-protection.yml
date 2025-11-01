@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [develop, feature/*, hotfix/*, release/*]
+    branches: [develop, feature/*, hotfix/*, bugfix/*, chore/*, docs/*, release/*]
 
 # Grant necessary permissions for GitHub Actions to access PR data
 permissions:
@@ -21,11 +21,22 @@ env:
 jobs:
   validate-branch-name:
     runs-on: self-hosted
+    timeout-minutes: 10
     steps:
       - name: Validate branch name
         if: github.event_name == 'pull_request'
         run: |
           branch_name="${{ github.head_ref }}"
+          actor="${{ github.actor }}"
+          
+          # Skip validation for Dependabot PRs - they use their own naming convention
+          if [[ "$actor" == "dependabot[bot]" ]]; then
+            echo "✅ Dependabot PR detected - skipping branch name validation"
+            echo "Branch: $branch_name"
+            exit 0
+          fi
+          
+          # Validate branch naming convention for human contributors
           if [[ ! "$branch_name" =~ ^(feature|hotfix|bugfix|chore|docs|release)/.+ ]]; then
             echo "❌ Invalid branch name: $branch_name"
             echo "Branch name must follow the pattern: feature/, hotfix/, bugfix/, chore/, docs/, or release/"
@@ -36,21 +47,23 @@ jobs:
 
   code-quality:
     runs-on: self-hosted
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: Verify Python installation
+        run: |
+          echo "Using pre-installed Python 3.12 from Ubuntu 24.04 runner"
+          python3 --version
+          which python3
+          poetry --version
+          echo "Poetry is pre-installed in our custom runners"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+      - name: Configure Poetry (pre-installed)
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
 
       - name: Load cached venv
         id: cached-poetry-dependencies
@@ -150,6 +163,7 @@ jobs:
 
   security-scan:
     runs-on: self-hosted
+    timeout-minutes: 15
     needs: code-quality
     steps:
       - name: Checkout code
@@ -187,6 +201,7 @@ jobs:
 
   architecture-compliance:
     runs-on: self-hosted
+    timeout-minutes: 10
     needs: code-quality
     steps:
       - name: Checkout code
@@ -223,6 +238,7 @@ jobs:
 
   pr-size-check:
     runs-on: self-hosted
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     steps:
       - name: Check PR size
@@ -264,6 +280,7 @@ jobs:
 
   status-check:
     runs-on: self-hosted
+    timeout-minutes: 5
     needs: [validate-branch-name, code-quality, security-scan, architecture-compliance, pr-size-check]
     if: always()
     steps:

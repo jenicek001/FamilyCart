@@ -1,9 +1,48 @@
-# Global rules for AI IDE
+````instructions
+# GitHub Copilot Instructions for FamilyCart
+
+## 📁 Repository Structure (Updated October 2025)
+
+### Root Directory (Essential Files Only)
+- **Project Files**: `README.md` (main documentation), `TASKS.md` (active tasks), `USER_STORIES.md` (requirements), `PLANNING.md` (roadmap)
+- **Docker Compose Files**:
+  - `docker-compose.dev.yml` - Local development (PostgreSQL port 5434, Redis port 6381)
+  - `docker-compose.uat.yml` - UAT environment deployment (used by CI/CD pipeline)
+  - `docker-compose.uat-monitoring.yml` - UAT monitoring stack (Prometheus, Grafana)
+  - `docker-compose.runners.yml` - GitHub self-hosted runners (3 active runners)
+  - `docker-compose.ci-infrastructure.yml` - CI services (PostgreSQL port 5432, Redis port 6379)
+
+### Organized Documentation Structure
+- **`docs/deployment/`** - Deployment guides, infrastructure setup, Cloudflare configuration
+- **`docs/github/`** - CI/CD setup, GitHub runners, environment configuration
+- **`docs/development/`** - Development workflow, coding standards
+- **`docs/features/`** - Feature specifications and implementation guides
+- **`docs/archives/`** - Historical documentation (sprints, fixes, ci-cd, test-reports)
+
+**Note:** Nginx reverse proxy runs from a separate repository on the host machine. This repo contains only nginx configuration templates.
+
+### Scripts Organization
+- **`scripts/`** - Main operational scripts (push-docker-images.sh, update-github-token.sh)
+- **`scripts/uat/`** - UAT-specific scripts (setup-cloudflare-monitoring.sh, test-uat-nginx.sh)
+- **`scripts/testing/`** - Test and debug scripts
+
+### Backend & Frontend
+- **`backend/`** - FastAPI backend with Poetry 2.x (use `poetry run`, never `python` directly)
+- **`frontend/`** - React/TypeScript frontend
+
+### Infrastructure Directories
+- **`deploy/`** - Deployment scripts and configuration templates
+- **`monitoring/`** - Active UAT monitoring stack (Prometheus, Grafana, Alertmanager)
+- **`nginx/`** - Nginx configuration templates (actual nginx runs from separate repo on host machine)
 
 ## 🔄 Project Awareness & Context
 - **Always read `PLANNING.md`** at the start of a new conversation to understand the project's architecture, goals, style, and constraints.
 - **Check `TASKS.md`** before starting a new task. If the task isn't listed, add it with a brief description and today's date.
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `PLANNING.md`.
+- **For deployment information**, check `docs/deployment/` directory
+- **For CI/CD setup**, check `docs/github/` directory
+- **For development workflow**, check `docs/development/` directory
+- **For feature specs**, check `docs/features/` directory
 
 ## 🌿 Git Branch Naming Conventions
 - **Feature branches**: `feature/sprint-N-brief-description` (e.g., `feature/sprint-7-visual-identity`)
@@ -22,10 +61,13 @@
 - **Organize code into clearly separated modules**, grouped by feature or responsibility.
 - **Use clear, consistent imports** (prefer relative imports within packages).
 
-## ✅ Task Completion
+## ✅ Task Completion & Documentation
 - **Mark completed tasks in `TASKS.md`** immediately after finishing them.
-- Add new sub-tasks or TODOs discovered during development to `TASKS.md` under a “Discovered During Work” section.
-- After finishing a sprint, create a new summary MD file (e.g., `SPRINT_7_SUMMARY.md`) documenting the key outcomes, challenges, fixed bugs, and next steps.
+- Add new sub-tasks or TODOs discovered during development to `TASKS.md` under a "Discovered During Work" section.
+- **Sprint summaries** should be placed in `docs/archives/sprints/` (not root directory)
+- **Fix documentation** should go in `docs/archives/fixes/`
+- **New features** should be documented in `docs/features/` with comprehensive specifications
+- **Keep root directory clean** - only essential active files belong there
 
 ## 📚 Documentation & Explainability
 - **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.
@@ -35,9 +77,12 @@
 ## 🧠 AI Behavior Rules
 - **Never assume missing context. Ask questions if uncertain.**
 - **When developing new features, adding new modules or libraries or debugging issues** - always use Context7 MCP server to reference up-to-date API documentation and code examples for any libraries or frameworks involved. Add 'use context7' to your prompt or leverage the Context7 MCP server for the most current, version-specific docs.
+- **Use Postgres MCP server** to get real, up-to-date database schema (don't assume table structures)
+- **Use Brave Search MCP** to find best practices, issue discussions, or articles on the internet
 - **Never hallucinate libraries or functions** – only use known, verified Python packages.
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
 - **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASKS.md`.
+- **Respect the repository structure** - place files in appropriate directories as defined above
 
 ## Backend-specific rules
 
@@ -52,10 +97,12 @@
 
 
 ### 📎 Style & Conventions
-- **Use Python** as the primary language for Backend.
+- **Use Python 3.12+** as the primary language for Backend.
+- **Use Poetry 2.x** for dependency management - always use `poetry run` commands, NEVER `python` directly
 - **Follow PEP8**, use type hints, and format with `black`.
 - **Use `pydantic` for data validation**.
-- Use `FastAPI` for APIs and `SQLAlchemy` or `SQLModel` for ORM if applicable.
+- **Use `FastAPI`** for APIs and **`SQLAlchemy` (async)** for ORM.
+- **Database migrations** via Alembic (see `alembic.ini` in root and `backend/alembic/`)
 - Write **docstrings for every function** using the Google style:
   ```python
   def example():
@@ -69,6 +116,19 @@
           type: Description.
       """
   ```
+
+### 🔧 Backend Development Environment
+- **Development database**: Use `docker-compose.dev.yml` (PostgreSQL port 5434, Redis port 6381)
+- **CI infrastructure**: Runs on ports 5432 (PostgreSQL) and 6379 (Redis) - don't conflict
+- **UAT environment**: Deployed to `/opt/familycart-uat/` via CI/CD pipeline
+- **Migrations**: `cd backend && poetry run alembic upgrade head`
+- **Run server**: `cd backend && poetry run uvicorn app.main:app --reload`
+- **Run tests**: `cd backend && poetry run pytest`
+- **Code quality**: 
+  - `poetry run black app/`
+  - `poetry run isort app/`
+  - `poetry run pylint app/` (target: ≥9.56/10)
+  - `poetry run bandit -r app/`
 
 ## Frontend-specific rules
 

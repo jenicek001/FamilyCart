@@ -2,7 +2,9 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from app.api.auth_logging import AuthLoggingMiddleware
 from app.api.cors import setup_cors_middleware  # Import CORS setup
@@ -57,6 +59,34 @@ app = FastAPI(
 # Add Prometheus metrics instrumentation
 instrumentator = Instrumentator()
 instrumentator.instrument(app).expose(app)
+
+# Add ProxyHeaders middleware to trust X-Forwarded-* headers from nginx/reverse proxy
+# This is essential for correct URL generation when behind a reverse proxy
+from starlette.middleware.base import BaseHTTPMiddleware
+
+
+class ProxyHeadersMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware to handle proxy headers and ensure correct scheme (HTTP/HTTPS) detection.
+    This prevents FastAPI from generating HTTP URLs when behind an HTTPS reverse proxy.
+    """
+
+    async def dispatch(self, request, call_next):
+        # Trust X-Forwarded-Proto header from proxy
+        forwarded_proto = request.headers.get("x-forwarded-proto")
+        if forwarded_proto:
+            request.scope["scheme"] = forwarded_proto
+
+        # Trust X-Forwarded-Host header from proxy
+        forwarded_host = request.headers.get("x-forwarded-host")
+        if forwarded_host:
+            request.scope["server"] = (forwarded_host, None)
+
+        response = await call_next(request)
+        return response
+
+
+app.add_middleware(ProxyHeadersMiddleware)
 
 # Add custom middleware for better error logging
 app.add_middleware(LoggingMiddleware)

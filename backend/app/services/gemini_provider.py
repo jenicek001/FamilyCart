@@ -33,11 +33,11 @@ class GeminiProvider(AIProvider):
         """
         Initialize the Gemini provider with API key and model configuration.
         """
-        if not settings.GOOGLE_API_KEY:
-            raise ValueError("GOOGLE_API_KEY is not set in the environment variables.")
+        if not settings.GEMINI_API_KEY:
+            raise ValueError("GEMINI_API_KEY is not set in the environment variables.")
 
         try:
-            genai.configure(api_key=settings.GOOGLE_API_KEY)
+            genai.configure(api_key=settings.GEMINI_API_KEY)
             self.model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
             logger.info(
                 f"Successfully initialized Gemini model: {settings.GEMINI_MODEL_NAME}"
