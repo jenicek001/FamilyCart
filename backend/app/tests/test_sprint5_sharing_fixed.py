@@ -72,7 +72,7 @@ class TestSharingPermissions:
 
         # Create shopping list and share it
         shopping_list = ShoppingList(name="Shared List", owner_id=owner.id)
-        shopping_list.shared_with.append(member)
+        shopping_list.members.append(member)
         test_db.add(shopping_list)
         await test_db.commit()
         await test_db.refresh(shopping_list)
@@ -212,10 +212,8 @@ class TestSharingEndpoints:
         assert response.status_code == 200
         response_data = response.json()
 
-        # Verify user was added to shared_with
-        assert any(
-            user["email"] == target_email for user in response_data["shared_with"]
-        )
+        # Verify user was added to members
+        assert any(user["email"] == target_email for user in response_data["members"])
 
     @pytest.mark.asyncio
     async def test_share_list_only_owner_can_share(
@@ -295,7 +293,7 @@ class TestSharingEndpoints:
     async def test_share_list_user_not_found(
         self, test_db: AsyncSession, client: AsyncClient
     ):
-        """Test sharing with nonexistent user email."""
+        """Test sharing with nonexistent user email sends invitation."""
         # Create owner via registration
         owner_email = f"owner-{uuid.uuid4().hex[:8]}@test.com"
         await client.post(
@@ -323,14 +321,18 @@ class TestSharingEndpoints:
         )
         shopping_list_id = list_response.json()["id"]
 
-        # Try to share with nonexistent user
+        # Share with nonexistent user should send invitation and return 200
         response = await client.post(
             f"/api/v1/shopping-lists/{shopping_list_id}/share",
             json={"email": "nonexistent@test.com"},
             headers=headers,
         )
 
-        assert response.status_code == 404
+        # Should succeed and send invitation email
+        assert response.status_code == 200
+        # User should not be in members list since they don't exist yet
+        response_data = response.json()
+        assert len(response_data["members"]) == 0
 
     @pytest.mark.asyncio
     async def test_share_list_already_shared(
@@ -389,8 +391,8 @@ class TestSharingEndpoints:
         assert response.status_code == 200
         response_data = response.json()
 
-        # Verify user appears only once in shared_with
-        shared_emails = [user["email"] for user in response_data["shared_with"]]
+        # Verify user appears only once in members
+        shared_emails = [user["email"] for user in response_data["members"]]
         assert shared_emails.count(target_email) == 1
 
 
