@@ -60,10 +60,7 @@ services:
           cpus: '0.25'
 
   uat-backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    image: familycart-backend:uat-local
+    image: ghcr.io/jenicek001/familycart-backend:latest
     container_name: familycart-uat-backend
     environment:
       - PORT=8000
@@ -117,14 +114,7 @@ services:
           cpus: '0.5'
 
   uat-frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        USE_NGINX_PROXY: "true"
-        API_URL: "https://uat.familycart.app"
-        NEXT_PUBLIC_API_URL: "https://uat.familycart.app"
-    image: familycart-frontend:uat-local
+    image: ghcr.io/jenicek001/familycart-frontend:latest
     container_name: familycart-uat-frontend
     environment:
       - NODE_ENV=production
