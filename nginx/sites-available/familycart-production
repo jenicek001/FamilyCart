@@ -1,0 +1,215 @@
+# FamilyCart Production site configuration
+# File: /etc/nginx/sites-available/familycart-production
+
+# Upstream definitions
+upstream familycart_backend {
+    server 127.0.0.1:8000;
+    keepalive 32;
+}
+
+upstream familycart_frontend {
+    server 127.0.0.1:3000;
+    keepalive 32;
+}
+
+# HTTP to HTTPS redirect for familycart.app
+server {
+    listen 80;
+    listen [::]:80;
+    server_name familycart.app www.familycart.app;
+    
+    # Health check endpoint (no redirect for monitoring)
+    location /health {
+        access_log off;
+        return 200 "FamilyCart Production HTTP Healthy\n";
+        add_header Content-Type text/plain;
+    }
+    
+    # Redirect all other traffic to HTTPS
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+# HTTP to HTTPS redirect for redirect domains
+server {
+    listen 80;
+    listen [::]:80;
+    server_name familycart.cz www.familycart.cz
+                familycart.eu www.familycart.eu
+                nakoupit.app www.nakoupit.app
+                nakoupit.com www.nakoupit.com;
+    
+    # Redirect to primary domain (familycart.app)
+    return 301 https://familycart.app$request_uri;
+}
+
+# HTTPS redirect for redirect domains
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name familycart.cz www.familycart.cz
+                familycart.eu www.familycart.eu
+                nakoupit.app www.nakoupit.app
+                nakoupit.com www.nakoupit.com;
+
+    # Cloudflare Origin Certificate (covers all domains)
+    ssl_certificate /etc/nginx/ssl/cloudflare/origin-cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/cloudflare/origin-key.pem;
+    
+    # Include common SSL settings
+    include /etc/nginx/conf.d/ssl-common.conf;
+    
+    # Include CloudFlare real IP configuration  
+    include /etc/nginx/conf.d/cloudflare-realip.conf;
+    
+    # Redirect to primary domain
+    return 301 https://familycart.app$request_uri;
+}
+
+# HTTPS server for FamilyCart Production (familycart.app)
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name familycart.app www.familycart.app;
+
+    # Cloudflare Origin Certificate
+    ssl_certificate /etc/nginx/ssl/cloudflare/origin-cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/cloudflare/origin-key.pem;
+    
+    # Include common SSL settings
+    include /etc/nginx/conf.d/ssl-common.conf;
+    
+    # Include CloudFlare real IP configuration  
+    include /etc/nginx/conf.d/cloudflare-realip.conf;
+    
+    # FamilyCart specific security headers
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss: https:; font-src 'self' data:;" always;
+    
+    # HSTS Header (Strict Transport Security) - 1 year with subdomains and preload
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    # Dedicated logs for FamilyCart Production
+    access_log /var/log/nginx/familycart-production.access.log main;
+    error_log /var/log/nginx/familycart-production.error.log;
+
+    # Rate limiting zones
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=web:10m rate=30r/s;
+
+    # API endpoints with proper proxy configuration
+    location /api/ {
+        limit_req zone=api burst=20 nodelay;
+        
+        proxy_pass http://familycart_backend/;
+        
+        # Standard proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # API-specific timeouts
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+        
+        # Enable keepalive connections
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        
+        # CORS headers (backend handles these, but we add for OPTIONS)
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin "https://familycart.app" always;
+            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+            add_header Access-Control-Allow-Headers "Accept, Authorization, Cache-Control, Content-Type, DNT, If-Modified-Since, Keep-Alive, Origin, User-Agent, X-Requested-With" always;
+            add_header Access-Control-Allow-Credentials true always;
+            add_header Access-Control-Max-Age 86400;
+            return 204;
+        }
+    }
+
+    # WebSocket endpoints
+    location /ws {
+        proxy_pass http://familycart_backend/ws;
+        
+        # WebSocket specific configuration
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        
+        # Standard proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket timeouts (long-lived connections)
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+        proxy_connect_timeout 10s;
+        
+        # Disable buffering
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+
+    # Frontend application
+    location / {
+        limit_req zone=web burst=50 nodelay;
+        
+        proxy_pass http://familycart_frontend/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Frontend timeouts
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Enable keepalive
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        
+        # Cache static assets aggressively
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            access_log off;
+        }
+        
+        # Cache HTML with short expiry
+        location ~* \.(html|htm)$ {
+            expires 1h;
+            add_header Cache-Control "public, must-revalidate";
+        }
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "FamilyCart Production HTTPS Healthy\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Block access to sensitive files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    location ~ \.(env|log|sql|bak)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
