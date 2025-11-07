@@ -9,15 +9,27 @@ This is a condensed step-by-step guide to get FamilyCart running in production.
 
 ---
 
-## Step 1: Copy Certificates to VM2 (from local machine)
+## Step 1: Copy Cloudflare Origin Certificates to VM2
+
+The Cloudflare Origin Certificates for familycart.app already exist on your local machine (used for UAT proxy).
+
+**Certificate details**:
+- Location: `/opt/familycart-nginx-proxy/nginx/ssl/familycart.app/`
+- Covers: `familycart.app`, `*.familycart.app` (includes www, uat, etc.)
+- Valid until: September 7, 2040
+- Issuer: Cloudflare Origin SSL Certificate Authority
+
+**Copy to VM2**:
 
 ```bash
-# On your LOCAL machine (where UAT runs)
-scp -i ~/.ssh/familycart_oci /etc/nginx/ssl/cloudflare/origin-cert.pem \
-    ubuntu@158.180.30.112:/tmp/
+# On your LOCAL machine
+scp -i ~/.ssh/familycart_oci \
+    /opt/familycart-nginx-proxy/nginx/ssl/familycart.app/uat.familycart.app.crt \
+    ubuntu@158.180.30.112:/tmp/origin-cert.pem
 
-scp -i ~/.ssh/familycart_oci /etc/nginx/ssl/cloudflare/origin-key.pem \
-    ubuntu@158.180.30.112:/tmp/
+scp -i ~/.ssh/familycart_oci \
+    /opt/familycart-nginx-proxy/nginx/ssl/familycart.app/uat.familycart.app.key \
+    ubuntu@158.180.30.112:/tmp/origin-key.pem
 ```
 
 ---

@@ -142,16 +142,37 @@ Apply these settings to **familycart.app** (primary domain):
 
 ## Step 6: Copy Certificates to VM2
 
-Run this script on your **local machine** (where UAT certificates are stored):
+You already have Cloudflare Origin Certificates for familycart.app on your local machine (used for UAT).
+
+**Certificate location**: `/opt/familycart-nginx-proxy/nginx/ssl/familycart.app/`
+
+**Verify certificate details**:
+```bash
+# Check certificate validity and domains covered
+openssl x509 -in /opt/familycart-nginx-proxy/nginx/ssl/familycart.app/uat.familycart.app.crt \
+    -noout -issuer -subject -dates
+
+# Check Subject Alternative Names
+openssl x509 -in /opt/familycart-nginx-proxy/nginx/ssl/familycart.app/uat.familycart.app.crt \
+    -noout -text | grep -A1 "Subject Alternative Name"
+```
+
+Expected output:
+- Issuer: CloudFlare Origin SSL Certificate Authority
+- Covers: `familycart.app`, `*.familycart.app`
+- Valid until: ~2040
+
+**Copy to VM2**:
 
 ```bash
-# Find your Cloudflare certificates
-LOCAL_CERT_PATH="/etc/nginx/ssl/cloudflare/origin-cert.pem"  # Adjust if different
-LOCAL_KEY_PATH="/etc/nginx/ssl/cloudflare/origin-key.pem"    # Adjust if different
+# From local machine
+scp -i ~/.ssh/familycart_oci \
+    /opt/familycart-nginx-proxy/nginx/ssl/familycart.app/uat.familycart.app.crt \
+    ubuntu@158.180.30.112:/tmp/origin-cert.pem
 
-# Copy to VM2
-scp -i ~/.ssh/familycart_oci $LOCAL_CERT_PATH ubuntu@158.180.30.112:/tmp/origin-cert.pem
-scp -i ~/.ssh/familycart_oci $LOCAL_KEY_PATH ubuntu@158.180.30.112:/tmp/origin-key.pem
+scp -i ~/.ssh/familycart_oci \
+    /opt/familycart-nginx-proxy/nginx/ssl/familycart.app/uat.familycart.app.key \
+    ubuntu@158.180.30.112:/tmp/origin-key.pem
 ```
 
 ---
