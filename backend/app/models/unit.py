@@ -1,13 +1,14 @@
-from sqlalchemy import String, Boolean, Numeric
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
+
+from sqlalchemy import Boolean, Numeric, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.base import Base
 
 
 class Unit(Base):
     """Unit model for quantity measurements."""
-    
+
     __tablename__ = "unit"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)

@@ -5,17 +5,18 @@ This module implements the AIProvider interface using Ollama for local or remote
 LLM deployments in FamilyCart.
 """
 
-import logging
 import json
-from typing import Dict, Any, List
-import ollama
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+import logging
+from typing import Any, Dict, List
 
+import ollama
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
+from app.core.cache import cache_service
 from app.core.config import settings
 from app.models.category import Category
-from app.core.cache import cache_service
 from app.services.ai_provider import AIProvider
 
 # Configure logging
@@ -35,7 +36,9 @@ class OllamaProvider(AIProvider):
         try:
             # Initialize Ollama client with custom host if specified
             self.client = ollama.AsyncClient(host=settings.OLLAMA_BASE_URL)
-            logger.info(f"Successfully initialized Ollama client with base URL: {settings.OLLAMA_BASE_URL}")
+            logger.info(
+                f"Successfully initialized Ollama client with base URL: {settings.OLLAMA_BASE_URL}"
+            )
             logger.info(f"Using model: {settings.OLLAMA_MODEL_NAME}")
         except Exception as e:
             logger.error(f"Error configuring Ollama client: {e}")
@@ -65,9 +68,9 @@ class OllamaProvider(AIProvider):
             response = await self.client.generate(
                 model=settings.OLLAMA_MODEL_NAME,
                 prompt=prompt,
-                options={'temperature': 0.7}
+                options={"temperature": 0.7},
             )
-            return response['response']
+            return response["response"]
         except Exception as e:
             logger.error(f"Error generating text with Ollama: {e}")
             return "Error: Could not generate text."
@@ -86,7 +89,9 @@ class OllamaProvider(AIProvider):
         cache_key = f"category_suggestion:{item_name.lower().strip()}"
         cached_category = await cache_service.get(cache_key)
         if cached_category:
-            logger.info(f"Cache hit for category suggestion: {item_name} -> {cached_category}")
+            logger.info(
+                f"Cache hit for category suggestion: {item_name} -> {cached_category}"
+            )
             return cached_category
 
         # Use async SQLAlchemy to get existing categories
@@ -119,18 +124,26 @@ Item to categorize: "{item_name}"
             response = await self.client.generate(
                 model=settings.OLLAMA_MODEL_NAME,
                 prompt=prompt,
-                options={'temperature': 0.1}  # Lower temperature for more consistent categorization
+                options={
+                    "temperature": 0.1
+                },  # Lower temperature for more consistent categorization
             )
-            suggested_category = response['response'].strip().replace(".", "").title()
-            logger.info(f"Ollama category suggestion: {item_name} -> {suggested_category}")
-            
-            await cache_service.set(cache_key, suggested_category, expire=3600 * 24 * 180) # Cache for 6 months
+            suggested_category = response["response"].strip().replace(".", "").title()
+            logger.info(
+                f"Ollama category suggestion: {item_name} -> {suggested_category}"
+            )
+
+            await cache_service.set(
+                cache_key, suggested_category, expire=3600 * 24 * 180
+            )  # Cache for 6 months
             return suggested_category
         except Exception as e:
             logger.error(f"Error suggesting category with Ollama: {e}")
             return "Uncategorized"
 
-    async def suggest_category_async(self, item_name: str, category_names: List[str]) -> str:
+    async def suggest_category_async(
+        self, item_name: str, category_names: List[str]
+    ) -> str:
         """
         Suggest a category for a given item name using the Ollama model (async version).
 
@@ -144,7 +157,9 @@ Item to categorize: "{item_name}"
         cache_key = f"category_suggestion:{item_name.lower().strip()}"
         cached_category = await cache_service.get(cache_key)
         if cached_category:
-            logger.info(f"Cache hit for category suggestion: {item_name} -> {cached_category}")
+            logger.info(
+                f"Cache hit for category suggestion: {item_name} -> {cached_category}"
+            )
             return cached_category
 
         prompt = f"""Given the following list of existing shopping item categories:
@@ -172,12 +187,18 @@ Item to categorize: "{item_name}"
             response = await self.client.generate(
                 model=settings.OLLAMA_MODEL_NAME,
                 prompt=prompt,
-                options={'temperature': 0.1}  # Lower temperature for more consistent categorization
+                options={
+                    "temperature": 0.1
+                },  # Lower temperature for more consistent categorization
             )
-            suggested_category = response['response'].strip().replace(".", "").title()
-            logger.info(f"Ollama category suggestion: {item_name} -> {suggested_category}")
-            
-            await cache_service.set(cache_key, suggested_category, expire=3600 * 24 * 180) # Cache for 6 months
+            suggested_category = response["response"].strip().replace(".", "").title()
+            logger.info(
+                f"Ollama category suggestion: {item_name} -> {suggested_category}"
+            )
+
+            await cache_service.set(
+                cache_key, suggested_category, expire=3600 * 24 * 180
+            )  # Cache for 6 months
             return suggested_category
         except Exception as e:
             logger.error(f"Error suggesting category with Ollama: {e}")
@@ -197,24 +218,99 @@ Item to categorize: "{item_name}"
         cache_key = f"icon_suggestion:{item_name.lower().strip()}:{category_name.lower().strip()}"
         cached_icon = await cache_service.get(cache_key)
         if cached_icon:
-            logger.info(f"Cache hit for icon suggestion: {item_name}/{category_name} -> {cached_icon}")
+            logger.info(
+                f"Cache hit for icon suggestion: {item_name}/{category_name} -> {cached_icon}"
+            )
             return cached_icon
 
         # A curated list of common icons. A more comprehensive list could be loaded from a file.
         icon_list = [
-            "shopping_cart", "local_grocery_store", "fastfood", "local_bar", "local_cafe", "local_dining",
-            "icecream", "local_pizza", "ramen_dining", "lunch_dining", "bakery_dining", "hardware",
-            "home", "kitchen", "tv", "lightbulb", "chair", "bed", "camera", "movie", "music_note",
-            "book", "school", "science", "pets", "park", "fitness_center", "checkroom", "face",
-            "spa", "content_cut", "brush", "medical_services", "medication", "local_pharmacy",
-            "local_hospital", "construction", "handyman", "plumbing", "electrical_services",
-            "cleaning_services", "flight", "train", "directions_car", "local_taxi", "local_gas_station",
-            "ev_station", "local_shipping", "local_post_office", "credit_card", "account_balance_wallet",
-            "savings", "paid", "receipt_long", "work", "business_center", "computer", "phone_iphone",
-            "smartphone", "tablet_mac", "watch", "devices", "toys", "sports_esports", "sports_soccer",
-            "sports_basketball", "sports_tennis", "sports_volleyball", "sports_baseball", "sports_golf",
-            "celebration", "cake", "card_giftcard", "redeem", "theaters", "attractions", "forest",
-            "terrain", "ac_unit", "water_drop", "grass", "eco", "recycling", "compost", "pets", "leaf"
+            "shopping_cart",
+            "local_grocery_store",
+            "fastfood",
+            "local_bar",
+            "local_cafe",
+            "local_dining",
+            "icecream",
+            "local_pizza",
+            "ramen_dining",
+            "lunch_dining",
+            "bakery_dining",
+            "hardware",
+            "home",
+            "kitchen",
+            "tv",
+            "lightbulb",
+            "chair",
+            "bed",
+            "camera",
+            "movie",
+            "music_note",
+            "book",
+            "school",
+            "science",
+            "pets",
+            "park",
+            "fitness_center",
+            "checkroom",
+            "face",
+            "spa",
+            "content_cut",
+            "brush",
+            "medical_services",
+            "medication",
+            "local_pharmacy",
+            "local_hospital",
+            "construction",
+            "handyman",
+            "plumbing",
+            "electrical_services",
+            "cleaning_services",
+            "flight",
+            "train",
+            "directions_car",
+            "local_taxi",
+            "local_gas_station",
+            "ev_station",
+            "local_shipping",
+            "local_post_office",
+            "credit_card",
+            "account_balance_wallet",
+            "savings",
+            "paid",
+            "receipt_long",
+            "work",
+            "business_center",
+            "computer",
+            "phone_iphone",
+            "smartphone",
+            "tablet_mac",
+            "watch",
+            "devices",
+            "toys",
+            "sports_esports",
+            "sports_soccer",
+            "sports_basketball",
+            "sports_tennis",
+            "sports_volleyball",
+            "sports_baseball",
+            "sports_golf",
+            "celebration",
+            "cake",
+            "card_giftcard",
+            "redeem",
+            "theaters",
+            "attractions",
+            "forest",
+            "terrain",
+            "ac_unit",
+            "water_drop",
+            "grass",
+            "eco",
+            "recycling",
+            "compost",
+            "pets",
+            "leaf",
         ]
 
         prompt = f"""Given the item "{item_name}" in the category "{category_name}", what is the most appropriate Google Material Icon name from the following list?
@@ -233,22 +329,32 @@ Examples:
             response = await self.client.generate(
                 model=settings.OLLAMA_MODEL_NAME,
                 prompt=prompt,
-                options={'temperature': 0.1}  # Lower temperature for consistent icon selection
+                options={
+                    "temperature": 0.1
+                },  # Lower temperature for consistent icon selection
             )
-            suggested_icon = response['response'].strip().replace(".", "")
+            suggested_icon = response["response"].strip().replace(".", "")
             if suggested_icon in icon_list:
-                await cache_service.set(cache_key, suggested_icon, expire=3600 * 24 * 180) # Cache for 6 months
+                await cache_service.set(
+                    cache_key, suggested_icon, expire=3600 * 24 * 180
+                )  # Cache for 6 months
                 return suggested_icon
             else:
                 # Fallback to a generic icon if the suggested one is not in the list
-                logger.warning(f"Suggested icon '{suggested_icon}' not in the predefined list. Falling back to default.")
-                await cache_service.set(cache_key, "shopping_cart", expire=3600 * 24 * 180) # Cache for 6 months
+                logger.warning(
+                    f"Suggested icon '{suggested_icon}' not in the predefined list. Falling back to default."
+                )
+                await cache_service.set(
+                    cache_key, "shopping_cart", expire=3600 * 24 * 180
+                )  # Cache for 6 months
                 return "shopping_cart"
         except Exception as e:
             logger.error(f"Error suggesting icon with Ollama: {e}")
             return "shopping_cart"
 
-    async def standardize_and_translate_item_name(self, item_name: str) -> Dict[str, Any]:
+    async def standardize_and_translate_item_name(
+        self, item_name: str
+    ) -> Dict[str, Any]:
         """
         Standardize an item name and provide translations.
 
@@ -311,24 +417,34 @@ Return only valid JSON:
             response = await self.client.generate(
                 model=settings.OLLAMA_MODEL_NAME,
                 prompt=prompt,
-                options={'temperature': 0.2}  # Slightly higher temperature for creative translation
+                options={
+                    "temperature": 0.2
+                },  # Slightly higher temperature for creative translation
             )
             # Clean the response text before parsing
-            cleaned_response_text = response['response'].strip()
+            cleaned_response_text = response["response"].strip()
             # Find the start and end of the JSON object
-            start_index = cleaned_response_text.find('{')
-            end_index = cleaned_response_text.rfind('}') + 1
+            start_index = cleaned_response_text.find("{")
+            end_index = cleaned_response_text.rfind("}") + 1
             if start_index != -1 and end_index != 0:
                 json_text = cleaned_response_text[start_index:end_index]
                 data = json.loads(json_text)
-                await cache_service.set(cache_key, json.dumps(data), expire=3600 * 24 * 180) # Cache for 6 months
+                await cache_service.set(
+                    cache_key, json.dumps(data), expire=3600 * 24 * 180
+                )  # Cache for 6 months
                 return data
             else:
-                logger.error(f"Could not find a valid JSON object in the response from Ollama.")
+                logger.error(
+                    f"Could not find a valid JSON object in the response from Ollama."
+                )
                 return {"standardized_name": item_name, "translations": {}}
         except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON from Ollama: {e}\nResponse text: {cleaned_response_text}")
+            logger.error(
+                f"Error decoding JSON from Ollama: {e}\nResponse text: {cleaned_response_text}"
+            )
             return {"standardized_name": item_name, "translations": {}}
         except Exception as e:
-            logger.error(f"Error standardizing and translating item name with Ollama: {e}")
+            logger.error(
+                f"Error standardizing and translating item name with Ollama: {e}"
+            )
             return {"standardized_name": item_name, "translations": {}}

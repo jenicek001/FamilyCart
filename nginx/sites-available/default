@@ -1,0 +1,31 @@
+# Default     # Use a self-signed certificate for unknown domains
+    ssl_certificate /etc/nginx/ssl/default/default.crt;
+    ssl_certificate_key /etc/nginx/ssl/default/default.key;
+    
+    # Use shared SSL configuration
+    include /etc/nginx/conf.d/ssl-common.conf;l server configuration
+# File: /etc/nginx/sites-available/default
+
+# Default server block (catch-all for unknown domains)
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    http2 on;
+    server_name _;
+
+    # Use a self-signed certificate for unknown domains
+    ssl_certificate /etc/nginx/ssl/default/default.crt;
+    ssl_certificate_key /etc/nginx/ssl/default/default.key;
+    
+    # Minimal SSL config for unknown domains (use same shared cache)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 5m;
+
+    # Log unknown domain attempts
+    access_log /var/log/nginx/unknown-domains.access.log main;
+    error_log /var/log/nginx/unknown-domains.error.log;
+
+    # Return 444 (connection closed without response) for unknown domains
+    return 444;
+}

@@ -1,8 +1,11 @@
-import redis.asyncio as redis
-from app.core.config import settings
 import logging
 
+import redis.asyncio as redis
+
+from app.core.config import settings
+
 logger = logging.getLogger(__name__)
+
 
 class CacheService:
     def __init__(self):
@@ -10,7 +13,9 @@ class CacheService:
 
     async def setup(self):
         try:
-            self.redis_client = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
+            self.redis_client = redis.from_url(
+                settings.REDIS_URL, encoding="utf-8", decode_responses=True
+            )
             await self.redis_client.ping()
             logger.info("Successfully connected to Redis.")
         except Exception as e:
@@ -31,5 +36,6 @@ class CacheService:
         if self.redis_client:
             await self.redis_client.close()
             logger.info("Redis connection closed.")
+
 
 cache_service = CacheService()

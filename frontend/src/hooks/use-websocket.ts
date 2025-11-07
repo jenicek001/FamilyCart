@@ -5,6 +5,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
+import { useWebSocketContext } from '@/contexts/WebSocketContext';
+import { API_CONFIG } from '@/config/constants';
+
+// WebSocket connection states
 
 export interface WebSocketMessage {
   type: 'item_change' | 'list_change' | 'pong' | 'connection_established';
@@ -17,6 +22,7 @@ export interface WebSocketMessage {
   new_member_email?: string;
   removed_user_id?: string;
   message?: string; // For connection_established type
+  session_id?: string; // Session ID from connection_established
 }
 
 export interface UseWebSocketOptions {
@@ -32,6 +38,7 @@ export interface UseWebSocketReturn {
   connected: boolean;
   connecting: boolean;
   error: string | null;
+  sessionId: string | null;
   send: (message: any) => void;
   disconnect: () => void;
   reconnect: () => void;
@@ -46,9 +53,11 @@ export function useWebSocket({
   reconnectInterval = 3000,
 }: UseWebSocketOptions): UseWebSocketReturn {
   const { token } = useAuth();
+  const { setSessionId: setContextSessionId } = useWebSocketContext();
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -152,10 +161,25 @@ export function useWebSocket({
     setError(null);
 
     try {
-      // Construct WebSocket URL
+      // Construct WebSocket URL - auto-detect appropriate host
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '') || 'localhost:8000';
+      
+      // Auto-detect the appropriate host for WebSocket connection
+      let host: string;
+      if (process.env.NEXT_PUBLIC_API_URL) {
+        // Use the configured API URL, removing the protocol
+        host = process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, '');
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local development: use localhost with backend port
+        host = `${window.location.hostname}:${API_CONFIG.DEFAULT_PORT}`;
+      } else {
+        // Production: use the current window host without adding port
+        // The reverse proxy (nginx) handles routing on standard ports
+        host = window.location.host;
+      }
+      
       const wsUrl = `${protocol}//${host}/api/v1/ws/lists/${listId}?token=${encodeURIComponent(token)}`;
+      console.log(`Connecting to WebSocket: ${wsUrl}`);
 
       wsRef.current = new WebSocket(wsUrl);
 
@@ -204,6 +228,12 @@ export function useWebSocket({
               break;
             case 'connection_established':
               console.log('WebSocket connection established:', message.message);
+              // Capture session ID from the backend
+              if (message.session_id) {
+                setSessionId(message.session_id);
+                setContextSessionId(message.session_id);
+                console.log('Session ID received:', message.session_id);
+              }
               break;
             default:
               console.log('Unknown WebSocket message type:', message.type);
@@ -341,6 +371,7 @@ export function useWebSocket({
     connected,
     connecting,
     error,
+    sessionId,
     send,
     disconnect,
     reconnect,

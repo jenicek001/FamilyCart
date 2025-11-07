@@ -9,10 +9,10 @@ from datetime import datetime, timezone
 def utc_now() -> datetime:
     """
     Return current UTC time as timezone-aware datetime.
-    
+
     This should be used instead of datetime.utcnow() which returns naive datetime objects.
     Timezone-aware datetime objects ensure proper serialization with timezone information.
-    
+
     Returns:
         datetime: Current UTC time with timezone information
     """
@@ -22,10 +22,10 @@ def utc_now() -> datetime:
 def to_utc(dt: datetime) -> datetime:
     """
     Convert a datetime object to UTC timezone.
-    
+
     Args:
         dt: datetime object (can be naive or timezone-aware)
-        
+
     Returns:
         datetime: UTC datetime with timezone information
     """
@@ -40,10 +40,10 @@ def to_utc(dt: datetime) -> datetime:
 def from_timestamp(timestamp: float) -> datetime:
     """
     Create timezone-aware UTC datetime from Unix timestamp.
-    
+
     Args:
         timestamp: Unix timestamp (seconds since epoch)
-        
+
     Returns:
         datetime: UTC datetime with timezone information
     """

@@ -8,13 +8,15 @@ ENV PYTHONUNBUFFERED 1
 # 3. Set the working directory in the container
 WORKDIR /app
 
-# 4. Install Poetry
-RUN pip install poetry
+# 4. Install Poetry and configure it for Docker
+#    Poetry 2.x best practice: Don't create virtualenv in Docker since container is already isolated
+RUN pip install poetry && \
+    poetry config virtualenvs.create false
 
 # 5. Copy only necessary files for dependency installation
-COPY poetry.toml pyproject.toml poetry.lock* ./
+COPY pyproject.toml poetry.lock* ./
 
-# 6. Install project dependencies
+# 6. Install project dependencies directly into system Python (no venv)
 #    --no-root: Don't install the project itself, only dependencies
 #    --without dev: Don't install development dependencies
 RUN poetry install --no-root --without dev

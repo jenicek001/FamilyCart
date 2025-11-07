@@ -14,7 +14,17 @@ RUN npm install
 # Copy the rest of your app's source code from your host to your image filesystem.
 COPY . .
 
-# 5. Build the Next.js Application
+# 5. Build Arguments for Next.js configuration
+ARG USE_NGINX_PROXY=false
+ARG API_URL=""
+ARG NEXT_PUBLIC_API_URL=""
+
+# Export as environment variables for the build
+ENV USE_NGINX_PROXY=$USE_NGINX_PROXY
+ENV API_URL=$API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+# 6. Build the Next.js Application
 # This will create an optimized production build in the .next folder.
 RUN npm run build
 
@@ -24,9 +34,20 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Copy package.json and install only production dependencies
+COPY --from=base /app/package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
 # Copy the built application from the previous stage
 COPY --from=base /app/.next ./.next
-COPY --from=base /app/package.json ./
+COPY --from=base /app/public ./public
+COPY --from=base /app/next.config.* ./
+
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
 # Expose the port the app runs on
 EXPOSE 3000

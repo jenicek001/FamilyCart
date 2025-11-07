@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/components/*": ["./src/components/*"]
+    }
+  },
+  "include": ["src/**/*", "next-env.d.ts"],
+  "exclude": ["node_modules", "tests/**/*"]
+}

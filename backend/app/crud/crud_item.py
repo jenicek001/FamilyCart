@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy.orm import Session
 
@@ -23,12 +23,12 @@ class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
         return db_obj
 
     def update(
-        self, 
-        db: Session, 
-        *, 
-        db_obj: Item, 
-        obj_in: Union[ItemUpdate, Dict[str, Any]], 
-        last_modified_by_id: int
+        self,
+        db: Session,
+        *,
+        db_obj: Item,
+        obj_in: Union[ItemUpdate, Dict[str, Any]],
+        last_modified_by_id: int,
     ) -> Item:
         # Use the base update method first
         updated_obj = super().update(db, db_obj=db_obj, obj_in=obj_in)

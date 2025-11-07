@@ -5,17 +5,18 @@ This module implements the AIProvider interface using Google's Gemini model
 for AI-powered features in FamilyCart.
 """
 
-import logging
 import json
-from typing import Dict, Any, List
-import google.generativeai as genai
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+import logging
+from typing import Any, Dict, List
 
+import google.generativeai as genai
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
+from app.core.cache import cache_service
 from app.core.config import settings
 from app.models.category import Category
-from app.core.cache import cache_service
 from app.services.ai_provider import AIProvider
 
 # Configure logging
@@ -32,13 +33,15 @@ class GeminiProvider(AIProvider):
         """
         Initialize the Gemini provider with API key and model configuration.
         """
-        if not settings.GOOGLE_API_KEY:
-            raise ValueError("GOOGLE_API_KEY is not set in the environment variables.")
-        
+        if not settings.GEMINI_API_KEY:
+            raise ValueError("GEMINI_API_KEY is not set in the environment variables.")
+
         try:
-            genai.configure(api_key=settings.GOOGLE_API_KEY)
+            genai.configure(api_key=settings.GEMINI_API_KEY)
             self.model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
-            logger.info(f"Successfully initialized Gemini model: {settings.GEMINI_MODEL_NAME}")
+            logger.info(
+                f"Successfully initialized Gemini model: {settings.GEMINI_MODEL_NAME}"
+            )
         except Exception as e:
             logger.error(f"Error configuring Google AI: {e}")
             raise
@@ -51,10 +54,10 @@ class GeminiProvider(AIProvider):
     def _is_rate_limit_error(self, error: Exception) -> bool:
         """
         Check if the error indicates a rate limit or quota has been reached.
-        
+
         Args:
             error: The exception to check
-            
+
         Returns:
             bool: True if this is a rate limit error that should trigger fallback
         """
@@ -62,11 +65,11 @@ class GeminiProvider(AIProvider):
         rate_limit_indicators = [
             "rate limit",
             "quota exceeded",
-            "too many requests", 
+            "too many requests",
             "429",
             "resource exhausted",
             "rate_limit_exceeded",
-            "current quota"
+            "current quota",
         ]
         return any(indicator in error_str for indicator in rate_limit_indicators)
 
@@ -106,7 +109,9 @@ class GeminiProvider(AIProvider):
         cache_key = f"category_suggestion:{item_name.lower().strip()}"
         cached_category = await cache_service.get(cache_key)
         if cached_category:
-            logger.info(f"Cache hit for category suggestion: {item_name} -> {cached_category}")
+            logger.info(
+                f"Cache hit for category suggestion: {item_name} -> {cached_category}"
+            )
             return cached_category
 
         # Use async SQLAlchemy to get existing categories
@@ -141,19 +146,30 @@ class GeminiProvider(AIProvider):
             # First try to parse as JSON (legacy behavior)
             try:
                 data = json.loads(response.text)
-                suggested_category = data.get("category_name", "Uncategorized").strip().replace(".", "").title()
+                suggested_category = (
+                    data.get("category_name", "Uncategorized")
+                    .strip()
+                    .replace(".", "")
+                    .title()
+                )
             except (json.JSONDecodeError, KeyError):
                 # Expected behavior: parse as plain text response
                 suggested_category = response.text.strip().replace(".", "").title()
-                logger.info(f"Parsed plain text category response: {suggested_category}")
-            
-            await cache_service.set(cache_key, suggested_category, expire=3600 * 24 * 180) # Cache for 6 months
+                logger.info(
+                    f"Parsed plain text category response: {suggested_category}"
+                )
+
+            await cache_service.set(
+                cache_key, suggested_category, expire=3600 * 24 * 180
+            )  # Cache for 6 months
             return suggested_category
         except Exception as e:
             logger.error(f"Error suggesting category with Gemini: {e}")
             return "Uncategorized"
 
-    async def suggest_category_async(self, item_name: str, category_names: List[str]) -> str:
+    async def suggest_category_async(
+        self, item_name: str, category_names: List[str]
+    ) -> str:
         """
         Suggest a category for a given item name using the Gemini model (async version).
 
@@ -167,7 +183,9 @@ class GeminiProvider(AIProvider):
         cache_key = f"category_suggestion:{item_name.lower().strip()}"
         cached_category = await cache_service.get(cache_key)
         if cached_category:
-            logger.info(f"Cache hit for category suggestion: {item_name} -> {cached_category}")
+            logger.info(
+                f"Cache hit for category suggestion: {item_name} -> {cached_category}"
+            )
             return cached_category
 
         prompt = f"""
@@ -197,13 +215,22 @@ class GeminiProvider(AIProvider):
             # First try to parse as JSON (legacy behavior)
             try:
                 data = json.loads(response.text)
-                suggested_category = data.get("category_name", "Uncategorized").strip().replace(".", "").title()
+                suggested_category = (
+                    data.get("category_name", "Uncategorized")
+                    .strip()
+                    .replace(".", "")
+                    .title()
+                )
             except (json.JSONDecodeError, KeyError):
                 # Expected behavior: parse as plain text response
                 suggested_category = response.text.strip().replace(".", "").title()
-                logger.info(f"Parsed plain text category response: {suggested_category}")
-            
-            await cache_service.set(cache_key, suggested_category, expire=3600 * 24 * 180) # Cache for 6 months
+                logger.info(
+                    f"Parsed plain text category response: {suggested_category}"
+                )
+
+            await cache_service.set(
+                cache_key, suggested_category, expire=3600 * 24 * 180
+            )  # Cache for 6 months
             return suggested_category
         except Exception as e:
             logger.error(f"Error suggesting category with Gemini: {e}")
@@ -226,24 +253,99 @@ class GeminiProvider(AIProvider):
         cache_key = f"icon_suggestion:{item_name.lower().strip()}:{category_name.lower().strip()}"
         cached_icon = await cache_service.get(cache_key)
         if cached_icon:
-            logger.info(f"Cache hit for icon suggestion: {item_name}/{category_name} -> {cached_icon}")
+            logger.info(
+                f"Cache hit for icon suggestion: {item_name}/{category_name} -> {cached_icon}"
+            )
             return cached_icon
 
         # A curated list of common icons. A more comprehensive list could be loaded from a file.
         icon_list = [
-            "shopping_cart", "local_grocery_store", "fastfood", "local_bar", "local_cafe", "local_dining",
-            "icecream", "local_pizza", "ramen_dining", "lunch_dining", "bakery_dining", "hardware",
-            "home", "kitchen", "tv", "lightbulb", "chair", "bed", "camera", "movie", "music_note",
-            "book", "school", "science", "pets", "park", "fitness_center", "checkroom", "face",
-            "spa", "content_cut", "brush", "medical_services", "medication", "local_pharmacy",
-            "local_hospital", "construction", "handyman", "plumbing", "electrical_services",
-            "cleaning_services", "flight", "train", "directions_car", "local_taxi", "local_gas_station",
-            "ev_station", "local_shipping", "local_post_office", "credit_card", "account_balance_wallet",
-            "savings", "paid", "receipt_long", "work", "business_center", "computer", "phone_iphone",
-            "smartphone", "tablet_mac", "watch", "devices", "toys", "sports_esports", "sports_soccer",
-            "sports_basketball", "sports_tennis", "sports_volleyball", "sports_baseball", "sports_golf",
-            "celebration", "cake", "card_giftcard", "redeem", "theaters", "attractions", "forest",
-            "terrain", "ac_unit", "water_drop", "grass", "eco", "recycling", "compost", "pets", "leaf"
+            "shopping_cart",
+            "local_grocery_store",
+            "fastfood",
+            "local_bar",
+            "local_cafe",
+            "local_dining",
+            "icecream",
+            "local_pizza",
+            "ramen_dining",
+            "lunch_dining",
+            "bakery_dining",
+            "hardware",
+            "home",
+            "kitchen",
+            "tv",
+            "lightbulb",
+            "chair",
+            "bed",
+            "camera",
+            "movie",
+            "music_note",
+            "book",
+            "school",
+            "science",
+            "pets",
+            "park",
+            "fitness_center",
+            "checkroom",
+            "face",
+            "spa",
+            "content_cut",
+            "brush",
+            "medical_services",
+            "medication",
+            "local_pharmacy",
+            "local_hospital",
+            "construction",
+            "handyman",
+            "plumbing",
+            "electrical_services",
+            "cleaning_services",
+            "flight",
+            "train",
+            "directions_car",
+            "local_taxi",
+            "local_gas_station",
+            "ev_station",
+            "local_shipping",
+            "local_post_office",
+            "credit_card",
+            "account_balance_wallet",
+            "savings",
+            "paid",
+            "receipt_long",
+            "work",
+            "business_center",
+            "computer",
+            "phone_iphone",
+            "smartphone",
+            "tablet_mac",
+            "watch",
+            "devices",
+            "toys",
+            "sports_esports",
+            "sports_soccer",
+            "sports_basketball",
+            "sports_tennis",
+            "sports_volleyball",
+            "sports_baseball",
+            "sports_golf",
+            "celebration",
+            "cake",
+            "card_giftcard",
+            "redeem",
+            "theaters",
+            "attractions",
+            "forest",
+            "terrain",
+            "ac_unit",
+            "water_drop",
+            "grass",
+            "eco",
+            "recycling",
+            "compost",
+            "pets",
+            "leaf",
         ]
 
         prompt = f"""
@@ -261,20 +363,28 @@ class GeminiProvider(AIProvider):
             # First try to parse as JSON (legacy behavior)
             try:
                 data = json.loads(response.text)
-                suggested_icon = data.get("icon_name", "shopping_cart").strip().replace(".", "")
+                suggested_icon = (
+                    data.get("icon_name", "shopping_cart").strip().replace(".", "")
+                )
                 logger.info(f"Parsed JSON icon response: {suggested_icon}")
             except (json.JSONDecodeError, KeyError):
                 # Expected behavior: parse as plain text response
                 suggested_icon = response.text.strip().replace(".", "")
                 logger.info(f"Parsed plain text icon response: {suggested_icon}")
-            
+
             if suggested_icon in icon_list:
-                await cache_service.set(cache_key, suggested_icon, expire=3600 * 24 * 180) # Cache for 6 months
+                await cache_service.set(
+                    cache_key, suggested_icon, expire=3600 * 24 * 180
+                )  # Cache for 6 months
                 return suggested_icon
             else:
                 # Fallback to a generic icon if the suggested one is not in the list
-                logger.warning(f"Suggested icon '{suggested_icon}' not in the predefined list. Falling back to default.")
-                await cache_service.set(cache_key, "shopping_cart", expire=3600 * 24 * 180) # Cache for 6 months
+                logger.warning(
+                    f"Suggested icon '{suggested_icon}' not in the predefined list. Falling back to default."
+                )
+                await cache_service.set(
+                    cache_key, "shopping_cart", expire=3600 * 24 * 180
+                )  # Cache for 6 months
                 return "shopping_cart"
         except Exception as e:
             logger.error(f"Error suggesting icon with Gemini: {e}")
@@ -283,7 +393,9 @@ class GeminiProvider(AIProvider):
                 raise e
             return "shopping_cart"
 
-    async def standardize_and_translate_item_name(self, item_name: str) -> Dict[str, Any]:
+    async def standardize_and_translate_item_name(
+        self, item_name: str
+    ) -> Dict[str, Any]:
         """
         Standardize an item name and provide translations.
 
@@ -346,21 +458,29 @@ class GeminiProvider(AIProvider):
             # Clean the response text before parsing
             cleaned_response_text = response.text.strip()
             # Find the start and end of the JSON object
-            start_index = cleaned_response_text.find('{')
-            end_index = cleaned_response_text.rfind('}') + 1
+            start_index = cleaned_response_text.find("{")
+            end_index = cleaned_response_text.rfind("}") + 1
             if start_index != -1 and end_index != 0:
                 json_text = cleaned_response_text[start_index:end_index]
                 data = json.loads(json_text)
-                await cache_service.set(cache_key, json.dumps(data), expire=3600 * 24 * 180) # Cache for 6 months
+                await cache_service.set(
+                    cache_key, json.dumps(data), expire=3600 * 24 * 180
+                )  # Cache for 6 months
                 return data
             else:
-                logger.error(f"Could not find a valid JSON object in the response from Gemini.")
+                logger.error(
+                    f"Could not find a valid JSON object in the response from Gemini."
+                )
                 return {"standardized_name": item_name, "translations": {}}
         except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON from Gemini: {e}\nResponse text: {response.text}")
+            logger.error(
+                f"Error decoding JSON from Gemini: {e}\nResponse text: {response.text}"
+            )
             return {"standardized_name": item_name, "translations": {}}
         except Exception as e:
-            logger.error(f"Error standardizing and translating item name with Gemini: {e}")
+            logger.error(
+                f"Error standardizing and translating item name with Gemini: {e}"
+            )
             # Re-raise rate limit and quota errors so fallback service can handle them
             if self._is_rate_limit_error(e):
                 raise e

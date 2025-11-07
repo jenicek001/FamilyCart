@@ -1,16 +1,16 @@
-from sqlalchemy import String, ForeignKey, Table, Column, DateTime
-from sqlalchemy.orm import Mapped, relationship, mapped_column
-from typing import List, TYPE_CHECKING
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, List
+
+from sqlalchemy import Column, DateTime, ForeignKey, String, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.base import Base
 from ..utils.timezone import utc_now
 
-
 if TYPE_CHECKING:
-    from .user import User
     from .item import Item
+    from .user import User
 
 # Association table for many-to-many relationship between users and shopping lists
 user_shopping_list = Table(
@@ -20,18 +20,23 @@ user_shopping_list = Table(
     Column("shopping_list_id", ForeignKey("shopping_list.id"), primary_key=True),
 )
 
+
 class ShoppingList(Base):
     """Shopping list model with relationships to users and items."""
-    
+
     __tablename__ = "shopping_list"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    
+
     # Use timezone-aware DateTime columns
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     # Owner relationship
     owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
@@ -39,14 +44,12 @@ class ShoppingList(Base):
 
     # Users with whom the list is shared
     shared_with: Mapped[List["User"]] = relationship(
-        secondary=user_shopping_list,
-        back_populates="shared_lists"
+        secondary=user_shopping_list, back_populates="shared_lists"
     )
 
     # Items in the list
     items: Mapped[List["Item"]] = relationship(
-        back_populates="shopping_list",
-        cascade="all, delete-orphan"
+        back_populates="shopping_list", cascade="all, delete-orphan"
     )
 
     def __str__(self) -> str:

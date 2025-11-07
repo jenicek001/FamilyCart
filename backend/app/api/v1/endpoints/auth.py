@@ -32,4 +32,3 @@ router.include_router(
     prefix="/verify",
     tags=["auth"],
 )
-

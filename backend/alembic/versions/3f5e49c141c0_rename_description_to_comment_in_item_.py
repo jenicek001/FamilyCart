@@ -8,9 +8,9 @@ Create Date: 2025-07-18 10:44:47.433830
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "3f5e49c141c0"
@@ -22,10 +22,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     # Rename description column to comment in item table
-    op.alter_column('item', 'description', new_column_name='comment')
+    op.alter_column("item", "description", new_column_name="comment")
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # Rename comment column back to description in item table
-    op.alter_column('item', 'comment', new_column_name='description')
+    op.alter_column("item", "comment", new_column_name="description")

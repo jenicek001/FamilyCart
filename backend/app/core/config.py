@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
@@ -6,24 +7,35 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Shared Shopping List API"
     API_V1_STR: str = "/api/v1"
+
+    # Server Configuration
+    PORT: int = 8005
+    HOST: str = "0.0.0.0"
+
     # Database
     POSTGRES_SERVER: str = ""
     POSTGRES_USER: str = ""
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
+    POSTGRES_PORT: int = 5432
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
     SQLALCHEMY_DATABASE_URI_ASYNC: Optional[str] = None
 
-    @model_validator(mode='after')
-    def get_db_connection_str(self) -> 'Settings':
-        if self.POSTGRES_USER and self.POSTGRES_PASSWORD and self.POSTGRES_SERVER and self.POSTGRES_DB:
+    @model_validator(mode="after")
+    def get_db_connection_str(self) -> "Settings":
+        if (
+            self.POSTGRES_USER
+            and self.POSTGRES_PASSWORD
+            and self.POSTGRES_SERVER
+            and self.POSTGRES_DB
+        ):
             self.SQLALCHEMY_DATABASE_URI = (
                 f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
-                f"{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+                f"{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
             )
             self.SQLALCHEMY_DATABASE_URI_ASYNC = (
                 f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
-                f"{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+                f"{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
             )
         return self
 
@@ -45,15 +57,19 @@ class Settings(BaseSettings):
 
     # AI APIs
     OPENAI_API_KEY: Optional[str] = None
-    GOOGLE_API_KEY: Optional[str] = None
-    GEMINI_MODEL_NAME: str = "gemini-2.5-flash-lite-preview-06-17"  # Cost-efficient model with low latency, supports text/images/video/audio
-    
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL_NAME: str = (
+        "gemini-2.5-flash-lite-preview-06-17"  # Cost-efficient model with low latency, supports text/images/video/audio
+    )
+
     # AI Provider Configuration
     AI_PROVIDER: str = "gemini"  # Options: "gemini", "ollama"
-    
+
     # Ollama Configuration
     OLLAMA_BASE_URL: str = "http://localhost:11434"  # Default Ollama server URL
-    OLLAMA_MODEL_NAME: str = "gemma3:4b"  # Default model for Ollama (matches available model)
+    OLLAMA_MODEL_NAME: str = (
+        "gemma3:4b"  # Default model for Ollama (matches available model)
+    )
     OLLAMA_TIMEOUT: int = 120  # Request timeout in seconds
 
     # Redis
@@ -62,10 +78,12 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: Optional[str] = None
     REDIS_URL: Optional[str] = None
 
-    @model_validator(mode='after')
-    def get_redis_url(self) -> 'Settings':
+    @model_validator(mode="after")
+    def get_redis_url(self) -> "Settings":
         if self.REDIS_PASSWORD:
-            self.REDIS_URL = f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+            self.REDIS_URL = (
+                f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+            )
         else:
             self.REDIS_URL = f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
         return self
@@ -73,8 +91,8 @@ class Settings(BaseSettings):
     class Config:
         # Pydantic-settings will automatically load environment variables from the .env file.
         env_file = ".env"
-        env_file_encoding = 'utf-8'
-        extra = 'ignore'
+        env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 settings = Settings()

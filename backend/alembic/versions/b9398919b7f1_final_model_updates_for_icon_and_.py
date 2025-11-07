@@ -8,10 +8,11 @@ Create Date: 2025-06-22 17:53:45.216838
 
 from typing import Sequence, Union
 
-from alembic import op
+import fastapi_users_db_sqlalchemy
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
-import fastapi_users_db_sqlalchemy
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b9398919b7f1"
@@ -59,7 +60,10 @@ def upgrade() -> None:
         sa.Column("quantity", sa.String(50), nullable=True),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column(
-            "is_completed", sa.Boolean(), nullable=False, server_default=sa.text("false")
+            "is_completed",
+            sa.Boolean(),
+            nullable=False,
+            server_default=sa.text("false"),
         ),
         sa.Column("icon_name", sa.String(50), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),

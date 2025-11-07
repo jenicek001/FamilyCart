@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -24,7 +24,7 @@ def read_categories(
 
 @router.post("/", response_model=schemas.Category)
 def create_category(
-    *, 
+    *,
     db: Session = Depends(deps.get_db),
     category_in: schemas.CategoryCreate,
     current_user: models.User = Depends(deps.get_current_active_superuser),
@@ -44,7 +44,7 @@ def create_category(
 
 @router.put("/{id}", response_model=schemas.Category)
 def update_category(
-    *, 
+    *,
     db: Session = Depends(deps.get_db),
     id: int,
     category_in: schemas.CategoryUpdate,
@@ -65,7 +65,7 @@ def update_category(
 
 @router.get("/{id}", response_model=schemas.Category)
 def read_category(
-    *, 
+    *,
     db: Session = Depends(deps.get_db),
     id: int,
 ) -> Any:
@@ -83,7 +83,7 @@ def read_category(
 
 @router.delete("/{id}", response_model=schemas.Category)
 def delete_category(
-    *, 
+    *,
     db: Session = Depends(deps.get_db),
     id: int,
     current_user: models.User = Depends(deps.get_current_active_superuser),

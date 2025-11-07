@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import apiClient from '@/lib/api';
+import { useApiClient } from '@/hooks/use-api-client';
 import { ShoppingList, User } from '@/types';
 import { UserBadge } from '@/components/ui/UserBadge';
 import { Share, UserMinus, Crown, Mail, Copy, Check } from 'lucide-react';
@@ -20,6 +20,7 @@ interface ShareDialogProps {
 }
 
 export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialogProps) {
+  const { apiClient } = useApiClient();
   const [email, setEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
@@ -51,13 +52,14 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
 
     setIsInviting(true);
     try {
-      const response = await apiClient.post(`/api/v1/shopping-lists/${list.id}/share`, {
-        email: email.trim()
+      const response = await apiClient(`/api/v1/shopping-lists/${list.id}/share/`, {
+        method: 'POST',
+        body: JSON.stringify({ email: email.trim() })
       });
 
       // Update the list with new member if the backend returns it
-      if (response.data && onListUpdate) {
-        onListUpdate(response.data);
+      if (response && onListUpdate) {
+        onListUpdate(response);
       }
 
       toast({
@@ -69,13 +71,13 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
       console.error('Error sharing list:', error);
       
       // Handle specific error cases
-      if (error.response?.status === 403) {
+      if (error.message?.includes('403')) {
         toast({
           title: "Permission denied",
           description: "Only the list owner can invite new members.",
           variant: "destructive"
         });
-      } else if (error.response?.status === 500) {
+      } else if (error.message?.includes('500')) {
         toast({
           title: "Failed to send invitation",
           description: "Could not send invitation email. Please check the email address and try again.",
@@ -84,7 +86,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
       } else {
         toast({
           title: "Failed to send invitation",
-          description: error.response?.data?.detail || "Could not invite user. Please try again.",
+          description: error.message || "Could not invite user. Please try again.",
           variant: "destructive"
         });
       }
@@ -105,11 +107,13 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
 
     setIsRemoving(memberId);
     try {
-      const response = await apiClient.delete(`/api/v1/shopping-lists/${list.id}/members/${memberId}`);
+      const response = await apiClient(`/api/v1/shopping-lists/${list.id}/members/${memberId}/`, {
+        method: 'DELETE'
+      });
       
       // Update the list with removed member if the backend returns it
-      if (response.data && onListUpdate) {
-        onListUpdate(response.data);
+      if (response && onListUpdate) {
+        onListUpdate(response);
       }
 
       toast({
@@ -120,7 +124,7 @@ export function ShareDialog({ isOpen, onClose, list, onListUpdate }: ShareDialog
       console.error('Error removing member:', error);
       toast({
         title: "Failed to remove member",
-        description: error.response?.data?.detail || "Could not remove member. Please try again.",
+        description: error.message || "Could not remove member. Please try again.",
         variant: "destructive"
       });
     } finally {
