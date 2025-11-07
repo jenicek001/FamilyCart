@@ -397,8 +397,8 @@ jobs:
     runs-on: self-hosted
     needs: [test, security-scan]
     outputs:
-      backend-image: ${{ steps.meta-backend.outputs.tags }}
-      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+      backend-image: ${{ steps.set-tags.outputs.backend-tag }}
+      frontend-image: ${{ steps.set-tags.outputs.frontend-tag }}
       backend-digest: ${{ steps.build-backend.outputs.digest }}
       frontend-digest: ${{ steps.build-frontend.outputs.digest }}
     steps:
@@ -460,6 +460,17 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+
+      - name: Set deployment tags
+        id: set-tags
+        run: |
+          # Extract the branch tag (first line) from the multi-line tags output
+          BACKEND_TAG=$(echo "${{ steps.meta-backend.outputs.tags }}" | head -n1)
+          FRONTEND_TAG=$(echo "${{ steps.meta-frontend.outputs.tags }}" | head -n1)
+          echo "backend-tag=${BACKEND_TAG}" >> $GITHUB_OUTPUT
+          echo "frontend-tag=${FRONTEND_TAG}" >> $GITHUB_OUTPUT
+          echo "Using backend tag: ${BACKEND_TAG}"
+          echo "Using frontend tag: ${FRONTEND_TAG}"
 
   deploy-uat:
     runs-on: self-hosted
