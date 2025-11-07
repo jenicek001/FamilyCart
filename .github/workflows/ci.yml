@@ -530,20 +530,9 @@ jobs:
             # Local UAT deployment (self-hosted runner)
             echo "🏠 Deploying to local UAT environment"
             
-            # Ensure UAT directory exists and copy latest compose file
-            mkdir -p /opt/familycart-uat/logs/backend /opt/familycart-uat/logs/frontend
-            cp docker-compose.uat.yml /opt/familycart-uat/
-            
-            # Copy postgres config if it exists
-            if [ -d "./postgres-config" ]; then
-              cp -r ./postgres-config /opt/familycart-uat/
-            fi
-            
-            cd /opt/familycart-uat
-            
-            # Export image tags for docker-compose
-            export BACKEND_IMAGE="${BACKEND_IMAGE}"
-            export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
+            # Deploy directly from repo using docker-compose
+            # The runner has Docker access, just use environment variables
+            cd $GITHUB_WORKSPACE
             
             # Pull new images and deploy
             echo "📦 Pulling images..."
@@ -559,12 +548,8 @@ jobs:
             # Show service status
             docker compose -f docker-compose.uat.yml ps
             
-            # Show recent logs for debugging
-            echo "📋 Recent logs:"
-            docker compose -f docker-compose.uat.yml logs --tail=20
+            echo "✅ UAT deployment completed!"
           fi
-          
-          echo "✅ UAT deployment completed!"
           
       - name: Health check UAT deployment
         env:

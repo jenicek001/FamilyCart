@@ -12,7 +12,7 @@ services:
       - POSTGRES_PASSWORD=${UAT_DB_PASSWORD}
     volumes:
       - uat_postgres_data:/var/lib/postgresql/data
-      - ./postgres-config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      # postgres-config mount removed - uses default config
     ports:
       - "5435:5432"  # Different port from development and other projects
     networks:
@@ -94,8 +94,8 @@ services:
     networks:
       - uat-network
     volumes:
-      # Mount logs for debugging
-      - ./logs/backend:/app/logs
+      # Logs stored in named volume instead of local mount
+      - uat_backend_logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -134,8 +134,8 @@ services:
     networks:
       - uat-network
     volumes:
-      # Mount logs for debugging
-      - ./logs/frontend:/app/logs
+      # Logs stored in named volume instead of local mount
+      - uat_frontend_logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/"]
       interval: 30s
@@ -251,3 +251,7 @@ volumes:
     name: familycart-uat-ollama-data
   uat_prometheus_data:
     name: familycart-uat-prometheus-data
+  uat_backend_logs:
+    name: familycart-uat-backend-logs
+  uat_frontend_logs:
+    name: familycart-uat-frontend-logs
