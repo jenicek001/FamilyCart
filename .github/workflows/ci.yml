@@ -552,7 +552,7 @@ jobs:
 
   deploy-production:
     runs-on: self-hosted
-    needs: [build, deploy-uat]
+    needs: build
     if: github.ref == 'refs/heads/main'
     environment: production
     steps:
