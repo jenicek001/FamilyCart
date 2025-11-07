@@ -520,15 +520,15 @@ jobs:
               export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
               
               # Pull new images and deploy
-              docker compose -f docker-compose.uat.yml pull
-              docker compose -f docker-compose.uat.yml up -d --remove-orphans
+              docker compose -p uat -f docker-compose.uat.yml pull
+              docker compose -p uat -f docker-compose.uat.yml up -d --remove-orphans
               
               # Wait for services to start
               echo "⏳ Waiting for services to start..."
               sleep 30
               
               # Verify services are running
-              docker compose -f docker-compose.uat.yml ps
+              docker compose -p uat -f docker-compose.uat.yml ps
           EOF
             
             # Cleanup SSH key
@@ -543,17 +543,17 @@ jobs:
             
             # Pull new images and deploy
             echo "📦 Pulling images..."
-            docker compose -f docker-compose.uat.yml pull
+            docker compose -p uat -f docker-compose.uat.yml pull
             
             echo "🚀 Starting UAT services..."
-            docker compose -f docker-compose.uat.yml up -d --remove-orphans
+            docker compose -p uat -f docker-compose.uat.yml up -d --remove-orphans
             
             # Wait for services to start
             echo "⏳ Waiting for services to become healthy..."
             sleep 30
             
             # Show service status
-            docker compose -f docker-compose.uat.yml ps
+            docker compose -p uat -f docker-compose.uat.yml ps
             
             echo "✅ UAT deployment completed!"
           fi
