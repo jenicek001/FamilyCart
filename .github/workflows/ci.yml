@@ -489,44 +489,82 @@ jobs:
           UAT_USER: ${{ secrets.UAT_USER }}
           UAT_SSH_KEY: ${{ secrets.UAT_SSH_KEY }}
         run: |
+          echo "🚀 Deploying to UAT environment..."
+          echo "Backend Image: ${BACKEND_IMAGE}"
+          echo "Frontend Image: ${FRONTEND_IMAGE}"
+          
           # Prepare SSH key if deploying to remote UAT
           if [ -n "$UAT_SSH_KEY" ] && [ -n "$UAT_HOST" ]; then
+            echo "📡 Deploying to remote UAT server: $UAT_HOST"
             echo "$UAT_SSH_KEY" > /tmp/uat_key
             chmod 600 /tmp/uat_key
             
-            # Deploy to remote UAT server
-            ssh -i /tmp/uat_key -o StrictHostKeyChecking=no $UAT_USER@$UAT_HOST << 'EOF'
+            # Copy deployment files to remote UAT server
+            scp -i /tmp/uat_key -o StrictHostKeyChecking=no \
+              docker-compose.uat.yml .env \
+              $UAT_USER@$UAT_HOST:/opt/familycart-uat/
+            
+            # Deploy on remote UAT server
+            ssh -i /tmp/uat_key -o StrictHostKeyChecking=no $UAT_USER@$UAT_HOST << EOF
               cd /opt/familycart-uat
               
-              # Update Docker Compose with new images
-              sudo sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|$BACKEND_IMAGE|g" docker-compose.uat.yml
-              sudo sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|$FRONTEND_IMAGE|g" docker-compose.uat.yml
+              # Export image tags for docker-compose
+              export BACKEND_IMAGE="${BACKEND_IMAGE}"
+              export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
               
               # Pull new images and deploy
               docker compose -f docker-compose.uat.yml pull
               docker compose -f docker-compose.uat.yml up -d --remove-orphans
               
               # Wait for services to start
-              sleep 60
+              echo "⏳ Waiting for services to start..."
+              sleep 30
+              
+              # Verify services are running
+              docker compose -f docker-compose.uat.yml ps
           EOF
             
             # Cleanup SSH key
             rm /tmp/uat_key
           else
             # Local UAT deployment (self-hosted runner)
+            echo "🏠 Deploying to local UAT environment"
+            
+            # Ensure UAT directory exists and copy latest compose file
+            mkdir -p /opt/familycart-uat/logs/backend /opt/familycart-uat/logs/frontend
+            cp docker-compose.uat.yml /opt/familycart-uat/
+            
+            # Copy postgres config if it exists
+            if [ -d "./postgres-config" ]; then
+              cp -r ./postgres-config /opt/familycart-uat/
+            fi
+            
             cd /opt/familycart-uat
             
-            # Update Docker Compose with new images
-            sudo sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|${BACKEND_IMAGE}|g" docker-compose.uat.yml
-            sudo sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|${FRONTEND_IMAGE}|g" docker-compose.uat.yml
+            # Export image tags for docker-compose
+            export BACKEND_IMAGE="${BACKEND_IMAGE}"
+            export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
             
             # Pull new images and deploy
+            echo "📦 Pulling images..."
             docker compose -f docker-compose.uat.yml pull
+            
+            echo "🚀 Starting UAT services..."
             docker compose -f docker-compose.uat.yml up -d --remove-orphans
             
             # Wait for services to start
-            sleep 60
+            echo "⏳ Waiting for services to become healthy..."
+            sleep 30
+            
+            # Show service status
+            docker compose -f docker-compose.uat.yml ps
+            
+            # Show recent logs for debugging
+            echo "📋 Recent logs:"
+            docker compose -f docker-compose.uat.yml logs --tail=20
           fi
+          
+          echo "✅ UAT deployment completed!"
           
       - name: Health check UAT deployment
         env:

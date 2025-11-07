@@ -60,7 +60,7 @@ services:
           cpus: '0.25'
 
   uat-backend:
-    image: ghcr.io/jenicek001/familycart-backend:latest
+    image: ${BACKEND_IMAGE:-ghcr.io/jenicek001/familycart-backend:latest}
     container_name: familycart-uat-backend
     environment:
       - PORT=8000
@@ -114,7 +114,7 @@ services:
           cpus: '0.5'
 
   uat-frontend:
-    image: ghcr.io/jenicek001/familycart-frontend:latest
+    image: ${FRONTEND_IMAGE:-ghcr.io/jenicek001/familycart-frontend:latest}
     container_name: familycart-uat-frontend
     environment:
       - NODE_ENV=production
