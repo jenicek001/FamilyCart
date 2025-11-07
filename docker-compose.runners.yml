@@ -27,6 +27,8 @@ services:
       - build-cache:/tmp/build-cache
       # Host tools and caches
       - /usr/bin/docker:/usr/bin/docker:ro
+      # UAT deployment directory
+      - /opt/familycart-uat:/opt/familycart-uat
 
     networks:
       - runners-network
@@ -69,6 +71,8 @@ services:
       - runner2-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
+      # UAT deployment directory
+      - /opt/familycart-uat:/opt/familycart-uat
 
     networks:
       - runners-network
@@ -109,6 +113,8 @@ services:
       - runner3-work:/home/runner/work
       - build-cache:/tmp/build-cache
       - /usr/bin/docker:/usr/bin/docker:ro
+      # UAT deployment directory
+      - /opt/familycart-uat:/opt/familycart-uat
 
     networks:
       - runners-network
