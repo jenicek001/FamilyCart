@@ -499,8 +499,8 @@ jobs:
               cd /opt/familycart-uat
               
               # Update Docker Compose with new images
-              sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|$BACKEND_IMAGE|g" docker-compose.uat.yml
-              sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|$FRONTEND_IMAGE|g" docker-compose.uat.yml
+              sudo sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|$BACKEND_IMAGE|g" docker-compose.uat.yml
+              sudo sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|$FRONTEND_IMAGE|g" docker-compose.uat.yml
               
               # Pull new images and deploy
               docker compose -f docker-compose.uat.yml pull
@@ -517,8 +517,8 @@ jobs:
             cd /opt/familycart-uat
             
             # Update Docker Compose with new images
-            sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|${BACKEND_IMAGE}|g" docker-compose.uat.yml
-            sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|${FRONTEND_IMAGE}|g" docker-compose.uat.yml
+            sudo sed -i "s|ghcr.io/jenicek001/familycart-backend:.*|${BACKEND_IMAGE}|g" docker-compose.uat.yml
+            sudo sed -i "s|ghcr.io/jenicek001/familycart-frontend:.*|${FRONTEND_IMAGE}|g" docker-compose.uat.yml
             
             # Pull new images and deploy
             docker compose -f docker-compose.uat.yml pull
