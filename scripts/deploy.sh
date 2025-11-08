@@ -26,8 +26,23 @@ chmod 600 /tmp/deploy_key
 # Copy deployment files to server
 echo "📦 Copying deployment files..."
 scp -i /tmp/deploy_key -o StrictHostKeyChecking=no \
-  ${COMPOSE_FILE} .env \
+  ${COMPOSE_FILE} \
   ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+
+# Copy environment file if it exists
+if [ -f ".env.${ENV_NAME,,}" ]; then
+  echo "📄 Copying .env.${ENV_NAME,,} as .env..."
+  scp -i /tmp/deploy_key -o StrictHostKeyChecking=no \
+    .env.${ENV_NAME,,} \
+    ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/.env
+elif [ -f ".env" ]; then
+  echo "📄 Copying .env..."
+  scp -i /tmp/deploy_key -o StrictHostKeyChecking=no \
+    .env \
+    ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/.env
+else
+  echo "⚠️  No .env file found, services may not start correctly"
+fi
 
 # Deploy on remote server
 echo "🚀 Deploying services on ${DEPLOY_HOST}..."
