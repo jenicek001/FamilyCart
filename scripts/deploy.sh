@@ -31,7 +31,13 @@ scp -i /tmp/deploy_key -o StrictHostKeyChecking=no \
 
 # Deploy on remote server
 echo "🚀 Deploying services on ${DEPLOY_HOST}..."
-ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} bash << 'ENDSSH'
+ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} \
+  BACKEND_IMAGE="${BACKEND_IMAGE}" \
+  FRONTEND_IMAGE="${FRONTEND_IMAGE}" \
+  DEPLOY_PATH="${DEPLOY_PATH}" \
+  COMPOSE_FILE="${COMPOSE_FILE}" \
+  ENV_NAME="${ENV_NAME}" \
+  bash << 'ENDSSH'
   set -e
   cd ${DEPLOY_PATH}
   
