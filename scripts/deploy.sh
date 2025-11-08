@@ -52,6 +52,7 @@ ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST}
   DEPLOY_PATH="${DEPLOY_PATH}" \
   COMPOSE_FILE="${COMPOSE_FILE}" \
   ENV_NAME="${ENV_NAME}" \
+  GITHUB_TOKEN="${GITHUB_TOKEN}" \
   bash << 'ENDSSH'
   set -e
   cd ${DEPLOY_PATH}
@@ -59,6 +60,12 @@ ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST}
   # Export image tags for docker-compose
   export BACKEND_IMAGE="${BACKEND_IMAGE}"
   export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
+  
+  # Login to GitHub Container Registry if token is available
+  if [ -n "${GITHUB_TOKEN}" ]; then
+    echo "🔐 Logging into GitHub Container Registry..."
+    echo "${GITHUB_TOKEN}" | docker login ghcr.io -u $(echo ${BACKEND_IMAGE} | cut -d'/' -f2) --password-stdin
+  fi
   
   # Pull new images
   echo "📥 Pulling images..."

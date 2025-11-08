@@ -498,6 +498,7 @@ jobs:
           DEPLOY_PATH: /opt/familycart-uat
           COMPOSE_FILE: docker-compose.uat.yml
           ENV_NAME: UAT
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh
