@@ -88,6 +88,43 @@ class Settings(BaseSettings):
             self.REDIS_URL = f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
         return self
 
+    # Email Service Configuration
+    EMAIL_PROVIDER: str = "console"  # Options: "brevo", "resend", "smtp", "console"
+    EMAIL_ENABLED: bool = True  # Set to False to disable all email sending
+
+    # Brevo Configuration (formerly Sendinblue)
+    BREVO_API_KEY: Optional[str] = None
+    BREVO_SMTP_HOST: str = "smtp-relay.brevo.com"
+    BREVO_SMTP_PORT: int = 587
+    BREVO_SMTP_USER: Optional[str] = None
+    BREVO_SMTP_PASSWORD: Optional[str] = None
+
+    # Generic SMTP Configuration
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_USE_TLS: bool = False
+    SMTP_START_TLS: bool = True
+
+    # Email Settings
+    FROM_EMAIL: str = "noreply@familycart.com"
+    FROM_NAME: str = "FamilyCart"
+    SUPPORT_EMAIL: str = "support@familycart.com"
+
+    # Frontend URL for email links
+    FRONTEND_URL: str = "http://localhost:3000"
+
+    # Email Token Expiration (for fastapi-users compatibility)
+    EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS: int = 48  # 2 days
+    PASSWORD_RESET_TOKEN_EXPIRE_HOURS: int = 1  # 1 hour for security
+    INVITATION_TOKEN_EXPIRE_DAYS: int = 7  # 7 days
+    
+    # Token lifetime in seconds (for compatibility with fastapi-users)
+    VERIFICATION_TOKEN_LIFETIME_SECONDS: int = 172800  # 48 hours
+    RESET_PASSWORD_TOKEN_LIFETIME_SECONDS: int = 3600  # 1 hour
+    INVITATION_TOKEN_LIFETIME_SECONDS: int = 604800  # 7 days
+
     class Config:
         # Pydantic-settings will automatically load environment variables from the .env file.
         env_file = ".env"

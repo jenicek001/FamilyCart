@@ -19,6 +19,15 @@
 - **`docs/features/`** - Feature specifications and implementation guides
 - **`docs/archives/`** - Historical documentation (sprints, fixes, ci-cd, test-reports)
 
+**IMPORTANT FILE PLACEMENT RULES:**
+- ✅ **Planning documents** → `docs/` (e.g., `docs/EMAIL_SERVICE_IMPLEMENTATION_PLAN.md`)
+- ✅ **Feature specifications** → `docs/features/` (e.g., `docs/features/websocket-implementation.md`)
+- ✅ **Sprint reports** → `docs/archives/sprints/` (e.g., `docs/archives/sprints/SPRINT_7_REPORT.md`)
+- ✅ **Bug fix documentation** → `docs/archives/fixes/` (e.g., `docs/archives/fixes/websocket-connection-fix.md`)
+- ✅ **Deployment guides** → `docs/deployment/` (e.g., `docs/deployment/DEPLOY_SELF_HOSTED_UAT.md`)
+- ✅ **Analysis documents** → `docs/` (e.g., `docs/CZECH_CATEGORIZATION_ANALYSIS.md`)
+- ❌ **NEVER create new .md files in repository root** except for the 4 essential files listed above
+
 **Note:** Nginx reverse proxy runs from a separate repository on the host machine. This repo contains only nginx configuration templates.
 
 ### Scripts Organization
@@ -67,7 +76,14 @@
 - **Sprint summaries** should be placed in `docs/archives/sprints/` (not root directory)
 - **Fix documentation** should go in `docs/archives/fixes/`
 - **New features** should be documented in `docs/features/` with comprehensive specifications
-- **Keep root directory clean** - only essential active files belong there
+- **Planning documents** (implementation plans, analysis, technical design) should go in `docs/` or appropriate subdirectory
+- **CRITICAL: NEVER create new markdown files in the repository root directory** - the root should ONLY contain:
+  - `README.md` - Main project documentation
+  - `TASKS.md` - Active task tracking
+  - `USER_STORIES.md` - Requirements and user stories
+  - `PLANNING.md` - High-level roadmap and vision
+  - Docker compose files (dev, uat, ci, runners, monitoring)
+- **All other documentation MUST go in the `docs/` directory hierarchy**
 
 ## 📚 Documentation & Explainability
 - **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.

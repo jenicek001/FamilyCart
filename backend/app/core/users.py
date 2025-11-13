@@ -1,4 +1,5 @@
 import uuid
+import logging
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, UUIDIDMixin
@@ -6,6 +7,9 @@ from fastapi_users import BaseUserManager, UUIDIDMixin
 from app.api.deps import get_user_db
 from app.core.config import settings
 from app.models.user import User
+from app.services.email_service import get_email_service
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
@@ -15,17 +19,54 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     verification_token_secret = settings.SECRET_KEY
 
     async def on_after_register(self, user: User, request: Request | None = None):
-        print(f"User {user.id} has registered.")
+        """
+        Called after a user successfully registers.
+        Logs the registration event.
+        
+        Note: Verification email is sent via on_after_request_verify hook
+        when the user requests verification or during auto-verification flow.
+        """
+        logger.info(f"User {user.id} ({user.email}) has registered.")
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+        """
+        Called after a password reset is requested.
+        Sends password reset email with token.
+        """
+        logger.info(f"User {user.id} ({user.email}) requested password reset.")
+        
+        try:
+            email_service = get_email_service()
+            await email_service.send_password_reset_email(
+                recipient=user.email,
+                token=token,
+            )
+            logger.info(f"Password reset email sent to {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send password reset email to {user.email}: {e}")
+            # Don't block password reset flow if email fails
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
     ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+        """
+        Called after email verification is requested.
+        Sends verification email with token.
+        """
+        logger.info(f"Verification requested for user {user.id} ({user.email}).")
+        
+        try:
+            email_service = get_email_service()
+            await email_service.send_verification_email(
+                recipient=user.email,
+                token=token,
+            )
+            logger.info(f"Verification email sent to {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send verification email to {user.email}: {e}")
+            # Don't block verification flow if email fails
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
