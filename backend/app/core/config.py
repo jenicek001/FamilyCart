@@ -119,7 +119,7 @@ class Settings(BaseSettings):
     EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS: int = 48  # 2 days
     PASSWORD_RESET_TOKEN_EXPIRE_HOURS: int = 1  # 1 hour for security
     INVITATION_TOKEN_EXPIRE_DAYS: int = 7  # 7 days
-    
+
     # Token lifetime in seconds (for compatibility with fastapi-users)
     VERIFICATION_TOKEN_LIFETIME_SECONDS: int = 172800  # 48 hours
     RESET_PASSWORD_TOKEN_LIFETIME_SECONDS: int = 3600  # 1 hour

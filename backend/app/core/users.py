@@ -1,5 +1,5 @@
-import uuid
 import logging
+import uuid
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, UUIDIDMixin
@@ -22,7 +22,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         """
         Called after a user successfully registers.
         Logs the registration event.
-        
+
         Note: Verification email is sent via on_after_request_verify hook
         when the user requests verification or during auto-verification flow.
         """
@@ -36,7 +36,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         Sends password reset email with token.
         """
         logger.info(f"User {user.id} ({user.email}) requested password reset.")
-        
+
         try:
             email_service = get_email_service()
             await email_service.send_password_reset_email(
@@ -56,7 +56,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         Sends verification email with token.
         """
         logger.info(f"Verification requested for user {user.id} ({user.email}).")
-        
+
         try:
             email_service = get_email_service()
             await email_service.send_verification_email(

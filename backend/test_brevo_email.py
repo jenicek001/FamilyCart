@@ -18,22 +18,22 @@ async def test_brevo_email():
     print("=" * 80)
     print("TESTING BREVO EMAIL SERVICE")
     print("=" * 80)
-    
+
     email_service = get_email_service()
-    
+
     # Send to specified email
     recipient = "honzik.zahradnik@gmail.com"
-    
+
     # Validate email
     validated = email_service.validate_email_address(recipient)
     if not validated:
         print(f"❌ Invalid email address: {recipient}")
         return False
-    
+
     print(f"\n✓ Email validated: {validated}")
     print(f"\nSending test email to {validated}...")
     print("This may take a few seconds...")
-    
+
     # Send test email
     success = await email_service.send_email(
         recipient=validated,
@@ -67,7 +67,7 @@ Sent from FamilyCart Backend
 Email Service Test
         """,
     )
-    
+
     print("\n" + "=" * 80)
     if success:
         print("✅ EMAIL SENT SUCCESSFULLY!")
@@ -92,5 +92,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
