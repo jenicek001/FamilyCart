@@ -21,12 +21,19 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_register(self, user: User, request: Request | None = None):
         """
         Called after a user successfully registers.
-        Logs the registration event.
-
-        Note: Verification email is sent via on_after_request_verify hook
-        when the user requests verification or during auto-verification flow.
+        Sends verification email automatically.
         """
         logger.info(f"User {user.id} ({user.email}) has registered.")
+
+        # Generate verification token and send email
+        try:
+            token = await self.request_verify(user, request)
+            logger.info(
+                f"Verification email automatically sent to {user.email} with token"
+            )
+        except Exception as e:
+            logger.error(f"Failed to send verification email to {user.email}: {e}")
+            # Don't block registration if email fails
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
