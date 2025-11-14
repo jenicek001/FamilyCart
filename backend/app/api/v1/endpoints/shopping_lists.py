@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_session, set_session_context
-from app.core.fastapi_users import current_user
+from app.core.dependencies import get_current_user
 from app.models import User
 from app.models.item import Item
 from app.models.shopping_list import ShoppingList
