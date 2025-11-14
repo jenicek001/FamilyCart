@@ -74,7 +74,7 @@ async def create_item(
     *,
     session: AsyncSession = Depends(get_session),
     item_in: ItemCreateStandalone,
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Create a new item in a shopping list.
@@ -130,7 +130,7 @@ async def create_item(
 async def read_item(
     item_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get an item by ID.
@@ -164,7 +164,7 @@ async def read_item(
 async def read_items_from_list(
     list_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get all items from a specific shopping list.
@@ -209,7 +209,7 @@ async def update_item(
     session: AsyncSession = Depends(get_session),
     item_id: int,
     item_in: ItemUpdate,
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """
@@ -323,7 +323,7 @@ async def delete_item(
     *,
     session: AsyncSession = Depends(get_session),
     item_id: int,
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """

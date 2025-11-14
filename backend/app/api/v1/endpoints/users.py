@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from app.core.dependencies import get_current_user
 from app.core.fastapi_users import fastapi_users
@@ -9,11 +9,9 @@ from app.schemas.user import UserRead, UserUpdate
 router = APIRouter()
 
 # User management routes (get user details, update user, delete user)
-# Pass get_current_user to ensure email verification is required
+# Require email verification for accessing user management endpoints
 router.include_router(
-    fastapi_users.get_users_router(
-        UserRead, UserUpdate, get_current_user=get_current_user
-    ),
+    fastapi_users.get_users_router(UserRead, UserUpdate, requires_verification=True),
     prefix="/users",  # This creates the /users/me endpoint
     tags=["users"],
 )

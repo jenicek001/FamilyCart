@@ -36,7 +36,7 @@ async def create_shopping_list(
     *,
     session: AsyncSession = Depends(get_session),
     list_in: ShoppingListCreate,
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Create new shopping list.
@@ -77,7 +77,7 @@ async def create_shopping_list(
 @router.get("/", response_model=List[ShoppingListRead])
 async def read_shopping_lists(
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Retrieve user's shopping lists (owned and shared).
@@ -133,7 +133,7 @@ async def read_shopping_lists(
 async def read_shopping_list(
     list_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get a specific shopping list by ID.
@@ -155,7 +155,7 @@ async def update_shopping_list(
     list_id: int,
     list_in: ShoppingListUpdate,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """
@@ -229,7 +229,7 @@ async def update_shopping_list(
 async def delete_shopping_list(
     list_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """
@@ -260,7 +260,7 @@ async def create_item_for_list(
     list_id: int,
     item_in: ItemCreate,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """
@@ -333,7 +333,7 @@ async def create_item_for_list(
 async def read_items_from_list(
     list_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get all items from a specific shopping list.
@@ -361,7 +361,7 @@ async def share_shopping_list(
     list_id: int,
     share_data: ShareRequest,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """
@@ -394,7 +394,7 @@ async def remove_member_from_list(
     list_id: int,
     user_email: str,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(current_user),
+    current_user: User = Depends(get_current_user),
     _session_context: str = Depends(set_session_context),
 ):
     """
