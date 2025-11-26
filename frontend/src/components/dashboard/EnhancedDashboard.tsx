@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 import { useApiClient } from '@/hooks/use-api-client';
+import axios from 'axios';
 import type { ShoppingList, Item, ItemCreate } from '@/types';
 import { ShoppingListSelector } from '@/components/ShoppingList/ShoppingListSelector';
 import { RealtimeShoppingList } from '@/components/ShoppingList/RealtimeShoppingList';
@@ -288,9 +289,10 @@ export default function EnhancedDashboard() {
         setResending(true);
         setResendMessage('');
         try {
-          await apiClient.post('/auth/verify/request-verify-token', {}, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          await axios.post('/api/v1/auth/verify/request-verify-token', 
+            { email: JSON.parse(atob(token.split('.')[1])).email },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
           setResendMessage('Verification email sent! Please check your inbox.');
         } catch (error: any) {
           setResendMessage(error.response?.data?.detail || 'Failed to resend email. Please try again.');
