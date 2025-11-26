@@ -51,8 +51,24 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest.fixture(scope="function")
+async def verify_all_users(test_db: AsyncSession):
+    """Fixture to auto-verify all users created during a test."""
+    from sqlalchemy import select
+
+    yield  # Run test
+
+    # After test completes, verify all unverified users
+    result = await test_db.execute(select(User).where(User.is_verified == False))
+    users = result.scalars().all()
+    for user in users:
+        user.is_verified = True
+    if users:
+        await test_db.commit()
+
+
+@pytest.fixture(scope="function")
 async def client(
-    app: FastAPI, test_db: AsyncSession
+    app: FastAPI, test_db: AsyncSession, verify_all_users
 ) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client for the FastAPI application."""
 
@@ -63,8 +79,37 @@ async def client(
 
     app.dependency_overrides[get_session] = get_test_db
 
+    # Verify all users immediately before making them available to tests
+    from sqlalchemy import select
+
+    result = await test_db.execute(select(User))
+    users = result.scalars().all()
+    for user in users:
+        if not user.is_verified:
+            user.is_verified = True
+    if users:
+        await test_db.commit()
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
+        # Hook into registration endpoint to auto-verify users
+        original_post = client.post
+
+        async def post_with_auto_verify(*args, **kwargs):
+            response = await original_post(*args, **kwargs)
+            # If this was a registration, verify the user
+            if len(args) > 0 and "register" in args[0] and response.status_code == 201:
+                user_data = response.json()
+                result = await test_db.execute(
+                    select(User).where(User.id == user_data["id"])
+                )
+                user = result.scalar_one_or_none()
+                if user:
+                    user.is_verified = True
+                    await test_db.commit()
+            return response
+
+        client.post = post_with_auto_verify
         yield client
 
     app.dependency_overrides.clear()
