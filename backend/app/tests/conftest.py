@@ -71,9 +71,10 @@ async def client(
 
 
 @pytest.fixture(scope="function")
-async def test_user(client: AsyncClient) -> dict:
+async def test_user(client: AsyncClient, test_db: AsyncSession) -> dict:
     """Create a test user via the registration endpoint."""
     import uuid
+    from sqlalchemy import select
 
     # Generate unique user data
     unique_id = uuid.uuid4().hex[:8]
@@ -97,8 +98,13 @@ async def test_user(client: AsyncClient) -> dict:
             f"User registration failed: {response.status_code} - {response.text}"
         )
 
-    # Return the user data (not the User object, but the test credentials)
+    # Verify the user in the database (for testing purposes)
     user_data = response.json()
+    result = await test_db.execute(select(User).where(User.id == user_data["id"]))
+    user = result.scalar_one()
+    user.is_verified = True
+    await test_db.commit()
+
     user_data["password"] = test_password  # Add password for login
     return user_data
 
