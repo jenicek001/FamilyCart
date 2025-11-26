@@ -74,6 +74,7 @@ async def client(
 async def test_user(client: AsyncClient, test_db: AsyncSession) -> dict:
     """Create a test user via the registration endpoint."""
     import uuid
+
     from sqlalchemy import select
 
     # Generate unique user data
