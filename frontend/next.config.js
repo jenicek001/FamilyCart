@@ -2,7 +2,7 @@ const path = require('path');
 
 // API Configuration - centralized port management
 const API_CONFIG = {
-  DEFAULT_PORT: 8005,
+  DEFAULT_PORT: 8002,
 };
 
 /** @type {import('next').NextConfig} */

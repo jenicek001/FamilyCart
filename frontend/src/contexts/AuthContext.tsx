@@ -53,6 +53,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!response.ok) {
+        // Handle 403 Forbidden (unverified email) differently from 401 (expired token)
+        if (response.status === 403) {
+          console.warn('User email not verified - keeping user logged in but showing verification message');
+          // Set user to null but keep token - this allows showing "verify email" message
+          setUser(null);
+          return; // Don't throw error, don't logout
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

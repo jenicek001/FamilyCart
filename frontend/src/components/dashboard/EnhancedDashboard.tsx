@@ -22,6 +22,8 @@ export default function EnhancedDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
 
   const { toast } = useToast();
 
@@ -280,6 +282,56 @@ export default function EnhancedDashboard() {
   }
 
   if (!user) {
+    // Check if user has token but no user data - this means email is not verified
+    if (token) {
+      const handleResendEmail = async () => {
+        setResending(true);
+        setResendMessage('');
+        try {
+          await apiClient.post('/auth/verify/request-verify-token', {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setResendMessage('Verification email sent! Please check your inbox.');
+        } catch (error: any) {
+          setResendMessage(error.response?.data?.detail || 'Failed to resend email. Please try again.');
+        } finally {
+          setResending(false);
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
+            <div className="mb-4">
+              <svg className="w-16 h-16 mx-auto text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">Verify Your Email</h2>
+            <p className="text-slate-600 mb-4">
+              We've sent a verification email to your inbox. Please check your email and click the verification link to access your shopping lists.
+            </p>
+            <p className="text-sm text-slate-500 mb-4">
+              Didn't receive the email? Check your spam folder.
+            </p>
+            <button
+              onClick={handleResendEmail}
+              disabled={resending}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              {resending ? 'Sending...' : 'Resend Verification Email'}
+            </button>
+            {resendMessage && (
+              <p className={`mt-4 text-sm ${resendMessage.includes('sent') ? 'text-green-600' : 'text-red-600'}`}>
+                {resendMessage}
+              </p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    // No token - user is not logged in
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
