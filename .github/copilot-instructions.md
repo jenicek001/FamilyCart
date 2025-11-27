@@ -65,6 +65,203 @@
 - **Delete feature branches** after successful merge to keep repository clean
 - **Use `develop` branch** for integration of completed features before production release
 
+## 🚀 CI/CD Workflow - CRITICAL PROCESS RULES
+
+### ⚠️ NEVER Push Without Local Testing - Cost & Time Critical
+**Every git push triggers expensive CI/CD pipeline runs. Follow this process religiously:**
+
+### 📋 Pre-Push Checklist (MANDATORY)
+**Before ANY `git push`, you MUST complete ALL these steps locally:**
+
+#### 1. Review CI/CD Pipeline Requirements
+```bash
+# Read the pipeline definition to understand what will be tested
+cat .github/workflows/ci-cd.yml
+```
+**Identify all jobs that will run:** tests, linting, type checking, builds, security scans
+
+#### 2. Backend Local Verification (if backend changes)
+```bash
+cd backend
+
+# Run ALL tests (must pass 100%)
+poetry run pytest -v
+
+# Check code formatting
+poetry run black --check app/
+
+# Check import sorting
+poetry run isort --check-only app/
+
+# Run linter (must be ≥9.56/10)
+poetry run pylint app/
+
+# Run security scan
+poetry run bandit -r app/
+
+# Verify migrations (if database changes)
+poetry run alembic upgrade head
+poetry run alembic downgrade -1
+poetry run alembic upgrade head
+```
+
+#### 3. Frontend Local Verification (if frontend changes)
+```bash
+cd frontend
+
+# Install dependencies (if package.json changed)
+npm install
+
+# Run linter
+npm run lint
+
+# Run type checking
+npm run typecheck
+
+# Build for production (CRITICAL - catches build-time errors)
+npm run build
+
+# Run tests (if tests exist)
+npm test
+```
+
+#### 4. Integration Testing (if both backend + frontend changed)
+```bash
+# Start development environment
+docker-compose -f docker-compose.dev.yml up -d
+cd backend && poetry run uvicorn app.main:app --reload &
+cd frontend && npm run dev &
+
+# Test the actual user flow end-to-end
+# Verify API responses, UI behavior, error handling
+```
+
+#### 5. Commit Strategy
+**MAKE ONE COMPREHENSIVE COMMIT, NOT MULTIPLE SMALL ONES**
+```bash
+# Stage all related changes together
+git add backend/ frontend/ docs/
+
+# Write descriptive commit message
+git commit -m "feat: implement email verification enforcement
+
+- Changed all protected endpoints to require verified users
+- Added verification UI flow with resend capability
+- Updated test fixtures to auto-verify test users
+- Fixed Next.js build issues with Suspense wrapper
+- All tests passing (71/71 backend tests)
+- Frontend build successful
+- Security scans passing"
+
+# Only NOW push to remote
+git push origin develop
+```
+
+### 🚫 FORBIDDEN PRACTICES - NEVER DO THESE
+
+#### ❌ Trial-and-Error Git Pushing
+**NEVER:** Push → Watch fail → Fix one thing → Push again → Repeat
+```bash
+# DON'T DO THIS:
+git commit -m "fix test users"          # Push 1
+git commit -m "fix imports"             # Push 2
+git commit -m "fix typescript"          # Push 3
+git commit -m "fix build"               # Push 4
+git commit -m "add suspense"            # Push 5
+git commit -m "fix another thing"       # Push 6
+```
+
+**INSTEAD:** Test everything locally first, make ONE commit with all fixes
+
+#### ❌ Assuming Tests Will Pass
+**NEVER:** Skip running tests locally because "it should work"
+- CI/CD environment may differ from your assumptions
+- Tests may fail due to: unverified test users, import order, TypeScript errors, build config
+- **ALWAYS run `poetry run pytest` and `npm run build` locally first**
+
+#### ❌ Ignoring CI/CD Pipeline Definition
+**NEVER:** Push without understanding what the pipeline will test
+- Read `.github/workflows/ci-cd.yml` to see all checks
+- Replicate those checks locally BEFORE pushing
+- Don't guess - verify against the actual pipeline requirements
+
+#### ❌ Partial Testing
+**NEVER:** Only test the specific feature you changed
+- Run the FULL test suite (`poetry run pytest` without filters)
+- Run FULL build (`npm run build` not just `npm run dev`)
+- Check ALL code quality tools (black, isort, pylint, eslint)
+
+### ✅ CORRECT WORKFLOW EXAMPLE
+
+```bash
+# 1. Make your code changes
+vim backend/app/api/v1/endpoints/shopping_lists.py
+
+# 2. Review what CI/CD will test
+cat .github/workflows/ci-cd.yml | grep -A10 "run:"
+
+# 3. Run ALL checks locally (Backend)
+cd backend
+poetry run pytest -v                    # Must show 71/71 passing
+poetry run black --check app/           # Must show "All done! ✨ 🍰 ✨"
+poetry run isort --check-only app/      # Must show no changes needed
+poetry run pylint app/                  # Must show ≥9.56/10
+
+# 4. Run ALL checks locally (Frontend)
+cd ../frontend
+npm run lint                            # Must show no errors
+npm run typecheck                       # Must show no type errors
+npm run build                           # Must complete successfully
+
+# 5. ONLY if ALL checks pass, commit and push
+cd ..
+git add backend/ frontend/
+git commit -m "feat: comprehensive change description with all fixes"
+git push origin develop
+
+# 6. Monitor CI/CD (should succeed on first try)
+gh run watch
+```
+
+### 💰 Cost & Time Implications
+- **Each CI/CD run costs money** (GitHub Actions minutes, runner compute time)
+- **Each CI/CD run takes 10-15 minutes** (tests, builds, deployments)
+- **Failed runs waste both money and time**
+- **Six failed runs = 60-90 minutes wasted + 6x the cost**
+
+**Proper local testing saves:**
+- ✅ Money (one successful run vs. multiple failed runs)
+- ✅ Time (15 minutes vs. 90+ minutes)
+- ✅ Reputation (professional vs. chaotic workflow)
+- ✅ CI/CD resources (keeps pipeline fast for urgent fixes)
+
+### 📊 CI/CD Pipeline Monitoring
+```bash
+# Check recent CI/CD runs
+gh run list --branch develop --limit 5
+
+# Watch current run (only AFTER pushing)
+gh run watch
+
+# View detailed results
+gh run view <run-id>
+
+# View logs for failed jobs
+gh run view <run-id> --log-failed
+```
+
+### 🎯 Success Criteria
+**A git push is ONLY acceptable when:**
+1. ✅ All backend tests pass locally (poetry run pytest)
+2. ✅ All code quality checks pass locally (black, isort, pylint)
+3. ✅ Frontend builds successfully locally (npm run build)
+4. ✅ All linting/type checking passes locally (npm run lint, typecheck)
+5. ✅ Integration testing completed for user-facing changes
+6. ✅ You understand exactly what the CI/CD pipeline will test
+7. ✅ ONE comprehensive commit contains all related fixes
+
+**If ANY of the above are not met: DO NOT PUSH**
+
 ## 🧱 Code Structure & Modularity Rules for AI IDE
 - **Never create a file longer than 500 lines of code.** If a file approaches this limit, refactor by splitting it into modules or helper files.
 - **Organize code into clearly separated modules**, grouped by feature or responsibility.
@@ -92,6 +289,8 @@
 
 ## 🧠 AI Behavior Rules
 - **Never assume missing context. Ask questions if uncertain.**
+- **CRITICAL: Before ANY `git push`, follow the complete Pre-Push Checklist in the CI/CD Workflow section above.** This is non-negotiable and saves significant time and money.
+- **Use documentation and facts, never trial-and-error with git pushes.** Research proper solutions using Context7, Brave Search, or official docs before implementing.
 - **When developing new features, adding new modules or libraries or debugging issues** - always use Context7 MCP server to reference up-to-date API documentation and code examples for any libraries or frameworks involved. Add 'use context7' to your prompt or leverage the Context7 MCP server for the most current, version-specific docs.
 - **Use Postgres MCP server** to get real, up-to-date database schema (don't assume table structures)
 - **Use Brave Search MCP** to find best practices, issue discussions, or articles on the internet
@@ -99,6 +298,7 @@
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
 - **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASKS.md`.
 - **Respect the repository structure** - place files in appropriate directories as defined above
+- **Test locally BEFORE pushing** - this includes running full test suites, builds, linters, and type checkers. Every push triggers expensive CI/CD runs.
 
 ## Backend-specific rules
 

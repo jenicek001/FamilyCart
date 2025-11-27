@@ -29,7 +29,10 @@ export default function EnhancedDashboard() {
   const { toast } = useToast();
 
   const fetchLists = useCallback(async () => {
-    if (!token) return;
+    if (!token || !user) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -59,7 +62,7 @@ export default function EnhancedDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, toast, apiClient]);
+  }, [token, user, toast, apiClient]);
 
   const handleCreateList = async (name: string, description?: string) => {
     try {

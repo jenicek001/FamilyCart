@@ -27,14 +27,27 @@ function VerifyEmailContent() {
         setStatus('success');
         setMessage('Your email has been verified successfully!');
         
-        // Redirect to dashboard after 2 seconds
+        // Redirect after 2 seconds
         setTimeout(() => {
-          router.push('/');
+          // Go to login page where user can sign in with their verified account
+          router.push('/login?verified=true');
         }, 2000);
       } catch (error: any) {
-        setStatus('error');
-        const errorMessage = error.response?.data?.detail || 'Verification failed. The link may be invalid or expired.';
-        setMessage(errorMessage);
+        // Check if error is "already verified"
+        const errorDetail = error.response?.data?.detail || '';
+        if (errorDetail.includes('VERIFY_USER_ALREADY_VERIFIED') || errorDetail.includes('already verified')) {
+          // User is already verified, treat as success
+          setStatus('success');
+          setMessage('Your email is already verified!');
+          
+          setTimeout(() => {
+            router.push('/login?verified=true');
+          }, 2000);
+        } else {
+          setStatus('error');
+          const errorMessage = error.response?.data?.detail || 'Verification failed. The link may be invalid or expired.';
+          setMessage(errorMessage);
+        }
       }
     };
 
