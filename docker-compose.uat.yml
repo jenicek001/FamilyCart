@@ -78,6 +78,14 @@ services:
       - ENVIRONMENT=uat
       - DEBUG=false
       - ALLOWED_HOSTS=${UAT_ALLOWED_HOSTS:-localhost,127.0.0.1,uat.familycart.local}
+      # Email Configuration for UAT
+      - EMAIL_PROVIDER=${EMAIL_PROVIDER:-brevo}
+      - BREVO_SMTP_HOST=${BREVO_SMTP_HOST}
+      - BREVO_SMTP_PORT=${BREVO_SMTP_PORT:-587}
+      - BREVO_SMTP_USER=${BREVO_SMTP_USER}
+      - BREVO_SMTP_PASSWORD=${BREVO_SMTP_PASSWORD}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@familycart.app}
+      - FROM_NAME=${FROM_NAME:-FamilyCart}
       # AI Configuration for UAT
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OLLAMA_HOST=http://uat-ollama:11434
