@@ -92,12 +92,13 @@ const nextConfig = {
     let apiUrl;
     
     if (process.env.NODE_ENV === 'production') {
-      // In production, try environment variable first, then auto-detect
+      // In production/UAT Docker environment, use API_URL from environment
+      // This will be the Docker service name (e.g., uat-backend:8000)
       if (process.env.API_URL) {
         apiUrl = process.env.API_URL;
       } else {
-        // Auto-detect current hostname and use configured port
-        apiUrl = process.env.API_URL || `http://localhost:${API_CONFIG.DEFAULT_PORT}`;
+        // Fallback for non-Docker production deployments
+        apiUrl = `http://localhost:${API_CONFIG.DEFAULT_PORT}`;
       }
     } else {
       // In development, always use localhost with configured port
