@@ -81,39 +81,8 @@ const nextConfig = {
     
     return config;
   },
-  async rewrites() {
-    // In production with nginx proxy, rewrites are not needed
-    // Nginx handles proxying /api requests to the backend
-    if (process.env.NODE_ENV === 'production' && process.env.USE_NGINX_PROXY === 'true') {
-      console.log('Production mode with nginx proxy - rewrites disabled');
-      return [];
-    }
-    
-    let apiUrl;
-    
-    if (process.env.NODE_ENV === 'production') {
-      // In production/UAT Docker environment, use API_URL from environment
-      // This will be the Docker service name (e.g., uat-backend:8000)
-      if (process.env.API_URL) {
-        apiUrl = process.env.API_URL;
-      } else {
-        // Fallback for non-Docker production deployments
-        apiUrl = `http://localhost:${API_CONFIG.DEFAULT_PORT}`;
-      }
-    } else {
-      // In development, always use localhost with configured port
-      apiUrl = `http://localhost:${API_CONFIG.DEFAULT_PORT}`;
-    }
-
-    console.log(`Frontend proxy will use API URL: ${apiUrl}`);
-
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`,
-      },
-    ];
-  },
+  // NOTE: API proxying is now handled by Next.js API routes in src/app/api/[...path]/route.ts
+  // This allows runtime environment variable configuration without rebuilds
 };
 
 module.exports = nextConfig;
