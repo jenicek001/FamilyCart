@@ -86,6 +86,7 @@ services:
       - BREVO_SMTP_PASSWORD=${BREVO_SMTP_PASSWORD}
       - FROM_EMAIL=${FROM_EMAIL:-noreply@familycart.app}
       - FROM_NAME=${FROM_NAME:-FamilyCart}
+      - FRONTEND_URL=https://uat.familycart.app
       # AI Configuration for UAT
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OLLAMA_HOST=http://uat-ollama:11434

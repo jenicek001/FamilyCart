@@ -28,11 +28,24 @@ export default function EnhancedDashboard() {
 
   const { toast } = useToast();
 
+  // Check if user is logged in but not verified
+  // We check both cases:
+  // 1. user object exists but is_verified is false (new behavior with backend fix)
+  // 2. user object is null but token exists (legacy behavior if backend returns 403)
+  const isUnverified = (user && !user.is_verified) || (!user && token);
+
   const fetchLists = useCallback(async () => {
     if (!token || !user) {
       setIsLoading(false);
       return;
     }
+
+    // Don't fetch lists if user is not verified
+    if (isUnverified) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
@@ -274,28 +287,11 @@ export default function EnhancedDashboard() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-700 mb-2">Error loading shopping lists</h2>
-          <p className="text-slate-600 mb-4">{error}</p>
-          <button
-            className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
-            onClick={() => fetchLists()}
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Check if user is logged in but not verified
   // We check both cases:
   // 1. user object exists but is_verified is false (new behavior with backend fix)
   // 2. user object is null but token exists (legacy behavior if backend returns 403)
-  const isUnverified = (user && !user.is_verified) || (!user && token);
+  // const isUnverified = (user && !user.is_verified) || (!user && token); // Moved to top
 
   if (isUnverified) {
       const handleResendEmail = async () => {
@@ -398,6 +394,25 @@ export default function EnhancedDashboard() {
         </div>
       );
     }
+
+  if (error && !isUnverified) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-700 mb-2">Error loading shopping lists</h2>
+          <p className="text-slate-600 mb-4">{error}</p>
+          <button
+            className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
+            onClick={() => fetchLists()}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
     
     if (!user) {
     // No token - user is not logged in
