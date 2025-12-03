@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        cache: 'no-store'
       });
 
       if (!response.ok) {
@@ -57,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (response.status === 403) {
           console.warn('User email not verified - keeping user logged in but showing verification message');
           // Set user to null but keep token - this allows showing "verify email" message
+          // NOTE: This should not happen anymore as we allow unverified users to fetch profile
           setUser(null);
           return; // Don't throw error, don't logout
         }
@@ -82,6 +84,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout(); // This will clear token and redirect
       } else {
         // For other errors, still logout to be safe
+        // Only logout if we don't have a token (which shouldn't happen here) or if it's a critical error
+        // If we have a token but fetch failed (e.g. network error), we might want to keep the token
+        // But for now, let's be safe and logout unless it's a 403 (which is handled above)
         logout();
       }
     } finally {

@@ -893,5 +893,23 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 - **Monitoring**: Prometheus, Grafana, system health checks, automated alerts
 - **Cost Efficiency**: ~$50/month vs $300-500/month equivalent cloud hosting
 
+### 2025-12-03: Verification Flow & Dashboard UX Fixes ✅ COMPLETED
+* [x] **Fixed Login Button Visibility on Dashboard**
+    * [x] **Problem**: "Login" button appeared in header while unverified user was on dashboard
+    * [x] **Solution**: Conditionally hide Login button when on `/dashboard` route
+    * [x] **Implementation**: Updated `Header.tsx` with route checking logic
+* [x] **Improved Verification Redirect Flow**
+    * [x] **Problem**: Users were redirected to login page after verification, requiring re-login
+    * [x] **Solution**: Redirect directly to dashboard after successful verification
+    * [x] **Implementation**: Updated `verify/page.tsx` to refresh user profile and redirect to `/`
+* [x] **Enhanced Dashboard Verification State**
+    * [x] **Problem**: "Verify Your Email" dialog persisted after verification due to caching
+    * [x] **Solution**: Forced profile refresh and disabled caching for user fetch
+    * [x] **Implementation**: Updated `AuthContext.tsx` and `EnhancedDashboard.tsx`
+* [x] **Fixed React Crash on Unverified Access**
+    * [x] **Problem**: Frontend crashed when backend returned 422 for unverified users
+    * [x] **Solution**: Updated backend to allow unverified access to `/users/me`
+    * [x] **Implementation**: Modified `users.py` endpoint configuration
+
 * [ ] 2025-08-14: Add production deployment automation (OCI Free Tier) – implement CI workflow, split stateful/app compose files, firewall automation script, and integrate new `DEPLOY_OCI_FREE_TIER.md` doc.
 

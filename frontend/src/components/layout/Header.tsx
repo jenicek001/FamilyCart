@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShoppingListContextSafe } from '@/contexts/ShoppingListContext';
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { useState } from 'react';
 export default function Header() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const shoppingListContext = useShoppingListContextSafe();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
@@ -208,9 +209,11 @@ export default function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
-                  <Link href="/login">Login</Link>
-                </Button>
+                !pathname?.includes('/dashboard') && (
+                  <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
+                    <Link href="/login">Login</Link>
+                  </Button>
+                )
               )}
             </nav>
           </div>
@@ -306,9 +309,13 @@ export default function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
-                <Link href="/login">Login</Link>
-              </Button>
+              // Only show Login button if we are NOT on the dashboard
+              // On dashboard, if user is null but has token (unverified state), we don't want to show Login
+              !pathname?.includes('/dashboard') && (
+                <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 sm:px-4">
+                  <Link href="/login">Login</Link>
+                </Button>
+              )
             )}
           </nav>
         </div>

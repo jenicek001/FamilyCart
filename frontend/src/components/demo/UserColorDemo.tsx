@@ -15,7 +15,8 @@ const mockUsers: User[] = [
     first_name: 'Alice',
     last_name: 'Johnson',
     is_active: true,
-    is_superuser: false
+    is_superuser: false,
+    is_verified: true
   },
   {
     id: 'user-2',
@@ -25,7 +26,8 @@ const mockUsers: User[] = [
     first_name: 'Bob',
     last_name: 'Smith',
     is_active: true,
-    is_superuser: false
+    is_superuser: false,
+    is_verified: true
   },
   {
     id: 'user-3',
@@ -35,7 +37,8 @@ const mockUsers: User[] = [
     first_name: 'Carol',
     last_name: 'Williams',
     is_active: true,
-    is_superuser: false
+    is_superuser: false,
+    is_verified: true
   },
   {
     id: 'user-4',
@@ -45,7 +48,8 @@ const mockUsers: User[] = [
     first_name: 'David',
     last_name: 'Brown',
     is_active: true,
-    is_superuser: false
+    is_superuser: false,
+    is_verified: true
   },
   {
     id: 'user-5',
@@ -55,7 +59,8 @@ const mockUsers: User[] = [
     first_name: 'Emma',
     last_name: 'Davis',
     is_active: true,
-    is_superuser: false
+    is_superuser: false,
+    is_verified: true
   }
 ];
 

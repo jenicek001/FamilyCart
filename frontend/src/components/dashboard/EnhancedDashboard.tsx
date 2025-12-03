@@ -15,7 +15,7 @@ import { setLastActiveListId, getLastActiveListId } from '@/utils/localStorage';
 
 
 export default function EnhancedDashboard() {
-  const { user, loading: authLoading, token } = useAuth();
+  const { user, loading: authLoading, token, fetchUser } = useAuth();
   const { trackLocalAction, ignoreNextCreate } = useWebSocketContext();
   const { apiClient } = useApiClient();
   const [lists, setLists] = useState<ShoppingList[]>([]);
@@ -252,6 +252,12 @@ export default function EnhancedDashboard() {
   useEffect(() => {
     if (!authLoading) {
       fetchLists();
+      
+      // If user appears unverified, try to refresh their profile
+      // This handles the case where they just verified and were redirected here
+      if (user && !user.is_verified) {
+        fetchUser();
+      }
     }
     // Only depend on authLoading to avoid infinite loop from fetchLists
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,20 +291,77 @@ export default function EnhancedDashboard() {
     );
   }
 
-  if (!user) {
-    // Check if user has token but no user data - this means email is not verified
-    if (token) {
+  // Check if user is logged in but not verified
+  // We check both cases:
+  // 1. user object exists but is_verified is false (new behavior with backend fix)
+  // 2. user object is null but token exists (legacy behavior if backend returns 403)
+  const isUnverified = (user && !user.is_verified) || (!user && token);
+
+  if (isUnverified) {
       const handleResendEmail = async () => {
         setResending(true);
         setResendMessage('');
         try {
+          let email = '';
+          
+          // Try to get email from user object first (reliable)
+          if (user?.email) {
+            email = user.email;
+          } 
+          // Fallback: try to extract from token (unreliable if token only has sub)
+          else {
+            try {
+              if (token) {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                  // Handle base64url format
+                  const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                  const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                  }).join(''));
+                  const payload = JSON.parse(jsonPayload);
+                  email = payload.sub || payload.email; 
+                }
+              }
+            } catch (e) {
+              console.error("Failed to decode token", e);
+            }
+          }
+
+          if (!email) {
+             throw new Error("Could not determine email address. Please sign out and sign in again.");
+          }
+
+          // Check if email looks like a UUID (which happens if sub is used as email)
+          // Simple regex for UUID: 8-4-4-4-12 hex digits
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (uuidRegex.test(email)) {
+             throw new Error("Cannot verify email: Session contains ID instead of email. Please sign out and sign in again.");
+          }
+
           await axios.post('/api/v1/auth/verify/request-verify-token', 
-            { email: JSON.parse(atob(token.split('.')[1])).email },
+            { email },
             { headers: { Authorization: `Bearer ${token}` } }
           );
           setResendMessage('Verification email sent! Please check your inbox.');
         } catch (error: any) {
-          setResendMessage(error.response?.data?.detail || 'Failed to resend email. Please try again.');
+          console.error("Resend email error:", error);
+          let msg = 'Failed to resend email. Please try again.';
+          
+          if (error.response?.data?.detail) {
+             const detail = error.response.data.detail;
+             if (Array.isArray(detail)) {
+                 // Handle Pydantic validation error
+                 msg = detail.map((e: any) => `${e.loc.join('.')}: ${e.msg}`).join(', ');
+             } else if (typeof detail === 'string') {
+                 msg = detail;
+             } else {
+                 msg = JSON.stringify(detail);
+             }
+          } else if (error.message) {
+             msg = error.message;
+          }
+          setResendMessage(msg);
         } finally {
           setResending(false);
         }
@@ -336,6 +399,7 @@ export default function EnhancedDashboard() {
       );
     }
     
+    if (!user) {
     // No token - user is not logged in
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">

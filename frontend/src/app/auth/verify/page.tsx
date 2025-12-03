@@ -3,10 +3,12 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
 
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { fetchUser } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
@@ -27,10 +29,13 @@ function VerifyEmailContent() {
         setStatus('success');
         setMessage('Your email has been verified successfully!');
         
+        // Refresh user profile to update verification status
+        await fetchUser();
+        
         // Redirect after 2 seconds
         setTimeout(() => {
-          // Go to login page where user can sign in with their verified account
-          router.push('/login?verified=true');
+          // Go to dashboard directly
+          router.push('/');
         }, 2000);
       } catch (error: any) {
         // Check if error is "already verified"
@@ -40,8 +45,11 @@ function VerifyEmailContent() {
           setStatus('success');
           setMessage('Your email is already verified!');
           
+          // Refresh user profile to update verification status
+          await fetchUser();
+          
           setTimeout(() => {
-            router.push('/login?verified=true');
+            router.push('/');
           }, 2000);
         } else {
           setStatus('error');

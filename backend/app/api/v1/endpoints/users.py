@@ -9,9 +9,9 @@ from app.schemas.user import UserRead, UserUpdate
 router = APIRouter()
 
 # User management routes (get user details, update user, delete user)
-# Require email verification for accessing user management endpoints
+# Allow unverified users to access their own profile (so they can see they are unverified)
 router.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate, requires_verification=True),
+    fastapi_users.get_users_router(UserRead, UserUpdate, requires_verification=False),
     prefix="/users",  # This creates the /users/me endpoint
     tags=["users"],
 )
