@@ -598,7 +598,7 @@ jobs:
           # Run performance tests
           cd deploy/scripts
           mkdir -p results
-          k6 run --env UAT_BASE_URL=http://localhost:3001 --out json=results/performance-results.json load-test.js
+          k6 run --env UAT_BASE_URL=http://localhost:3001 --summary-export=results/performance-summary.json load-test.js
           
       - name: Archive performance results
         if: always()
