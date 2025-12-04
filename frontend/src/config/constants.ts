@@ -4,25 +4,36 @@
  */
 
 // API Configuration
-export const API_CONFIG = {
-  DEFAULT_PORT: 8005,
-  LOCALHOST_HOST: 'localhost',
-  FALLBACK_URL: 'http://localhost:8005',
-} as const;
-
-// Environment-specific API URL construction
 export const getApiUrl = (): string => {
-  // In production/deployed environments, use environment variable or current host
-  if (process.env.NODE_ENV === 'production' || process.env.API_URL) {
-    return process.env.API_URL || `http://${window?.location?.hostname || 'localhost'}:${API_CONFIG.DEFAULT_PORT}`;
+  // 1. Prefer NEXT_PUBLIC_API_URL (Client-side & Build-time)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
   }
-  
-  // In development, always use localhost with configured port
-  return API_CONFIG.FALLBACK_URL;
+
+  // 2. Fallback to API_URL (Server-side)
+  if (process.env.API_URL) {
+    return process.env.API_URL;
+  }
+
+  // 3. Fallback for local development if no env vars are set
+  // This allows the app to work locally without .env in some cases, but warns
+  if (typeof window !== 'undefined') {
+    console.warn('No API_URL or NEXT_PUBLIC_API_URL found. Defaulting to http://localhost:8000');
+  }
+  return 'http://localhost:8000';
 };
 
 // WebSocket URL construction
 export const getWebSocketUrl = (path: string = ''): string => {
+  // 1. Prefer NEXT_PUBLIC_WEBSOCKET_URL
+  if (process.env.NEXT_PUBLIC_WEBSOCKET_URL) {
+    // Ensure we don't double-slash if path is provided
+    const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL.replace(/\/$/, '');
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return path ? `${baseUrl}${cleanPath}` : baseUrl;
+  }
+
+  // 2. Derive from API URL
   const baseUrl = getApiUrl();
   const wsUrl = baseUrl.replace(/^http/, 'ws');
   return `${wsUrl}${path}`;

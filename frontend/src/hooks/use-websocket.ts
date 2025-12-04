@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
-import { API_CONFIG } from '@/config/constants';
+import { getWebSocketUrl } from '@/config/constants';
 
 // WebSocket connection states
 
@@ -161,24 +161,9 @@ export function useWebSocket({
     setError(null);
 
     try {
-      // Construct WebSocket URL - auto-detect appropriate host
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      
-      // Auto-detect the appropriate host for WebSocket connection
-      let host: string;
-      if (process.env.NEXT_PUBLIC_API_URL) {
-        // Use the configured API URL, removing the protocol
-        host = process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, '');
-      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // Local development: use localhost with backend port
-        host = `${window.location.hostname}:${API_CONFIG.DEFAULT_PORT}`;
-      } else {
-        // Production: use the current window host without adding port
-        // The reverse proxy (nginx) handles routing on standard ports
-        host = window.location.host;
-      }
-      
-      const wsUrl = `${protocol}//${host}/api/v1/ws/lists/${listId}?token=${encodeURIComponent(token)}`;
+      // Construct WebSocket URL using centralized configuration
+      const wsPath = `/api/v1/ws/lists/${listId}?token=${encodeURIComponent(token)}`;
+      const wsUrl = getWebSocketUrl(wsPath);
       console.log(`Connecting to WebSocket: ${wsUrl}`);
 
       wsRef.current = new WebSocket(wsUrl);

@@ -3,7 +3,7 @@
  */
 
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
-import { API_CONFIG } from '@/config/constants';
+import { getApiUrl } from '@/config/constants';
 
 interface ApiRequestOptions extends RequestInit {
   sessionId?: string;
@@ -23,7 +23,7 @@ export function useApiClient() {
     if (url.startsWith('/api/')) {
       if (typeof window === 'undefined') {
         // Server-side rendering: use environment variable or fallback
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || API_CONFIG.FALLBACK_URL;
+        const baseUrl = getApiUrl();
         fullUrl = `${baseUrl}${url}`;
       } else {
         // Client-side: construct full URL using current page's origin (preserves HTTPS)
