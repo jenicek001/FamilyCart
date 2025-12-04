@@ -596,15 +596,16 @@ jobs:
           fi
           
           # Run performance tests
-          cd scripts
-          k6 run --env UAT_BASE_URL=http://localhost:3001 load-test.js
+          cd deploy/scripts
+          mkdir -p results
+          k6 run --env UAT_BASE_URL=http://localhost:3001 --out json=results/performance-results.json load-test.js
           
       - name: Archive performance results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: performance-results
-          path: scripts/results/
+          path: deploy/scripts/results/
           retention-days: 30
 
   cleanup:

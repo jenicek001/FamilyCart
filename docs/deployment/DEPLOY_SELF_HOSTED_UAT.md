@@ -503,7 +503,7 @@ jobs:
       - name: Run load tests
         run: |
           docker run --rm --network host \
-            grafana/k6 run - <scripts/load-test.js \
+            grafana/k6 run - <deploy/scripts/load-test.js \
             -e UAT_BASE_URL=http://localhost:3001
 ```
 
