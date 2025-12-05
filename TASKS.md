@@ -913,3 +913,10 @@ For detailed documentation of major bug fixes and debugging sessions, see:
 
 * [ ] 2025-08-14: Add production deployment automation (OCI Free Tier) – implement CI workflow, split stateful/app compose files, firewall automation script, and integrate new `DEPLOY_OCI_FREE_TIER.md` doc.
 
+### Discovered During Work (2025-10-27)
+* [ ] **Fix UAT WebSocket Connection Issues**
+    * [x] **Problem**: WebSocket connection failing on UAT environment
+    * [x] **Analysis**: Nginx missing upgrade headers, Backend CORS rejecting UAT origin, Frontend using hardcoded URLs
+    * [x] **Fix**: Updated Nginx config, Backend CORS settings, and Frontend URL discovery
+    * [ ] **Verification**: Deploy and verify on UAT
+

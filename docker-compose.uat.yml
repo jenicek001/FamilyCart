@@ -92,7 +92,7 @@ services:
       - OLLAMA_HOST=http://uat-ollama:11434
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       # WebSocket configuration
-      - WEBSOCKET_ALLOWED_ORIGINS=${UAT_WEBSOCKET_ORIGINS:-http://localhost:3001,https://uat.familycart.local}
+      - WEBSOCKET_ALLOWED_ORIGINS=${UAT_WEBSOCKET_ORIGINS:-http://localhost:3001,https://uat.familycart.app}
     ports:
       - "8001:8000"  # Different port from development
     depends_on:
@@ -129,7 +129,7 @@ services:
       - NODE_ENV=production
       - USE_NGINX_PROXY=false
       - API_URL=http://uat-backend:8000
-      - NEXT_PUBLIC_WEBSOCKET_URL=wss://uat.familycart.app/ws
+      # NEXT_PUBLIC_WEBSOCKET_URL removed to allow auto-discovery via window.location
       - NEXT_PUBLIC_ENVIRONMENT=uat
       - NEXT_PUBLIC_APP_VERSION=${UAT_APP_VERSION:-latest}
       # Feature flags for UAT testing

@@ -25,7 +25,17 @@ export const getApiUrl = (): string => {
 
 // WebSocket URL construction
 export const getWebSocketUrl = (path: string = ''): string => {
-  // 1. Prefer NEXT_PUBLIC_WEBSOCKET_URL
+  // 1. Client-side: Derive from window.location.origin (Best for UAT/Prod/Dev with proxy)
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    const baseUrl = `${protocol}//${host}`;
+    // Ensure path starts with / if provided
+    const cleanPath = path && !path.startsWith('/') ? `/${path}` : path;
+    return `${baseUrl}${cleanPath}`;
+  }
+
+  // 2. Server-side or fallback: Prefer NEXT_PUBLIC_WEBSOCKET_URL
   if (process.env.NEXT_PUBLIC_WEBSOCKET_URL) {
     // Ensure we don't double-slash if path is provided
     const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL.replace(/\/$/, '');
@@ -33,7 +43,7 @@ export const getWebSocketUrl = (path: string = ''): string => {
     return path ? `${baseUrl}${cleanPath}` : baseUrl;
   }
 
-  // 2. Derive from API URL
+  // 3. Derive from API URL
   const baseUrl = getApiUrl();
   const wsUrl = baseUrl.replace(/^http/, 'ws');
   return `${wsUrl}${path}`;
