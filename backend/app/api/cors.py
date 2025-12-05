@@ -29,8 +29,8 @@ def setup_cors_middleware(app: FastAPI) -> None:
         "http://localhost:9002",  # Frontend dev port
         "http://127.0.0.1:3000",  # Alternative localhost (UAT)
         "http://127.0.0.1:9002",  # Alternative localhost for frontend dev
-        "https://uat.familycart.app", # UAT Environment
-        "https://familycart.app", # Production Environment
+        "https://uat.familycart.app",  # UAT Environment
+        "https://familycart.app",  # Production Environment
     ] + backend_urls
 
     app.add_middleware(
