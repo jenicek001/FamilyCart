@@ -2,7 +2,6 @@
  * Enhanced API client that includes WebSocket session ID for real-time sync exclusion
  */
 
-import { useCallback } from 'react';
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 import { getApiUrl } from '@/config/constants';
 
@@ -13,7 +12,7 @@ interface ApiRequestOptions extends RequestInit {
 export function useApiClient() {
   const { sessionId: contextSessionId } = useWebSocketContext();
 
-  const apiClient = useCallback(async (url: string, options: ApiRequestOptions = {}) => {
+  const apiClient = async (url: string, options: ApiRequestOptions = {}) => {
     const { sessionId, ...fetchOptions } = options;
 
     // Use provided session ID or fall back to context session ID
@@ -53,7 +52,7 @@ export function useApiClient() {
     }
 
     console.log(`API Client: About to fetch with URL: ${fullUrl}, method: ${fetchOptions.method}`);
-    // console.log(`API Client: Request headers:`, Object.fromEntries(headers.entries()));
+    console.log(`API Client: Request headers:`, Object.fromEntries(headers.entries()));
 
     const response = await fetch(fullUrl, {
       ...fetchOptions,
@@ -70,7 +69,7 @@ export function useApiClient() {
     }
 
     return response;
-  }, [contextSessionId]);
+  };
 
   return { apiClient };
 }

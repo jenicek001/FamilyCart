@@ -32,11 +32,8 @@ export default function EnhancedDashboard() {
   const isUnverified = (user && !user.is_verified) || (!user && token);
 
   const fetchLists = useCallback(async () => {
-    // If we don't have a token or user yet, we can't fetch lists.
-    // However, we should NOT set isLoading to false here, because we are likely
-    // still waiting for the auth state to settle (e.g. after login).
-    // If we set isLoading(false), the UI will flash the Empty State or "Please sign in".
     if (!token || !user) {
+      setIsLoading(false);
       return;
     }
 
@@ -49,19 +46,11 @@ export default function EnhancedDashboard() {
     setIsLoading(true);
     setError(null);
     try {
-      console.log('[EnhancedDashboard] Fetching shopping lists...');
       const data = await apiClient('/api/v1/shopping-lists/', { method: 'GET' });
-      console.log(`[EnhancedDashboard] Fetched ${Array.isArray(data) ? data.length : 'unknown'} lists`);
-      
-      if (Array.isArray(data)) {
-        const sortedLists = data.sort((a: ShoppingList, b: ShoppingList) => 
-          new Date(b.updated_at).getTime() - new Date(a.created_at).getTime()
-        );
-        setLists(sortedLists);
-      } else {
-        console.error('[EnhancedDashboard] Received invalid data format for lists:', data);
-        setLists([]);
-      }
+      const sortedLists = data.sort((a: ShoppingList, b: ShoppingList) => 
+        new Date(b.updated_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setLists(sortedLists);
     } catch (err: any) {
       console.error("Error fetching lists: ", err);
       setError(err?.message || 'Could not fetch shopping lists.');
