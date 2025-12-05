@@ -51,16 +51,6 @@ export default function EnhancedDashboard() {
         new Date(b.updated_at).getTime() - new Date(a.created_at).getTime()
       );
       setLists(sortedLists);
-      // Only set selectedList if it is not already set
-      if (selectedList === null && sortedLists.length > 0) {
-        const lastActiveListId = getLastActiveListId();
-        const lastActiveList = lastActiveListId 
-          ? sortedLists.find((list: ShoppingList) => list.id === lastActiveListId)
-          : null;
-        const listToSelect = lastActiveList || sortedLists[0];
-        setSelectedList(listToSelect);
-        setLastActiveListId(listToSelect.id);
-      }
     } catch (err: any) {
       console.error("Error fetching lists: ", err);
       setError(err?.message || 'Could not fetch shopping lists.');
@@ -72,7 +62,20 @@ export default function EnhancedDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, user, toast, apiClient, isUnverified, selectedList]);
+  }, [token, user, toast, apiClient, isUnverified]);
+
+  // Effect to handle initial list selection
+  useEffect(() => {
+    if (lists.length > 0 && selectedList === null) {
+      const lastActiveListId = getLastActiveListId();
+      const lastActiveList = lastActiveListId 
+        ? lists.find((list: ShoppingList) => list.id === lastActiveListId)
+        : null;
+      const listToSelect = lastActiveList || lists[0];
+      setSelectedList(listToSelect);
+      setLastActiveListId(listToSelect.id);
+    }
+  }, [lists, selectedList]);
 
   const handleCreateList = async (name: string, description?: string) => {
     try {
@@ -269,9 +272,7 @@ export default function EnhancedDashboard() {
         fetchUser();
       }
     }
-    // Only depend on authLoading to avoid infinite loop from fetchLists
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading]);
+  }, [authLoading, fetchLists, user, fetchUser]);
 
   if (authLoading || isLoading) {
     return (
