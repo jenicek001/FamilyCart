@@ -25,22 +25,40 @@ export const getApiUrl = (): string => {
 
 // WebSocket URL construction
 export const getWebSocketUrl = (path: string = ''): string => {
-  // 1. Client-side: Derive from window.location.origin (Best for UAT/Prod/Dev with proxy)
-  if (typeof window !== 'undefined') {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const baseUrl = `${protocol}//${host}`;
-    // Ensure path starts with / if provided
-    const cleanPath = path && !path.startsWith('/') ? `/${path}` : path;
-    return `${baseUrl}${cleanPath}`;
-  }
-
-  // 2. Server-side or fallback: Prefer NEXT_PUBLIC_WEBSOCKET_URL
+  // 1. Prefer NEXT_PUBLIC_WEBSOCKET_URL if set (allows override for local dev)
   if (process.env.NEXT_PUBLIC_WEBSOCKET_URL) {
+    console.log('Using NEXT_PUBLIC_WEBSOCKET_URL:', process.env.NEXT_PUBLIC_WEBSOCKET_URL);
     // Ensure we don't double-slash if path is provided
     const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL.replace(/\/$/, '');
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     return path ? `${baseUrl}${cleanPath}` : baseUrl;
+  }
+
+  console.log('NEXT_PUBLIC_WEBSOCKET_URL not found, falling back to window/api url');
+
+  // 2. Client-side: Derive from window.location.origin (Best for UAT/Prod/Dev with proxy)
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    const hostname = window.location.hostname;
+
+    // SPECIAL CASE FOR LOCAL DEV:
+    // If we are running on the frontend dev port (9002), we assume the backend is running
+    // on the standard backend dev port (8000) on the SAME hostname.
+    // This supports localhost, 127.0.0.1, and LAN IPs (e.g. 192.168.x.x).
+    if (window.location.port === '9002') {
+        const devBackendPort = '8000';
+        const baseUrl = `${protocol}//${hostname}:${devBackendPort}`;
+        console.log(`Detected local dev on port 9002, using backend on same host port ${devBackendPort}: ${baseUrl}`);
+        const cleanPath = path && !path.startsWith('/') ? `/${path}` : path;
+        return `${baseUrl}${cleanPath}`;
+    }
+
+    const baseUrl = `${protocol}//${host}`;
+    // Ensure path starts with / if provided
+    const cleanPath = path && !path.startsWith('/') ? `/${path}` : path;
+    console.log('Derived WebSocket URL from window:', `${baseUrl}${cleanPath}`);
+    return `${baseUrl}${cleanPath}`;
   }
 
   // 3. Derive from API URL

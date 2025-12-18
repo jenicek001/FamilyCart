@@ -260,18 +260,10 @@ export default function EnhancedDashboard() {
   };
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && user) {
       fetchLists();
-      
-      // If user appears unverified, try to refresh their profile
-      // This handles the case where they just verified and were redirected here
-      if (user && !user.is_verified) {
-        fetchUser();
-      }
     }
-    // Only depend on authLoading to avoid infinite loop from fetchLists
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading]);
+  }, [authLoading, user?.id, fetchLists]);
 
   if (authLoading || isLoading) {
     return (
