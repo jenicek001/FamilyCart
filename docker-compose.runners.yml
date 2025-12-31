@@ -9,7 +9,7 @@ services:
       args:
         # Pass host docker group ID to ensure proper permissions
         DOCKER_GID: 984
-    container_name: familycart-runner-1
+    container_name: familycart-github-runner-1
     environment:
       - GITHUB_OWNER=jenicek001
       - GITHUB_REPO=FamilyCart
@@ -57,7 +57,7 @@ services:
       dockerfile: Dockerfile
       args:
         DOCKER_GID: 984
-    container_name: familycart-runner-2
+    container_name: familycart-github-runner-2
     environment:
       - GITHUB_OWNER=jenicek001
       - GITHUB_REPO=FamilyCart
@@ -99,7 +99,7 @@ services:
       dockerfile: Dockerfile
       args:
         DOCKER_GID: 984
-    container_name: familycart-runner-3
+    container_name: familycart-github-runner-3
     environment:
       - GITHUB_OWNER=jenicek001
       - GITHUB_REPO=FamilyCart
@@ -138,7 +138,7 @@ services:
   # Registry cache for faster image pulls
   registry-cache:
     image: registry:2
-    container_name: familycart-registry-cache
+    container_name: familycart-github-registry-cache
     environment:
       - REGISTRY_PROXY_REMOTEURL=https://ghcr.io
       - REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR=inmemory
@@ -158,7 +158,7 @@ services:
   # Monitoring for runners
   runner-monitor:
     image: prom/node-exporter:latest
-    container_name: familycart-runner-monitor
+    container_name: familycart-github-runner-monitor
     command:
       - '--path.rootfs=/host'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
@@ -178,7 +178,7 @@ services:
   # Log aggregator for runners
   runner-logs:
     image: grafana/promtail:latest
-    container_name: familycart-runner-logs
+    container_name: familycart-github-runner-logs
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro

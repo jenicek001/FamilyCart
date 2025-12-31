@@ -49,10 +49,10 @@ services:
       - SECRET_KEY=dev-secret-key-change-in-prod
       - DEBUG=true
       - LOG_LEVEL=DEBUG
-      - ALLOWED_ORIGINS=http://localhost:3002
-      - CORS_ORIGINS=http://localhost:3002
+      - ALLOWED_ORIGINS=http://localhost:3003
+      - CORS_ORIGINS=http://localhost:3003
     ports:
-      - "8002:8000"  # External:Internal
+      - "8003:8000"  # External:Internal
     volumes:
       # Mount source code for hot-reload
       - ./backend/app:/code/app
@@ -75,11 +75,11 @@ services:
       target: development
     container_name: familycart-frontend-dev
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8002
-      - NEXT_PUBLIC_WS_URL=ws://localhost:8002
+      - NEXT_PUBLIC_API_URL=http://localhost:8003
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8003
       - NODE_ENV=development
     ports:
-      - "3002:3000"  # External:Internal
+      - "3003:3000"  # External:Internal
     volumes:
       # Mount source code for hot-reload
       - ./frontend/src:/app/src

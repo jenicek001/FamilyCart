@@ -9,7 +9,7 @@
 services:
   postgres-ci:
     image: postgres:16-alpine
-    container_name: postgres-ci-familycart
+    container_name: familycart-github-ci-postgres
     environment:
       POSTGRES_DB: ${CI_POSTGRES_DB:-ci_familycart_db}
       POSTGRES_USER: ${CI_POSTGRES_USER:-ci_user_familycart}
@@ -40,7 +40,7 @@ services:
 
   redis-ci:
     image: redis:7-alpine
-    container_name: redis-ci-familycart
+    container_name: familycart-github-ci-redis
     ports:
       - "6379:6379"
     volumes:
@@ -71,7 +71,7 @@ services:
   # Database administration tool (optional, for debugging)
   adminer:
     image: adminer:4-standalone
-    container_name: adminer-ci-familycart
+    container_name: familycart-github-ci-adminer
     ports:
       - "8080:8080"
     networks:
@@ -88,7 +88,7 @@ services:
   # Redis admin tool (optional, for debugging)
   redis-commander:
     image: rediscommander/redis-commander:latest
-    container_name: redis-commander-ci-familycart
+    container_name: familycart-github-ci-redis-commander
     environment:
       - REDIS_HOSTS=local:redis-ci:6379
     ports:
