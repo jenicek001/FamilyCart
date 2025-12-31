@@ -1,17 +1,84 @@
-# Python virtual environment
-.venv
+# Git
+.git
+.gitignore
 
-# Python cache
-__pycache__/
+# Environment
+.env*
+!.env.example
+
+# Python
+__pycache__
 *.pyc
-
-# Local environment files
-.env
-.env.*
-!/.env.example
-
-# VSCode
-.vscode/
-
-# Pytest cache
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
 .pytest_cache
+.coverage
+htmlcov
+.tox
+.hypothesis
+
+# Virtual environments
+.venv
+venv
+ENV
+env
+virtualenv
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Test files
+test_*.py
+*_test.py
+debug_*.py
+benchmark_*.py
+
+# Documentation
+*.md
+!README.md
+
+# JSON reports (keep configs)
+*.json
+!pyproject.toml
+!poetry.lock
+!alembic.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+temp/
+tmp/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Alembic (keep the directory structure)
+alembic/versions/*.pyc
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Other
+coverage.xml
+.coverage
+nosetests.xml

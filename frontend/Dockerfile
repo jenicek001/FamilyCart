@@ -1,20 +1,59 @@
-# 1. Base Image: Use the official Node.js 20 image.
-# Using a specific version is good for reproducibility.
-FROM node:20-alpine AS base
+# ============================================
+# Dependencies Stage
+# ============================================
+FROM node:20-alpine AS deps
 
-# 2. Set Working Directory
 WORKDIR /app
 
-# 3. Install Dependencies
-# Copy package.json and package-lock.json first to leverage Docker cache.
-COPY package*.json ./
-RUN npm install
+# Install dependencies only when needed
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production --ignore-scripts
 
-# 4. Copy Application Code
-# Copy the rest of your app's source code from your host to your image filesystem.
+# ============================================
+# Development Stage - With hot-reload
+# ============================================
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including dev) for development
+RUN npm ci
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+# Source code will be mounted as volume
+# No COPY needed here - enables hot-reload
+
+EXPOSE 3000
+
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Development server with hot-reload
+CMD ["npm", "run", "dev"]
+
+# ============================================
+# Builder Stage - Build production assets
+# ============================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# 5. Build Arguments for Next.js configuration
+# Build arguments for Next.js configuration
 ARG USE_NGINX_PROXY=false
 ARG API_URL=""
 ARG NEXT_PUBLIC_API_URL=""
@@ -23,35 +62,40 @@ ARG NEXT_PUBLIC_API_URL=""
 ENV USE_NGINX_PROXY=$USE_NGINX_PROXY
 ENV API_URL=$API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# 6. Build the Next.js Application
-# This will create an optimized production build in the .next folder.
+# Build Next.js application with standalone output
 RUN npm run build
 
-# 6. Production Stage
-# Use a smaller, more secure base image for the final production image.
+# ============================================
+# Production Stage - Standalone output
+# ============================================
 FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Copy package.json and install only production dependencies
-COPY --from=base /app/package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy the built application from the previous stage
-COPY --from=base /app/.next ./.next
-COPY --from=base /app/public ./public
-COPY --from=base /app/next.config.* ./
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Create a non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-RUN chown -R nextjs:nodejs /app
+# Copy only standalone output (minimal files)
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 USER nextjs
 
-# Expose the port the app runs on
 EXPOSE 3000
 
-# Command to run the app
-# `next start` starts the application in production mode.
-CMD ["npm", "start"]
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+
+# Use standalone server (minimal footprint)
+CMD ["node", "server.js"]

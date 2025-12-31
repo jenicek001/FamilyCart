@@ -8,6 +8,9 @@ const API_CONFIG = {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
+  // Enable standalone output for optimized Docker builds
+  output: 'standalone',
+  
   typescript: {
     ignoreBuildErrors: true, // Temporarily ignore TS errors since we have explicit webpack aliases
   },
