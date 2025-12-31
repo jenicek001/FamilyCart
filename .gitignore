@@ -106,3 +106,12 @@ __pycache__/
 .playwright-mcp/page-2025-09-11T09-19-44-805Z.png
 .playwright-mcp/page-2025-09-11T09-31-10-001Z.png
 backend/pylint-report.json
+
+# Docker backups
+backend/Dockerfile.backup
+frontend/Dockerfile.backup
+docker-compose.dev-old.yml
+
+# Debug and test scripts
+debug_ws_connection.py
+test_ws_local.py
