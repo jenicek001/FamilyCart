@@ -28,15 +28,26 @@ const nextConfig = {
     ],
   },
   experimental: {
-    // turbo: {
-    //   rules: {
-    //     // Enable Turbopack for faster builds during development
-    //     "*.svg": {
-    //       loaders: ["@svgr/webpack"],
-    //       as: "*.js",
-    //     },
-    //   },
-    // },
+    // Allow cross-origin requests for dev server
+    turbo: {
+      unstable_allowImportMappingWithoutBaseUrl: true,
+    },
+  },
+  // Allow dev access from any origin (fixes CSS not loading from LAN IPs)
+  async headers() {
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/:path*',
+          headers: [
+            { key: 'Access-Control-Allow-Origin', value: '*' },
+            { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
+            { key: 'Access-Control-Allow-Headers', value: '*' },
+          ],
+        },
+      ];
+    }
+    return [];
   },
   // Webpack configuration to ensure path aliases work consistently
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {

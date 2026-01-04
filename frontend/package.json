@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 9002 -H 0.0.0.0",
+    "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -61,6 +61,7 @@
     "@types/react-dom": "^18",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
+    "autoprefixer": "^10",
     "eslint": "^9.35.0",
     "eslint-config-next": "^15.5.3",
     "postcss": "^8",

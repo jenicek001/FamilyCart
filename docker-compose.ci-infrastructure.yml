@@ -11,9 +11,9 @@ services:
     image: postgres:16-alpine
     container_name: familycart-github-ci-postgres
     environment:
-      POSTGRES_DB: ${CI_POSTGRES_DB:-ci_familycart_db}
-      POSTGRES_USER: ${CI_POSTGRES_USER:-ci_user_familycart}
-      POSTGRES_PASSWORD: ${CI_POSTGRES_PASSWORD:-changeme_generate_secure_password}
+      POSTGRES_DB: ${CI_POSTGRES_DB}
+      POSTGRES_USER: ${CI_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${CI_POSTGRES_PASSWORD}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
     volumes:
       - postgres-ci-data:/var/lib/postgresql/data
@@ -24,7 +24,7 @@ services:
       - ci-infrastructure
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${CI_POSTGRES_USER:-ci_user_familycart} -d ${CI_POSTGRES_DB:-ci_familycart_db}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,10 +49,11 @@ services:
       - ci-infrastructure
     restart: unless-stopped
     environment:
-      - REDIS_PASSWORD=${CI_REDIS_PASSWORD:-changeme_generate_secure_redis_password}
-    command: redis-server --requirepass ${CI_REDIS_PASSWORD:-changeme_generate_secure_redis_password} --maxmemory 200mb --maxmemory-policy allkeys-lru
+      - REDIS_PASSWORD=${CI_REDIS_PASSWORD}
+    command: >
+      sh -c "redis-server --requirepass \"$$REDIS_PASSWORD\" --maxmemory 200mb --maxmemory-policy allkeys-lru"
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${CI_REDIS_PASSWORD:-changeme_generate_secure_redis_password}", "ping"]
+      test: ["CMD", "sh", "-c", "redis-cli -a \"$$REDIS_PASSWORD\" ping"]
       interval: 10s
       timeout: 3s
       retries: 5

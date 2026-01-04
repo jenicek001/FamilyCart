@@ -115,3 +115,8 @@ docker-compose.dev-old.yml
 # Debug and test scripts
 debug_ws_connection.py
 test_ws_local.py
+
+# Development environment variables
+.env.dev
+backend/.env.dev
+.env

@@ -37,6 +37,16 @@ print_info() {
 
 # Commands
 cmd_start() {
+    # Check if .env.dev exists
+    if [ ! -f "backend/.env.dev" ]; then
+        print_error ".env.dev file not found!"
+        echo ""
+        print_info "Run this command to generate secure passwords:"
+        echo "  ./scripts/generate-dev-env.sh"
+        echo ""
+        exit 1
+    fi
+    
     print_header "Starting Development Environment"
     $COMPOSE_CMD -f "$COMPOSE_FILE" up -d
     print_success "Development environment started"
