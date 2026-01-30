@@ -60,7 +60,7 @@ USER app
 EXPOSE 8000
 
 # Development server with auto-reload
-CMD ["fastapi", "dev", "app/main.py", "--port", "8000", "--reload"]
+CMD ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 # ============================================
 # Production Stage - Optimized runtime

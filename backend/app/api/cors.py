@@ -24,14 +24,27 @@ def setup_cors_middleware(app: FastAPI) -> None:
         f"http://127.0.0.1:{settings.PORT}",  # Alternative localhost for backend dev
     ]
 
-    origins = [
+    # Base origins for different environments
+    base_origins = [
         "http://localhost:3000",  # Next.js development server (UAT)
-        "http://localhost:9002",  # Frontend dev port
+        "http://localhost:3003",  # Frontend dev port (updated)
+        "http://localhost:9002",  # Alternative frontend dev port
         "http://127.0.0.1:3000",  # Alternative localhost (UAT)
+        "http://127.0.0.1:3003",  # Alternative localhost for frontend dev (updated)
         "http://127.0.0.1:9002",  # Alternative localhost for frontend dev
+        "http://192.168.12.200:3003",  # Remote SSH development frontend
+        "http://192.168.12.200:8003",  # Remote SSH development backend
         "https://uat.familycart.app",  # UAT Environment
         "https://familycart.app",  # Production Environment
-    ] + backend_urls
+    ]
+    
+    # Allow additional origins from environment variable if set
+    env_origins = getattr(settings, 'ALLOWED_ORIGINS', None)
+    if env_origins and isinstance(env_origins, str):
+        additional_origins = [origin.strip() for origin in env_origins.split(',')]
+        base_origins.extend(additional_origins)
+    
+    origins = base_origins + backend_urls
 
     app.add_middleware(
         CORSMiddleware,

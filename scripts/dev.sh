@@ -37,26 +37,16 @@ print_info() {
 
 # Commands
 cmd_start() {
-    # Check if .env.dev exists
-    if [ ! -f "backend/.env.dev" ]; then
-        print_error ".env.dev file not found!"
-        echo ""
-        print_info "Run this command to generate secure passwords:"
-        echo "  ./scripts/generate-dev-env.sh"
-        echo ""
-        exit 1
-    fi
-    
     print_header "Starting Development Environment"
     $COMPOSE_CMD -f "$COMPOSE_FILE" up -d
     print_success "Development environment started"
     echo ""
     print_info "Services:"
-    echo "  🌐 Frontend:  http://localhost:3003"
-    echo "  🔌 Backend:   http://localhost:8003"
-    echo "  📊 API Docs:  http://localhost:8003/docs"
-    echo "  🗄️  PostgreSQL: localhost:5436 (familycart-dev-postgres)"
-    echo "  💾 Redis:     localhost:6382 (familycart-dev-redis)"
+    echo "  🌐 Frontend:  http://localhost:3000"
+    echo "  🔌 Backend:   http://localhost:8000"
+    echo "  📊 API Docs:  http://localhost:8000/docs"
+    echo "  🗄️  PostgreSQL: localhost:5432"
+    echo "  💾 Redis:     localhost:6379"
     echo ""
     print_info "View logs with: $0 logs"
 }

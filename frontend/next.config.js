@@ -33,6 +33,8 @@ const nextConfig = {
       unstable_allowImportMappingWithoutBaseUrl: true,
     },
   },
+  // Allow dev access from LAN IPs (fixes CSS not loading from remote SSH)
+  allowedDevOrigins: ['192.168.12.200:3003', '192.168.11.50:3003', 'localhost:3003'],
   // Allow dev access from any origin (fixes CSS not loading from LAN IPs)
   async headers() {
     if (process.env.NODE_ENV === 'development') {
