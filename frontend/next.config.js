@@ -28,7 +28,9 @@ const nextConfig = {
     ],
   },
   // Disable instrumentation to avoid module resolution issues
-  experimental: {},
+  experimental: {
+    instrumentationHook: false,
+  },
   // Allow dev access from any origin (fixes CSS not loading from LAN IPs)
   async headers() {
     if (process.env.NODE_ENV === 'development') {
