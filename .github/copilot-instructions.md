@@ -53,17 +53,217 @@
 - **For development workflow**, check `docs/development/` directory
 - **For feature specs**, check `docs/features/` directory
 
-## 🌿 Git Branch Naming Conventions
-- **Feature branches**: `feature/sprint-N-brief-description` (e.g., `feature/sprint-7-visual-identity`)
+## 🌿 Git Branch Strategy & Auto-Deployment
+
+### Branch Structure (Established January 2026)
+**Primary Branches:**
+- **`main`** - Production baseline, always deployable
+  - Tagged releases: `v1.0.0`, `v1.1.0`, `v1.2.0`, etc.
+  - Deployed to production on merge
+  - Protected branch: requires PR reviews
+  - Source of truth for production state
+
+- **`develop`** - Integration branch for UAT testing
+  - Auto-deploys to UAT on every push (CI/CD pipeline)
+  - Merges to `main` weekly (or when stable)
+  - All features must pass UAT before production
+
+**Reference Branches (Never Delete):**
+- **`baseline/uat-2025-12-05`** - UAT baseline reference
+  - Tagged: `v1.0.0-uat-baseline` at commit `d53f33d`
+  - Historical reference for recovery
+  - Never merge, never delete
+
+**Backup Branches (Delete after 90 days):**
+- **`backup/main-pre-cleanup-YYYY-MM-DD`** - Main branch snapshots
+- **`backup/develop-pre-cleanup-YYYY-MM-DD`** - Develop branch snapshots
+- Created before major restructuring
+- Safe to delete after 3 months of stable operation
+
+### Feature Branch Naming Conventions
+- **Feature branches**: `feature/brief-description` (e.g., `feature/email-verification`)
 - **Hotfix branches**: `hotfix/brief-description` (e.g., `hotfix/ssl-certificate-renewal`)
-- **Release branches**: `release/vN.N.N` (e.g., `release/v2.0.0`)
-- **Bug fix branches**: `bugfix/brief-description` (e.g., `bugfix/websocket-connection-timeout`)
+- **Bug fix branches**: `bugfix/brief-description` (e.g., `bugfix/websocket-timeout`)
 - **Chore branches**: `chore/brief-description` (e.g., `chore/update-dependencies`)
-- **Documentation branches**: `docs/brief-description` (e.g., `docs/api-documentation-update`)
+- **Documentation branches**: `docs/brief-description` (e.g., `docs/api-update`)
 - **Always use lowercase with hyphens** for readability and consistency
-- **Keep branch names concise but descriptive** (max 50 characters recommended)
-- **Delete feature branches** after successful merge to keep repository clean
-- **Use `develop` branch** for integration of completed features before production release
+- **Keep branch names concise but descriptive** (max 50 characters)
+- **Delete feature branches immediately after merge** to keep repository clean
+
+### Auto-Deployment Workflow
+
+#### Development Flow
+```bash
+# 1. Create feature branch from develop
+git checkout develop
+git pull origin develop
+git checkout -b feature/my-new-feature
+
+# 2. Develop and test locally (see Pre-Push Checklist)
+# ... make changes ...
+poetry run pytest  # Backend tests must pass
+npm run build      # Frontend must build
+
+# 3. Commit and push
+git add .
+git commit -m "feat: implement my feature"
+git push origin feature/my-new-feature
+
+# 4. Create PR to develop
+gh pr create --base develop --title "Feature: My new feature"
+
+# 5. After PR approval and merge to develop:
+# ✅ Auto-deploys to UAT (via CI/CD)
+# ✅ Monitor: gh run watch
+# ✅ Test in UAT: https://uat.familycart.app
+```
+
+#### Weekly Release Flow
+```bash
+# Every Friday (or when develop is stable)
+git checkout main
+git pull origin main
+git merge develop --no-ff -m "release: merge develop to main for v1.x.0"
+
+# Tag the release
+git tag -a v1.x.0 -m "Release v1.x.0 - Brief description of changes"
+git push origin main --tags
+
+# ✅ Auto-deploys to production (when configured)
+# ✅ Creates GitHub Release with changelog
+```
+
+#### Hotfix Flow (Emergency Production Fix)
+```bash
+# 1. Branch from main (not develop)
+git checkout main
+git pull origin main
+git checkout -b hotfix/critical-bug
+
+# 2. Fix and test
+# ... make minimal changes ...
+poetry run pytest
+npm run build
+
+# 3. Merge to both main and develop
+git checkout main
+git merge hotfix/critical-bug
+git tag -a v1.x.1 -m "Hotfix: Critical bug description"
+git push origin main --tags
+
+git checkout develop
+git merge hotfix/critical-bug
+git push origin develop
+
+# 4. Delete hotfix branch
+git branch -d hotfix/critical-bug
+git push origin --delete hotfix/critical-bug
+```
+
+### CI/CD Auto-Deployment Rules
+
+**Triggers:**
+- **Push to `develop`** → Auto-deploy to UAT environment
+  - UAT URL: https://uat.familycart.app
+  - UAT API: http://localhost:8001 (local runner)
+  - Monitoring: Prometheus + Grafana
+
+- **Push to `main`** → Auto-deploy to production (when configured)
+  - Production URL: https://familycart.app
+  - Requires tagged release
+  - Blue-green deployment strategy
+
+**Branch Protection:**
+- `main`: Requires PR reviews, status checks must pass
+- `develop`: Requires status checks (can bypass reviews for maintainers)
+- Direct pushes blocked (except for repository admins)
+
+### Branch Lifecycle Management
+
+**Active Branches (Keep):**
+- `main`, `develop` - Core branches
+- `baseline/*` - Reference branches
+- `backup/*` - Recent backups (<90 days)
+- `feature/*`, `bugfix/*`, `hotfix/*` - Active work
+
+**Delete Immediately After Merge:**
+- All feature branches once merged
+- All bugfix branches once merged
+- Hotfix branches once merged to both main and develop
+
+**Auto-Deletion:**
+- Enable in GitHub: Settings → General → Pull Requests
+- ✅ "Automatically delete head branches"
+- Reduces branch clutter automatically
+
+### Version Tagging Strategy
+
+**Semantic Versioning (SemVer):**
+- `vMAJOR.MINOR.PATCH` (e.g., `v1.2.3`)
+- **MAJOR**: Breaking changes, major features
+- **MINOR**: New features, backward compatible
+- **PATCH**: Bug fixes, hotfixes
+
+**Special Tags:**
+- `v1.0.0-uat-baseline` - UAT baseline reference
+- `v1.0.0-rc.1` - Release candidates
+- `v1.0.0-beta.1` - Beta releases
+
+**Tagging Commands:**
+```bash
+# Create annotated tag
+git tag -a v1.2.0 -m "Release v1.2.0: Email verification + dashboard fixes"
+
+# Push tag
+git push origin v1.2.0
+
+# List all tags
+git tag -l
+
+# Delete tag (if mistake)
+git tag -d v1.2.0
+git push origin --delete v1.2.0
+```
+
+### Commit Message Format
+
+**Structure:**
+```
+<type>: <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `style:` - Code formatting (no logic change)
+- `refactor:` - Code restructuring
+- `test:` - Adding/updating tests
+- `chore:` - Build/tool changes
+
+**Examples:**
+```bash
+git commit -m "feat: implement email verification for user registration
+
+- Add email service with Brevo SMTP integration
+- Create verification email template
+- Add verification endpoint and UI flow
+- Update tests to auto-verify test users
+
+Closes #42"
+
+git commit -m "fix: resolve WebSocket connection timeout in UAT
+
+- Increase connection timeout to 30s
+- Add CORS headers for WebSocket handshake
+- Update nginx configuration for WebSocket proxy
+
+Fixes #38"
+```
 
 ## 🚀 CI/CD Workflow - CRITICAL PROCESS RULES
 
