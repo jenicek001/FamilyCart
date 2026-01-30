@@ -27,12 +27,8 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    // Allow cross-origin requests for dev server
-    turbo: {
-      unstable_allowImportMappingWithoutBaseUrl: true,
-    },
-  },
+  // Disable instrumentation to avoid module resolution issues
+  experimental: {},
   // Allow dev access from any origin (fixes CSS not loading from LAN IPs)
   async headers() {
     if (process.env.NODE_ENV === 'development') {
