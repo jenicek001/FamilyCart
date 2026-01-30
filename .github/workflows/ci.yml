@@ -127,7 +127,7 @@ jobs:
           # Test PostgreSQL connectivity
           echo "� Testing PostgreSQL connectivity..."
           for i in {1..10}; do
-              if docker exec postgres-ci-familycart pg_isready -U ${{ secrets.CI_POSTGRES_USER }} -d ${{ secrets.CI_POSTGRES_DB }}; then
+              if docker exec familycart-github-ci-postgres pg_isready -U ${{ secrets.CI_POSTGRES_USER }} -d ${{ secrets.CI_POSTGRES_DB }}; then
               echo "✅ PostgreSQL is available!"
               break
             fi
@@ -143,7 +143,7 @@ jobs:
           # Test Redis connectivity
           echo "📡 Testing Redis connectivity..."
           for i in {1..5}; do
-            if docker exec redis-ci-familycart redis-cli -a "${{ secrets.CI_REDIS_PASSWORD }}" ping | grep -q PONG; then
+            if docker exec familycart-github-ci-redis redis-cli -a "${{ secrets.CI_REDIS_PASSWORD }}" ping | grep -q PONG; then
               echo "✅ Redis is available!"
               break
             fi
@@ -167,7 +167,7 @@ jobs:
       - name: Verify database containers are running
         run: |
           echo "🐳 Verifying CI infrastructure containers are running..."
-          docker ps --filter "name=postgres-ci-familycart" --filter "name=redis-ci-familycart"
+          docker ps --filter "name=familycart-github-ci-postgres" --filter "name=familycart-github-ci-redis"
           echo "✅ Database containers verified!"
 
       - name: Configure Poetry (pre-installed)
@@ -299,7 +299,7 @@ jobs:
         working-directory: ./backend
         env:
           # Test database configuration - PostgreSQL for production parity
-          POSTGRES_SERVER: postgres-ci-familycart
+          POSTGRES_SERVER: familycart-github-ci-postgres
           POSTGRES_USER: ${{ secrets.CI_POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.CI_POSTGRES_DB }}
@@ -316,7 +316,7 @@ jobs:
           # Wait for PostgreSQL to be ready using pg_isready
           echo "⏳ Waiting for PostgreSQL to be ready..."
           for i in {1..30}; do
-            if pg_isready -h postgres-ci-familycart -p 5432 -U ${{ secrets.CI_POSTGRES_USER }}; then
+            if pg_isready -h familycart-github-ci-postgres -p 5432 -U ${{ secrets.CI_POSTGRES_USER }}; then
               echo "✅ PostgreSQL is ready!"
               break
             fi
@@ -326,7 +326,7 @@ jobs:
           
           # Test database connection
           echo "🔌 Testing database connection..."
-          PGPASSWORD=${{ secrets.CI_POSTGRES_PASSWORD }} psql -h postgres-ci-familycart -U ${{ secrets.CI_POSTGRES_USER }} -d ${{ secrets.CI_POSTGRES_DB }} -c "SELECT 1;" || {
+          PGPASSWORD=${{ secrets.CI_POSTGRES_PASSWORD }} psql -h familycart-github-ci-postgres -U ${{ secrets.CI_POSTGRES_USER }} -d ${{ secrets.CI_POSTGRES_DB }} -c "SELECT 1;" || {
             echo "❌ Failed to connect to PostgreSQL"
             exit 1
           }
